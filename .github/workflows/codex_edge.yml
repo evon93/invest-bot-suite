@@ -24,4 +24,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           CODEX_ENV_ID:   ${{ secrets.CODEX_ENV_ID }}
         run: |
-          python scripts/codex_client.py "import numpy as np; print(np.__version__)"
+          python Scripts/codex_client.py "import numpy as np; print(np.__version__)"
