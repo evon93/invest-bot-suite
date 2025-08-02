@@ -1,0 +1,104 @@
+cat > backtester_fix_clean.patch << 'EOF'
+diff --git a/backtest_initial.py b/backtest_initial.py
+index 0000000..1111111 100644
+--- a/backtest_initial.py
++++ b/backtest_initial.py
+@@ -126,6 +126,9 @@ class SimpleBacktester:
+             "CRYPTO_ETH": 0.04,
+             "BONDS": 0.28
+         }
++        self.last_rebalance_date = None
++        self.rebalance_interval_days = 30
++        self.current_step = 0
+ 
+     def _calculate_current_weights(self, date: pd.Timestamp) -> Dict[str, float]:
+         """Calcula pesos actuales de la cartera."""
+@@ -147,6 +150,15 @@ class SimpleBacktester:
+         return weights
+ 
+     def _rebalance(self, date: pd.Timestamp, risk_manager=None) -> None:
+-        """Ejecuta rebalanceo mensual aplicando reglas de riesgo."""
++        """Ejecuta rebalanceo cada X días aplicando reglas de riesgo."""
++        current_prices = self.prices.loc[date]
++        valid_assets = [
++            a for a in self.prices.columns
++            if pd.notna(current_prices[a]) and current_prices[a] > 0
++        ]
++        if not valid_assets:
++            return
++            
+         current_weights = self._calculate_current_weights(date)
+         nav = self.portfolio_value[-1]
+ 
+@@ -179,9 +191,13 @@ class SimpleBacktester:
+             if abs(delta) < 0.01:  # Umbral mínimo 1%
+                 continue
+                 
++            if asset not in valid_assets:
++                continue
++                
+             target_value = self.target_weights.get(asset, 0) * nav
+             current_shares = self.positions.get(asset, 0)
+-            target_shares = target_value / self.prices.loc[date, asset]
++            price = self.prices.loc[date, asset]
++            target_shares = target_value / price if price > 0 else 0
+             shares_delta = target_shares - current_shares
+             
+             if shares_delta != 0:
+@@ -194,6 +210,8 @@ class SimpleBacktester:
+                     "value": shares_delta * self.prices.loc[date, asset]
+                 })
+         
++        self.last_rebalance_date = date
++    
+     def run(self, risk_manager=None) -> pd.DataFrame:
+         """Ejecuta el backtest completo."""
+         first_date = self.prices.index[0]
+@@ -208,7 +226,10 @@ class SimpleBacktester:
+             # Calcular valor de cartera
+             total_value = 0
+             for asset, shares in self.positions.items():
+-                total_value += shares * self.prices.loc[date, asset]
++                price = self.prices.loc[date, asset]
++                if pd.notna(price) and price > 0:
++                    total_value += shares * price
+             
+             portfolio_values.append({
+                 "date": date,
+@@ -216,8 +237,13 @@ class SimpleBacktester:
+                 "weights": self._calculate_current_weights(date)
+             })
+             
+-            # Rebalancear mensualmente
+-            if date.day == 1 and date != first_date:
++            # Rebalancear cada 30 días
++            days_since_last = (
++                (date - self.last_rebalance_date).days
++                if self.last_rebalance_date else self.rebalance_interval_days
++            )
++            if days_since_last >= self.rebalance_interval_days:
+                 self._rebalance(date, risk_manager)
+         
+         return pd.DataFrame(portfolio_values)
+@@ -231,12 +257,17 @@ def calculate_metrics(portfolio_df: pd.DataFrame, benchmark_return: float = 0.08
+     cagr = (1 + total_return) ** (1/years) - 1
+     
+     # Max Drawdown
+-    rolling_max = portfolio_df['value'].expanding().max()
+-    drawdown = (portfolio_df['value'] / rolling_max - 1)
+-    max_dd = drawdown.min()
++    values = portfolio_df['value'].replace(0, np.nan).ffill()
++    rolling_max = values.expanding().max()
++    drawdown = values / rolling_max - 1
++    max_dd = drawdown.min() if not drawdown.empty else 0
+     
+     # Sharpe Ratio
+-    sharpe = returns.mean() / returns.std() * np.sqrt(252)
++    sharpe = (
++        returns.mean() / returns.std() * np.sqrt(252)
++        if returns.std() > 0 else 0
++    )
+     
+     # Tracking vs benchmark
+     tracking_error = cagr - benchmark_return
+EOF
