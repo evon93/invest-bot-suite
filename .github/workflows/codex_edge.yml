@@ -1,0 +1,27 @@
+name: codex_edge
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sandbox:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps for client
+        run: pip install openai
+
+      - name: Run Codex smoke-test
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CODEX_ENV_ID:   ${{ secrets.CODEX_ENV_ID }}
+        run: |
+          python Scripts/codex_client.py "import numpy as np; print(np.__version__)"
