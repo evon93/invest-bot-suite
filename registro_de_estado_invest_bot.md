@@ -4,6 +4,17 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
+##  Estado Actual (2025-11-21)
+
+- **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
+- **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
+- **Rama**: `orchestrator-v2` (base tag `baseline_20251121_D0`).
+- **Python venv**: 3.12.3 · numpy 2.3.1 · pandas 2.3.1 · pytest 8.4.1 · pyyaml 6.0.2.
+- **Build/tests**: `pytest` → 4 FAIL / 6 PASS (fallos en `tests/test_backtest_deepseek.py`).
+- **Artefactos baseline**: `requirements.lock`, `baseline_venv_packages_0A.txt`, `report/pytest_20251121_baseline_full.txt`, `report/env_20251121.json`.
+
+---
+
 ##  Estado Actual (2025-07-12)
 
 - **Entorno**: Windows 11 23H2 host  **WSL 2** (Ubuntu 24.04, kernel 5.15, GPU habilitada).

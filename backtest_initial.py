@@ -139,8 +139,8 @@ class SimpleBacktester:
     # ----------------------------------------------------------------------
     def run(self, risk_manager=None) -> pd.DataFrame:
         first_date = self.prices.index[0]
-        if first_date.weekday() < 5:            # solo días hábiles
-    self._rebalance(first_date, risk_manager)
+        if first_date.weekday() < 5:  # solo días hábiles
+            self._rebalance(first_date, risk_manager)
 
         records: List[Dict] = []
         for date in self.prices.index:
