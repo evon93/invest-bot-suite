@@ -1,0 +1,38 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.1, pluggy-1.6.0 -- /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/c/Users/ivn_b/Desktop/invest-bot-suite
+plugins: anyio-4.10.0
+collecting ... collected 1 item
+
+tests/test_backtest_deepseek.py::test_metrics_after_crash FAILED         [100%]
+
+=================================== FAILURES ===================================
+___________________________ test_metrics_after_crash ___________________________
+
+crash_prices = 2023-01-01    100.000000
+2023-01-02    100.505051
+2023-01-03    101.010101
+2023-01-04    101.515152
+2023-01-05    102....04-08     89.393939
+2023-04-09     89.696970
+2023-04-10     90.000000
+Freq: D, Name: price, Length: 100, dtype: float64
+
+    def test_metrics_after_crash(crash_prices):
+        backtester = SimpleBacktester(crash_prices)
+        portfolio = backtester.run()
+        metrics = calculate_metrics(portfolio)
+>       assert metrics['max_drawdown'] <= -0.35
+E       assert np.float64(nan) <= -0.35
+
+tests/test_backtest_deepseek.py:44: AssertionError
+=============================== warnings summary ===============================
+tests/test_backtest_deepseek.py::test_metrics_after_crash
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/backtest_initial.py:166: RuntimeWarning: invalid value encountered in scalar divide
+    total_return = df["value"].iloc[-1] / df["value"].iloc[0] - 1
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_backtest_deepseek.py::test_metrics_after_crash - assert np.float64(nan) <= -0.35
+========================= 1 failed, 1 warning in 4.90s =========================

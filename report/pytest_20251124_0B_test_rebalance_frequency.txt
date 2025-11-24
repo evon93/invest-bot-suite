@@ -1,0 +1,35 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.1, pluggy-1.6.0 -- /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/c/Users/ivn_b/Desktop/invest-bot-suite
+plugins: anyio-4.10.0
+collecting ... collected 1 item
+
+tests/test_backtest_deepseek.py::test_rebalance_frequency FAILED         [100%]
+
+=================================== FAILURES ===================================
+___________________________ test_rebalance_frequency ___________________________
+
+synthetic_prices = 2023-01-01    102.483571
+2023-01-02     99.813729
+2023-01-03    104.248544
+2023-01-04    109.130301
+2023-01-05    100....04-08    150.295175
+2023-04-09    149.520517
+2023-04-10    148.827064
+Freq: D, Name: price, Length: 100, dtype: float64
+
+    def test_rebalance_frequency(synthetic_prices):
+        backtester = SimpleBacktester(synthetic_prices)
+        backtester.run()
+        trade_days = sorted({t['date'] for t in backtester.trades})
+>       assert len(trade_days) >= 3        # al menos 3 rebalanceos en 100 días
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 0 >= 3
+E        +  where 0 = len([])
+
+tests/test_backtest_deepseek.py:54: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_backtest_deepseek.py::test_rebalance_frequency - assert 0 >= 3
+ +  where 0 = len([])
+============================== 1 failed in 4.85s ===============================

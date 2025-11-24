@@ -4,6 +4,34 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
+##  Estado Actual (2025-11-24)
+
+- **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
+- **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
+- **Rama**: `orchestrator-v2` (tag base `baseline_20251121_D0`).
+- **Backtester**: `backtest_initial.py` refactorizado (`fix_0C`) con precios robustos y rebalanceo mensual.
+- **Build/tests**: `python -m pytest tests/test_backtest_deepseek.py -q` → **6/6 PASSED** (2025-11-24).
+- **Artefactos clave**:
+  - `report/pytest_20251124_backtest_0C_after_fix.txt`
+  - `report/backtest_0B_diagnostico_resumen_20251124.md`
+  - Logs detallados 0B (`report/pytest_20251124_0B_*.txt`) y snapshot de tests (`report/test_backtest_deepseek_snapshot_0B.py`).
+
+### Notas de diseño del backtester (fix_0C)
+
+- **Precios efectivos (`last_valid_prices`)**:  
+  - Para cada activo se mantiene el último precio estrictamente positivo.  
+  - Precios 0 o negativos se consideran no operables y se saltan en el rebalanceo.
+- **Rebalanceo & calendario**:
+  - No hay trades en fin de semana (respeta `test_no_rebalance_on_weekend`).
+  - Si el primer día es fin de semana o no se ha entrado aún, se realiza **entrada tardía** el primer día hábil disponible.
+  - Rebalanceo mensual el día 1 sólo si es laborable y no se ha rebalanceado ya ese mismo día.
+  - Se registran eventos en `backtester.trades` incluso si `shares_delta == 0` para single-asset, lo que permite verificar frecuencia de rebalanceo.
+- **Métricas robustas (`calculate_metrics`)**:
+  - Protecciones para series vacías o con menos de 2 puntos → métricas 0 en lugar de NaN.
+  - `total_return` protegido cuando el valor inicial ≤ 0.
+  - Drawdown calculado con `cummax` + `fillna(0.0)` para evitar NaN.
+  - Sharpe ratio forzado a 0 si la volatilidad es 0 o NaN.
+
 ##  Estado Actual (2025-11-21)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
