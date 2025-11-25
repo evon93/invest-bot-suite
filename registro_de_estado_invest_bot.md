@@ -3,6 +3,35 @@
 _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
+##  Estado Actual (2025-11-24)
+
+- **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
+- **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
+- **Rama**: `orchestrator-v2` (base tag `baseline_20251121_D0`).
+- **Python venv**: 3.12.3 · numpy 2.3.1 · pandas 2.3.1 · pytest 8.4.1 · pyyaml 6.0.2.
+
+- **Backtester**: `backtest_initial.py` · SimpleBacktester v0.1 (parche 0C aplicado con Antigravity/Gemini 3 Pro).
+- **Tests backtester**: `tests/test_backtest_deepseek.py` → **6/6 PASS**
+  - Antes del fix: 4 FAIL (max_drawdown NaN, sin rebalanceos, portfolio 0 con precios 0/negativos).
+  - Después del fix: ver `report/pytest_20251124_backtest_0C_after_fix.txt`.
+
+- **Cambios clave 0C**:
+  - Manejo robusto de precios 0/negativos: uso de `last_valid_prices` por activo.
+  - Restricción “no weekend trading” respetada (entrada en primer día hábil disponible).
+  - Entrada tardía + rebalanceo mensual con **log de rebalanceos** aunque `shares_delta = 0`
+    (permite contar rebalanceos en portfolios single-asset).
+  - Métricas robustas: evita `NaN` en `max_drawdown`, `cagr` y `sharpe` cuando hay valores iniciales 0
+    o volatilidad ~0.
+
+- **Artefactos 0C**:
+  - Backup código: `backtest_initial.py.bak_0C`.
+  - Diagnóstico previo: `report/backtest_0B_diagnostico_resumen_20251124.md`.
+  - Logs pytest:
+    - `report/pytest_0C_before_fix.txt`
+    - `report/pytest_20251124_backtest_0B_summary.txt`
+    - `report/pytest_20251124_0B_test_*.txt`
+    - `report/pytest_20251124_backtest_0C_after_fix.txt`
+  - Snapshot tests: `report/test_backtest_deepseek_snapshot_0B.py`.
 
 ##  Estado Actual (2025-11-24)
 
