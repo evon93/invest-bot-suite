@@ -3,6 +3,34 @@
 _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
+##  Estado Actual (2025-11-26)
+
+- **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
+- **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
+- **Rama**: `orchestrator-v2` (tag base `baseline_20251121_D0`).
+- **Python venv**: 3.12.3 · numpy 2.3.1 · pandas 2.3.1 · pytest 8.4.1 · pyyaml 6.0.2.
+
+- **Backtester**: `backtest_initial.py` · SimpleBacktester v0.1 (`fix_0C`) sin cambios adicionales respecto a 2025-11-24.
+- **Tests backtester**: `tests/test_backtest_deepseek.py` → **6/6 PASS** (ver artefactos 0C ya registrados).
+
+- **Módulo de riesgo**: `RiskManager` v0.4 vía `risk_manager_v0_4_shim.py` (sin cambios de lógica en 1A; solo documentación y trazabilidad).
+- **Tests de riesgo** (antes/después de 1A):  
+  - `python -m pytest tests/test_risk_suite.py -q` → **PASS** (`report/pytest_1A_risk_suite_before.txt`)  
+  - `python -m pytest tests/test_risk_deepseek.py -q` → **PASS** (`report/pytest_1A_risk_deepseek_before.txt`)
+
+- **Artefactos 1A (riesgo)**:
+  - `report/risk_rules_summary_1A_20251126.md`
+  - `report/risk_manager_contract_1A_20251126.md`
+  - `report/risk_tests_matrix_1A_20251126.md`
+  - `report/risk_manager_1A_auditoria_20251126.md`
+
+- **Resumen 1A**:
+  - Auditoría completa del sistema de riesgo:
+    - YAML de reglas (`risk_rules.yaml`) → mapeado y resumido.
+    - Implementación `RiskManager` v0.4 + shim → contrato explícito.
+    - Tests de riesgo → matriz de escenarios y brechas de cobertura.
+  - Sin modificación de código productivo; solo documentación y clarificación de contrato de riesgo.
+
 ##  Estado Actual (2025-11-24)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
@@ -105,6 +133,17 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 ---
 
 ##  Historial de Fases Clave
+
+### 2025-11-26  Paso 1A — Auditoría sistema de riesgo
+
+- Congelado estado de tests de riesgo (`test_risk_suite.py`, `test_risk_deepseek.py`) con artefactos en `report/pytest_1A_*.txt`.
+- Generados resúmenes estructurados:
+  - Reglas declarativas (`risk_rules.yaml`).
+  - Contrato de `RiskManager` v0.4 + shim.
+  - Matriz de casos de prueba de riesgo.
+- Redactado informe `report/risk_manager_1A_auditoria_20251126.md` sin tocar lógica:
+  - Identificadas reglas de YAML no implementadas (stops, drawdown, liquidez real, overrides por activo).
+  - Documentadas brechas de cobertura de tests para ser abordadas en fases 1B/1C.
 
 ### 2025-07-12  Migración a WSL 2 & detección de 6 tests FAIL
 - Copiado repo a `~/invest-bot-suite` en volumen ext4.
