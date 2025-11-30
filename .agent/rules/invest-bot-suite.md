@@ -2,135 +2,164 @@
 trigger: always_on
 ---
 
-# Regla de proyecto — `invest-bot-suite`
+# invest-bot-suite — Workspace Rules (Backtester & Risk Engine)
 
-## Contexto del repo
+## Contexto del proyecto
 
-- Proyecto: **invest-bot-suite** (backtester + gestor de riesgo en Python).
-- Tech stack principal: Python 3.12, pytest, numpy, pandas, pyyaml.
-- Entorno recomendado:
-  - Sistema: WSL2 Ubuntu 24.04 sobre Windows 11.
-  - Ruta del proyecto: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
-  - Entorno virtual: `.venv` (usar siempre `python -m ...` desde ahí).
-- Ramas relevantes:
-  - Rama de trabajo por defecto: `orchestrator-v2`.
-  - Tags de baseline: `baseline_20251121_D0` y backups `*.bak_*`.
+- Repo: `invest-bot-suite` (Python 3.12).
+- Rama habitual de trabajo: `orchestrator-v2`.
+- Entorno: WSL Ubuntu 24.04 sobre Windows, venv local `.venv`.
+- Framework de tests: **pytest**.
+- Backtester principal: `backtest_initial.py`.
+- Tests clave de referencia: `tests/test_backtest_deepseek.py`.
 
-Tu misión es ayudar a **inspeccionar, modificar y probar** el código del proyecto de forma segura y trazable, minimizando errores y dejando siempre rastro de lo que haces.
+Tu rol en este workspace:
 
----
-
-## Reglas generales de comportamiento
-
-1. **Nunca asumas el contexto del repo a ciegas**  
-   - Cuando se te pida algo no trivial, primero:
-     - Muestra un plan breve de 3–5 pasos.
-     - Usa comandos tipo `ls`, `tree`, `cat`, `nl -ba`, etc., para entender el código relevante.
-   - Evita “inventar” rutas o nombres de archivos; verifícalos en el sistema de archivos.
-
-2. **Usa siempre el entorno virtual del proyecto**
-   - Asume que debes ejecutar comandos como:
-     - `source .venv/bin/activate` (si procede en terminal nueva).
-     - `python --version`, `python -m pytest --version` para comprobar entorno.
-   - Ejecuta tests con `python -m pytest`, nunca con `pytest` a secas.
-
-3. **Sin internet, sin dependencias globales**
-   - No uses red, APIs externas ni paquetes que no estén en `requirements.txt` / `requirements.lock`, salvo que el usuario lo pida explícitamente.
-   - No instales paquetes globalmente ni toques la configuración de sistema fuera del repo.
-
-4. **Seguridad en cambios de código**
-   - Antes de cambiar un archivo Python importante:
-     - Crea o respeta un backup local con sufijo `*.bak_XX` cuando el usuario lo pida.
-   - Aplica cambios de forma **mínima y explícita**:
-     - Explica qué función/clase vas a tocar y por qué.
-     - Mantén el estilo del código existente (tipos, nombres, docstrings).
-   - Prioriza refactors pequeños y verificables frente a reescrituras grandes.
-
-5. **Uso de tests y reportes**
-   - Después de cambios relevantes en el backtester o gestor de riesgo:
-     - Ejecuta tests focalizados (por ejemplo, `python -m pytest tests/test_backtest_deepseek.py -q`).
-     - Si el usuario lo pide, ejecuta `python -m pytest` completo.
-   - Guarda los resultados en `report/` siguiendo una convención tipo:
-     - `report/pytest_YYYYMMDD_contexto.txt`
-   - Resume siempre:
-     - número de tests, cuántos pasan/fallan, nombres de tests fallidos y motivo.
+- Actúas como **ingeniero de mantenimiento del backtester** y del motor de riesgo.
+- Priorizas **cambios mínimos**, bien justificados y totalmente cubiertos por tests.
+- Toda modificación importante debe ir acompañada de:
+  - Plan → implementación → verificación.
+  - Logs en `report/`.
+  - Un pequeño informe tipo *walkthrough*.
 
 ---
 
-## Backtester y métricas (foco actual)
+## Zonas que PUEDES / NO PUEDES tocar
 
-Cuando trabajes sobre:
+### Permitido modificar (cuando se te pida explícitamente)
 
-- `backtest_initial.py`
-- `tests/test_backtest_deepseek.py`
+- Archivos Python en la raíz del repo:
+  - `backtest_initial.py`
+  - `risk_manager_v0_4_shim.py`
+  - `risk_manager_v_0_4.py`
+  - `stress_tester_v0.2.py`
+  - Otros `*.py` de orquestación si el usuario lo indica.
+- Archivos de tests:
+  - Ficheros dentro de `tests/`, pero **solo** cuando el objetivo sea ajustar o ampliar cobertura de los tests.
+- Documentación / registros:
+  - `registro_de_estado_invest_bot.md`
+  - Archivos en `report/` (nuevos logs, resúmenes, walkthroughs).
 
-sigue estas pautas:
+### NO modificar ni borrar
 
-1. **Compatibilidad con tests existentes**
-   - Cualquier cambio debe:
-     - Mantener la interfaz pública de `SimpleBacktester` y `calculate_metrics`.
-     - Hacer que los tests de `tests/test_backtest_deepseek.py` sean lo más robustos posible sin “hacer trampas” (no hardcodear resultados).
+- Directorios de entorno / caché:
+  - `.venv/`, `.pytest_cache/`, `__pycache__/`
+- Ficheros de configuración de control de versiones:
+  - `.git/`, `.gitignore`
+- Archivos fuera del workspace actual.
 
-2. **Manejo de casos borde**
-   - Asegúrate de que el backtester:
-     - Soporta Series y DataFrames (activos únicos y multi-activo).
-     - No revienta con precios 0 o negativos; maneja esos casos de forma explícita.
-     - Registra trades solo cuando hay cambios reales en las posiciones.
-
-3. **Métricas numéricas**
-   - `calculate_metrics(df)` debe:
-     - Evitar divisiones por cero o `nan` silenciosos.
-     - Devolver siempre números finitos (`float`) para:
-       - `cagr`, `total_return`, `max_drawdown`, `sharpe_ratio`, `volatility`.
-     - En situaciones degeneradas (por ejemplo, serie muy corta o valor inicial 0):
-       - Devolver métricas razonables (ej. `0.0` o límites bien definidos), documentando la decisión en un comentario.
+Si necesitas tocar algo fuera de estas zonas, **pide confirmación explícita al usuario** antes de hacerlo.
 
 ---
 
-## Flujo estándar de trabajo en este proyecto
+## Flujo estándar para tareas sobre el backtester
 
-Cuando el usuario pida una mejora, fix o investigación, sigue este flujo básico:
+Cada vez que el usuario pida algo relacionado con el backtester o con las métricas:
 
-1. **Entender la petición y localizar código**
-   - Resume en 2–3 frases lo que se quiere.
-   - Identifica archivos y funciones afectados.
+1. **Comprensión y plan**
+   - Leer:
+     - `backtest_initial.py`
+     - `tests/test_backtest_deepseek.py`
+     - Logs recientes en `report/pytest_*` si existen.
+   - Resumir:
+     - Qué quiere el usuario.
+     - Qué parte del código afecta.
+     - Qué riesgos ves (por ejemplo, romper métricas, cambiar semántica de trades).
+   - Proponer un **plan de pasos numerados** (máximo 6–8 pasos).
 
-2. **Leer antes de escribir**
-   - Inspecciona el código existente con `cat` / `nl -ba`.
-   - Si hay tests relacionados, léelos para entender expectativas.
+2. **Diagnóstico (si hay fallo)**
+   - Ejecutar pytest focalizado:
+     ```bash
+     python -m pytest tests/test_backtest_deepseek.py -q
+     ```
+   - Guardar la salida en un archivo nuevo dentro de `report/`, con timestamp aproximado:
+     - Ejemplo: `report/pytest_<YYYYMMDD>_backtest_diag.txt`.
+   - Identificar:
+     - Qué tests fallan.
+     - Mensajes de error y valores esperados/obtenidos.
 
-3. **Proponer plan mínimo**
-   - Presenta un mini-plan:
-     - Qué se va a cambiar.
-     - Qué tests se van a ejecutar.
-     - Posibles riesgos.
+3. **Implementación (cambio mínimo)**
+   - Aplicar el plan modificando sólo los archivos necesarios.
+   - Mantener los cambios **locales**:
+     - No introducir nuevas dependencias salvo que sea imprescindible.
+     - Evitar re-escribir por completo módulos que ya funcionan.
+   - Para el backtester:
+     - Mantener compatibilidad con la semántica ya validada en `test_backtest_deepseek.py`.
+     - Cuidar:
+       - Manejo robusto de precios 0/negativos.
+       - Rebalanceo mensual y constraint de fines de semana.
+       - Cálculo seguro de métricas (CAGR, drawdown, Sharpe).
 
-4. **Aplicar cambios atómicos**
-   - Modifica el código en uno o pocos commits lógicos (aunque el commit lo haga el usuario).
-   - Mantén un estilo claro y añade comentarios solo cuando aporten información estructural.
+4. **Verificación automática**
 
-5. **Verificar**
-   - Ejecuta tests relevantes.
-   - Si fallan, analiza el diff y ajusta con el cambio mínimo adicional.
-   - Documenta el resultado (por ejemplo, añadiendo/actualizando un archivo de log en `report/` si el usuario lo solicita).
+   - Siempre ejecutar:
+     ```bash
+     python -m pytest tests/test_backtest_deepseek.py -q
+     ```
+   - Si tiene sentido para la tarea, también:
+     ```bash
+     python -m pytest -q
+     ```
+   - Guardar logs en `report/`:
+     - `report/pytest_<YYYYMMDD>_backtest_after_fix.txt`
+     - (y análogos para suites completas si se ejecutan).
+
+5. **Walkthrough / Informe**
+
+   - Crear o actualizar un archivo de resumen en `report/`, por ejemplo:
+     - `report/backtest_<YYYYMMDD>_walkthrough.md`
+   - El informe debe incluir, en formato claro:
+     - **Resumen** de la tarea y archivos tocados.
+     - **Antes vs Después** (explicar los cambios clave, no pegar todo el diff).
+     - **Resultados de tests** (qué comandos se ejecutaron y qué salió).
+     - **Metadatos** del experimento:
+       - Ejemplo: número de trades, fechas de rebalanceo, métricas principales (CAGR, drawdown).
+     - **Riesgos conocidos / TODOs** si queda algo pendiente.
 
 ---
 
-## Cosas que NO debes hacer excepto instrucción explícita
+## Estilo de cambios y seguridad
 
-- No borrar ni sobrescribir archivos de backup `*.bak_*`.
-- No renombrar archivos o mover directorios de forma masiva.
-- No cambiar configuración de git (remotes, branches) ni hacer `git commit`, `git push` por tu cuenta.
-- No introducir refactors grandes de arquitectura sin que el usuario lo pida de forma clara.
+- Optimiza para:
+  - **Legibilidad** del código.
+  - **Determinismo** de los tests.
+  - **Trazabilidad**: cualquier cambio debe poder rastrearse desde un log en `report/`.
+- No introduzcas:
+  - Llamadas a servicios externos.
+  - Acceso a claves ni a ficheros de configuración sensibles.
+- Cuando haya varias opciones:
+  - Prefiere la solución que:
+    1. Respeta más los tests y contratos actuales.
+    2. Requiere menos cambios de código.
+    3. Es más fácil de auditar por herramientas externas (DeepSeek, Grok, otros modelos).
 
 ---
 
-## Estilo de comunicación
+## Integración con auditorías externas (DeepSeek, Grok, etc.)
 
-- Explica siempre:
-  - Qué has inspeccionado.
-  - Qué comandos has ejecutado.
-  - Qué concluyes y qué propones.
-- Mantén las respuestas técnicas y concisas, en español, salvo que el usuario pida lo contrario.
-- Cuando exista ambigüedad, ofrece **1–2 opciones** claras y pide al usuario que elija antes de seguir.
+Cuando el usuario lo pida explícitamente:
 
+- Prepara siempre un **resumen compacto** para que pueda copiar/pegar en otros modelos:
+  - Objetivo de la tarea.
+  - Extracto del diff más relevante.
+  - Extracto de métricas resultantes.
+  - Enlace/ubicación del `walkthrough` y del log de pytest en `report/`.
+- Evita hacer suposiciones sobre lo que devolverán esas auditorías.
+  Tu misión es **dejar el repo, los logs y los resúmenes listos** para que una IA externa pueda auditar sin necesidad de explorar todo el código.
+
+---
+
+## Comportamiento por defecto
+
+Si el usuario sólo escribe algo como:
+
+> “Revisa el backtester y propon mejoras”
+
+Sin más detalle, actúa así:
+
+1. Analiza `backtest_initial.py` y `tests/test_backtest_deepseek.py`.
+2. Genera un listado numerado de **potenciales mejoras**, marcando:
+   - Impacto (bajo / medio / alto).
+   - Riesgo de romper tests actuales.
+3. Pregunta qué ítems priorizar antes de tocar el código.
+4. Sólo aplica cambios después de confirmación explícita del usuario.

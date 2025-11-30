@@ -3,6 +3,31 @@
 _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
+##  Estado Actual (2025-11-27)
+
+- **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
+- **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
+- **Rama**: `orchestrator-v2` (sin cambios de código desde 1A; solo specs y blueprints de riesgo).
+- **Python venv**: 3.12.3 · mismo stack que en 1A (pytest, pyyaml, pandas, etc.).
+
+- **Módulo de riesgo**: sigue siendo `RiskManager` v0.4 vía `risk_manager_v0_4_shim.py` (sin cambios de lógica).
+- **Specs de riesgo avanzadas (1B)**:
+  - `report/risk_advanced_guardrails_spec_1B_20251127.md`
+  - `report/risk_advanced_tests_blueprint_1B_20251127.md`
+
+- **Resumen 1B**:
+  - Definido contrato objetivo de guardrails de riesgo avanzados:
+    - max_drawdown (soft/hard), stop_loss basado en ATR, volatility_stop, liquidez, Kelly/overrides por activo.
+  - Diseñado blueprint de tests:
+    - matriz de cobertura por guardrail,
+    - catálogo de tests unitarios,
+    - escenarios de integración con backtester,
+    - métricas a monitorizar.
+  - Documentada integración event-driven propuesta:
+    - uso de `context` en `filter_signal`,
+    - eventos auxiliares (`PortfolioSnapshot`, `MarketFeatures`, etc.).
+  - No se ha modificado código productivo; 1B es 100% diseño y documentación previa a la implementación (1C).
+
 ##  Estado Actual (2025-11-26)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
@@ -134,8 +159,20 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ##  Historial de Fases Clave
 
-### 2025-11-26  Paso 1A — Auditoría sistema de riesgo
+### 2025-11-27  Paso 1B — Diseño avanzado de guardrails de riesgo
+- Generada spec de guardrails avanzados:
+  - `report/risk_advanced_guardrails_spec_1B_20251127.md`
+  - Basada en auditoría 1A, risk_rules.yaml y código v0.4.
+- Definida semántica objetivo para:
+  - max_drawdown, stop_loss_ATR, volatility_stop, liquidez, Kelly con overrides per_asset.
+- Diseñado blueprint de tests de riesgo:
+  - catálogo de tests unitarios por guardrail,
+  - escenarios de integración con estrategia/backtester,
+  - métricas clave (DD, Sharpe/Calmar, % señales bloqueadas).
+- Documentada integración event-driven propuesta para RiskManager v0.5 sin romper la API v0.4.
+- Sin cambios de lógica aún; 1B sirve como base para la futura implementación en la Fase 1C.
 
+### 2025-11-26  Paso 1A — Auditoría sistema de riesgo
 - Congelado estado de tests de riesgo (`test_risk_suite.py`, `test_risk_deepseek.py`) con artefactos en `report/pytest_1A_*.txt`.
 - Generados resúmenes estructurados:
   - Reglas declarativas (`risk_rules.yaml`).
