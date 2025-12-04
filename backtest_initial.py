@@ -6,12 +6,15 @@ Backtest con datos sintéticos y gestión de riesgo.
 from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
+
+from risk_manager_v0_5 import RiskManagerV05
 
 # ------------------------------------------------------------------------------
 # Configuración
@@ -120,17 +123,19 @@ class SimpleBacktester:
 
         if risk_manager:
             allow, annotated = risk_manager.filter_signal(
-                {"deltas": deltas}, current_w, nav
+                {"deltas": deltas, "assets": list(self.prices.columns)},
+                current_w,
+                nav,
             )
             if not allow:
-                logger.warning("Señal rechazada: %s", annotated["risk_reasons"])
+                logger.warning("Señal rechazada: %s", annotated.get("risk_reasons", []))
                 return
 
         for asset, delta in deltas.items():
             # Usar precio efectivo
             price = self.last_valid_prices.get(asset, 0)
             if price <= 0:
-                continue # No podemos operar sin precio válido
+                continue  # No podemos operar sin precio válido
 
             target_val = self.target_weights.get(asset, 0) * nav
             target_shares = target_val / price
@@ -241,7 +246,7 @@ def calculate_metrics(
     start_val = vals.iloc[0]
     end_val = vals.iloc[-1]
     if start_val <= 0:
-        total_return = 0.0 # Fallback si empezamos en 0 o negativo
+        total_return = 0.0  # Fallback si empezamos en 0 o negativo
     else:
         total_return = end_val / start_val - 1
 
@@ -281,6 +286,24 @@ def calculate_metrics(
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     prices = generate_synthetic_prices()
+
+    # Wiring opcional de RiskManagerV05:
+    # - RISK_MANAGER_VERSION = "none"  → sin gestor de riesgo (comportamiento actual).
+    # - RISK_MANAGER_VERSION = "v0_5" → usa RiskManagerV05 con risk_rules.yaml.
+    rm = None
+    rm_version = os.getenv("RISK_MANAGER_VERSION", "none").lower()
+
+    if rm_version == "v0_5":
+        rules_path = Path("risk_rules.yaml")
+        try:
+            rm = RiskManagerV05(rules_path)
+            logger.info("Usando RiskManagerV05 con reglas desde %s", rules_path)
+        except FileNotFoundError:
+            logger.warning(
+                "No se encontró %s; se continúa SIN gestor de riesgo.", rules_path
+            )
+            rm = None
+
     bt = SimpleBacktester(prices)
-    result = bt.run()
+    result = bt.run(risk_manager=rm)
     print(calculate_metrics(result))

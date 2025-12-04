@@ -229,3 +229,45 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 - Actualizar este registro tras cada push relevante.
 - Adjuntar artefactos (edge_logs, metrics) en cada auditoría.
 - Mantener backups tras milestones.
+
+---
+
+## 2025-12-01 — Fase 1C: RiskManager v0.5 (guardrails DD global + stop-loss ATR básico)
+
+- **Rama:** `feature/1C_riskmanager_v0_5`
+- **Componentes afectados:**
+  - `risk_manager_v0_5.py`
+  - `risk_manager_factory.py`
+  - `risk_rules.yaml`
+  - Suite de tests v0.5:
+    - `tests/test_risk_dd_v0_5.py`
+    - `tests/test_risk_atr_stop_v0_5.py`
+    - `tests/test_risk_decision_v0_5.py`
+    - `tests/test_risk_v0_5_extended.py`
+- **Guardrails de riesgo implementados en 1C:**
+  - **Drawdown global (DD):**
+    - Cálculo robusto de drawdown a partir de la curva de equity / PnL.
+    - Evaluación de umbral de DD según `risk_rules.yaml`.
+    - Bloqueo de nuevas posiciones cuando el DD excede el límite global.
+  - **Stop-loss básico basado en ATR:**
+    - Cálculo de niveles de stop por activo usando ATR.
+    - Manejo explícito de casos sin datos suficientes de ATR.
+    - Interacción coherente con el resto de filtros de riesgo.
+  - **Wiring `risk_decision` v0.5:**
+    - Integración de los guardrails DD y ATR en el flujo de decisión.
+    - Priorización de límites de riesgo frente a señales agresivas de la estrategia.
+- **Artefactos de apoyo generados en 1C:**
+  - `report/risk_guardrails_impl_1C_20251201.md`
+  - `report/risk_decision_v0_5_spec_1C_20251201.md`
+  - `report/risk_v0_5_review_20251201.md`
+  - `report/risk_tests_matrix_v0_5_1C_20251201.md`
+  - `report/pytest_1C_full_after.txt`
+- **Estado de tests (post-1C):**
+  - `python -m pytest -q` → **47 tests PASANDO** (baseline de regresión con guardrails activos).
+- **Notas para fases siguientes (1D+):**
+  - Extender guardrails con:
+    - Stops por volatilidad (σ rolling / %ATR).
+    - Reglas de liquidez (ADV, % de volumen) para limitar tamaño de posiciones.
+    - Overrides por activo/estrategia para ajustes finos.
+  - Integrar estos guardrails adicionales con `stress_tester` y métricas de portfolio (Calmar, Max DD, etc.).
+
