@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+import math
 from typing import Dict, Tuple, Union, Any
 from pathlib import Path
 import yaml
@@ -52,6 +53,24 @@ class RiskManagerV05:
             self.logger.addHandler(logging.StreamHandler())
         self.logger.setLevel(logging.INFO)
         self.logger.info("RiskManager initialized with %d rules", len(self.rules))
+
+    # --------------------------------------------------------------------- #
+    #  Acceso a configuración DD                                            #
+    # --------------------------------------------------------------------- #
+    def get_dd_cfg(self) -> Dict[str, Any]:
+        """Devuelve la configuración de DD guardrail desde las reglas cargadas.
+        
+        Mapea los nombres de risk_rules.yaml a los esperados por eval_dd_guardrail:
+        - soft_limit_pct -> max_dd_soft
+        - hard_limit_pct -> max_dd_hard
+        - size_multiplier_soft -> size_multiplier_soft
+        """
+        dd_rules = self.rules.get("max_drawdown", {})
+        return {
+            "max_dd_soft": float(dd_rules.get("soft_limit_pct", 0.05)),
+            "max_dd_hard": float(dd_rules.get("hard_limit_pct", 0.10)),
+            "size_multiplier_soft": float(dd_rules.get("size_multiplier_soft", 0.5)),
+        }
 
     # --------------------------------------------------------------------- #
     #  Kelly / tamaño de posición                                           #
@@ -172,56 +191,81 @@ class RiskManagerV05:
         # ------------------------------------------------------------------
         # 3) Guardrail de Drawdown (DD) global
         # ------------------------------------------------------------------
+        # Prioridad máxima: DD hard_stop → force_close_positions=True,
+        # size_multiplier=0.0, allow_new_trades=False
+        # ------------------------------------------------------------------
         equity_curve = kwargs.get("equity_curve")
         dd_cfg = kwargs.get("dd_cfg")
         if equity_curve is not None and dd_cfg is not None:
             dd_stats = self.compute_drawdown(equity_curve)
-            dd_val = dd_stats.get("max_dd", 0.0)
-            dd_eval = self.eval_dd_guardrail(dd_val, dd_cfg)
-
-            state = dd_eval.get("state", "normal")
-            if state == "risk_off_light":
-                # Reducimos tamaño global de forma conservadora
-                dd_mult = float(dd_eval.get("size_multiplier", 1.0))
-                risk_decision["size_multiplier"] = min(
-                    risk_decision["size_multiplier"], dd_mult
+            
+            # Caso: curva inválida (vacía o solo NaN/inf)
+            if dd_stats.get("skipped", False):
+                risk_decision["dd_skipped"] = True
+                annotated["dd_skipped_reason"] = "invalid_or_empty_equity_curve"
+                self.logger.warning(
+                    "DD guardrail desactivado: equity_curve sin datos válidos"
                 )
-                self._add_reason(risk_decision, reasons, "dd_soft")
-            elif state == "hard_stop":
-                risk_decision["allow_new_trades"] = False
-                risk_decision["force_close_positions"] = True
-                risk_decision["size_multiplier"] = 0.0
-                allow = False
-                self._add_reason(risk_decision, reasons, "dd_hard")
+            else:
+                dd_val = dd_stats.get("max_dd", 0.0)
+                dd_eval = self.eval_dd_guardrail(dd_val, dd_cfg)
+
+                state = dd_eval.get("state", "normal")
+                if state == "risk_off_light":
+                    # Reducimos tamaño global de forma conservadora
+                    dd_mult = float(dd_eval.get("size_multiplier", 1.0))
+                    risk_decision["size_multiplier"] = min(
+                        risk_decision["size_multiplier"], dd_mult
+                    )
+                    self._add_reason(risk_decision, reasons, "dd_soft")
+                elif state == "hard_stop":
+                    risk_decision["allow_new_trades"] = False
+                    risk_decision["force_close_positions"] = True
+                    risk_decision["size_multiplier"] = 0.0
+                    allow = False
+                    self._add_reason(risk_decision, reasons, "dd_hard")
+        else:
+            # Contexto DD faltante → modo degrade-to-safe
+            risk_decision["dd_skipped"] = True
+            annotated["dd_skipped_reason"] = "missing_equity_curve_or_dd_cfg"
 
         # ------------------------------------------------------------------
         # 4) Stop-loss ATR por posición
         # ------------------------------------------------------------------
+        # Prioridad secundaria: ATR stop → añade tickers a stop_signals
+        # sin anular DD hard_stop
+        # ------------------------------------------------------------------
         atr_ctx = kwargs.get("atr_ctx") or {}
         last_prices = kwargs.get("last_prices") or {}
-        for ticker, ctx in atr_ctx.items():
-            entry_price = ctx.get("entry_price")
-            atr = ctx.get("atr")
-            side = ctx.get("side")
-            if entry_price is None or side is None:
-                continue
+        
+        if not atr_ctx:
+            # Contexto ATR faltante → modo degrade-to-safe
+            risk_decision["atr_skipped"] = True
+            annotated["atr_skipped_reason"] = "missing_or_empty_atr_ctx"
+        else:
+            for ticker, ctx in atr_ctx.items():
+                entry_price = ctx.get("entry_price")
+                atr = ctx.get("atr")
+                side = ctx.get("side")
+                if entry_price is None or side is None:
+                    continue
 
-            cfg = {
-                "atr_multiplier": ctx.get("atr_multiplier", 2.5),
-                "min_stop_pct": ctx.get("min_stop_pct", 0.02),
-            }
-            stop_price = self.compute_atr_stop(entry_price, atr, side, cfg)
-            if stop_price is None:
-                continue
+                cfg = {
+                    "atr_multiplier": ctx.get("atr_multiplier", 2.5),
+                    "min_stop_pct": ctx.get("min_stop_pct", 0.02),
+                }
+                stop_price = self.compute_atr_stop(entry_price, atr, side, cfg)
+                if stop_price is None:
+                    continue
 
-            last_price = ctx.get("last_price", last_prices.get(ticker))
-            if last_price is None:
-                continue
+                last_price = ctx.get("last_price", last_prices.get(ticker))
+                if last_price is None:
+                    continue
 
-            if self.is_stop_triggered(side, stop_price, last_price):
-                if ticker not in risk_decision["stop_signals"]:
-                    risk_decision["stop_signals"].append(ticker)
-                self._add_reason(risk_decision, reasons, "stop_loss_atr")
+                if self.is_stop_triggered(side, stop_price, last_price):
+                    if ticker not in risk_decision["stop_signals"]:
+                        risk_decision["stop_signals"].append(ticker)
+                    self._add_reason(risk_decision, reasons, "stop_loss_atr")
 
         # ------------------------------------------------------------------
         # 5) Kelly sizing (lógica v0.4, integrada en risk_decision)
@@ -275,20 +319,31 @@ class RiskManagerV05:
         - max_dd: drawdown máximo en [0, 1].
         - peak_idx: índice del máximo previo al DD máximo.
         - trough_idx: índice del mínimo asociado al DD máximo.
+        - skipped: True si la curva no tenía datos válidos.
         """
-        if not equity_curve:
-            return {"max_dd": 0.0, "peak_idx": None, "trough_idx": None}
+        # Filtrar valores no válidos (None, NaN, inf)
+        valid_curve: list[tuple[int, float]] = []
+        for i, val in enumerate(equity_curve):
+            try:
+                fval = float(val)
+                if math.isfinite(fval):
+                    valid_curve.append((i, fval))
+            except (TypeError, ValueError):
+                pass
 
-        peak = equity_curve[0]
-        peak_idx = 0
+        if not valid_curve:
+            return {"max_dd": 0.0, "peak_idx": None, "trough_idx": None, "skipped": True}
+
+        peak = valid_curve[0][1]
+        peak_orig_idx = valid_curve[0][0]
         max_dd = 0.0
-        dd_peak_idx = 0
-        dd_trough_idx = 0
+        dd_peak_idx = peak_orig_idx
+        dd_trough_idx = peak_orig_idx
 
-        for i, nav in enumerate(equity_curve):
+        for orig_idx, nav in valid_curve:
             if nav > peak:
                 peak = nav
-                peak_idx = i
+                peak_orig_idx = orig_idx
 
             if peak <= 0:
                 # Sin referencia válida de peak → no definimos DD > 0
@@ -297,13 +352,14 @@ class RiskManagerV05:
             dd = (peak - nav) / peak
             if dd > max_dd:
                 max_dd = dd
-                dd_peak_idx = peak_idx
-                dd_trough_idx = i
+                dd_peak_idx = peak_orig_idx
+                dd_trough_idx = orig_idx
 
         return {
             "max_dd": float(max_dd),
             "peak_idx": dd_peak_idx,
             "trough_idx": dd_trough_idx,
+            "skipped": False,
         }
 
     @staticmethod

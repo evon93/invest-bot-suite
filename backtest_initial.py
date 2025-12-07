@@ -122,10 +122,18 @@ class SimpleBacktester:
         }
 
         if risk_manager:
+            # Construir risk_ctx completo (dd_cfg desde yaml, no hardcodeado)
+            equity_curve = self.portfolio_value if self.portfolio_value else []
+            dd_cfg = risk_manager.get_dd_cfg()
+            
             allow, annotated = risk_manager.filter_signal(
                 {"deltas": deltas, "assets": list(self.prices.columns)},
                 current_w,
                 nav,
+                equity_curve=equity_curve,
+                dd_cfg=dd_cfg,
+                atr_ctx={},
+                last_prices=self.last_valid_prices,
             )
             if not allow:
                 logger.warning("Señal rechazada: %s", annotated.get("risk_reasons", []))

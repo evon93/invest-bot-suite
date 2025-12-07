@@ -1,0 +1,37 @@
+
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/test_risk_atr_stop_v0_5.py _______________
+import file mismatch:
+imported module 'test_risk_atr_stop_v0_5' has this __file__ attribute:
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/audit/audit_1C_v0_5/test_risk_atr_stop_v0_5.py
+which is not the same as the test file we want to collect:
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_risk_atr_stop_v0_5.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_________________ ERROR collecting tests/test_risk_dd_v0_5.py __________________
+import file mismatch:
+imported module 'test_risk_dd_v0_5' has this __file__ attribute:
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/audit/audit_1C_v0_5/test_risk_dd_v0_5.py
+which is not the same as the test file we want to collect:
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_risk_dd_v0_5.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_risk_decision_v0_5.py _______________
+import file mismatch:
+imported module 'test_risk_decision_v0_5' has this __file__ attribute:
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/audit/audit_1C_v0_5/test_risk_decision_v0_5.py
+which is not the same as the test file we want to collect:
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_risk_decision_v0_5.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________ ERROR collecting tests/test_risk_v0_5_extended.py _______________
+import file mismatch:
+imported module 'test_risk_v0_5_extended' has this __file__ attribute:
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/audit/audit_1C_v0_5/test_risk_v0_5_extended.py
+which is not the same as the test file we want to collect:
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_risk_v0_5_extended.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+=========================== short test summary info ============================
+ERROR tests/test_risk_atr_stop_v0_5.py
+ERROR tests/test_risk_dd_v0_5.py
+ERROR tests/test_risk_decision_v0_5.py
+ERROR tests/test_risk_v0_5_extended.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!!
+4 errors in 9.39s

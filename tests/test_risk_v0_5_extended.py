@@ -89,3 +89,160 @@ def test_is_stop_triggered_precision():
     last_below = 99.9999999999999
     # Long: last < stop -> True
     assert RiskManagerV05.is_stop_triggered("long", stop, last_below) is True
+
+
+# --------------------------------------------------------------------------- #
+#  Tests for dd_skipped / atr_skipped flags (1D.core)
+# --------------------------------------------------------------------------- #
+def make_rm(rules=None) -> RiskManagerV05:
+    """Crea un RiskManagerV05 con reglas mínimas."""
+    if rules is None:
+        rules = {}
+    return RiskManagerV05(rules)
+
+
+def test_filter_signal_dd_skipped_empty_equity():
+    """
+    Caso: equity_curve vacía → dd_skipped=True, sin excepción.
+    """
+    rm = make_rm()
+    signal = {"assets": ["BTC"], "deltas": {"BTC": 0.01}}
+    current_weights = {"BTC": 0.01}
+    dd_cfg = {"max_dd_soft": 0.05, "max_dd_hard": 0.10, "size_multiplier_soft": 0.5}
+
+    allow, annotated = rm.filter_signal(
+        signal,
+        current_weights,
+        nav_eur=10_000.0,
+        equity_curve=[],
+        dd_cfg=dd_cfg,
+        atr_ctx={},
+        last_prices={},
+    )
+
+    decision = annotated["risk_decision"]
+    
+    # DD skipped, no exception
+    assert decision.get("dd_skipped") is True
+    assert "dd_skipped_reason" in annotated
+    # Should still allow trades (degrade-to-safe)
+    assert allow is True
+
+
+def test_filter_signal_dd_skipped_only_nan():
+    """
+    Caso: equity_curve solo NaN/inf → dd_skipped=True, sin excepción.
+    """
+    rm = make_rm()
+    signal = {"assets": ["BTC"], "deltas": {"BTC": 0.01}}
+    current_weights = {"BTC": 0.01}
+    dd_cfg = {"max_dd_soft": 0.05, "max_dd_hard": 0.10, "size_multiplier_soft": 0.5}
+
+    allow, annotated = rm.filter_signal(
+        signal,
+        current_weights,
+        nav_eur=10_000.0,
+        equity_curve=[float('nan'), float('inf'), float('-inf')],
+        dd_cfg=dd_cfg,
+        atr_ctx={},
+        last_prices={},
+    )
+
+    decision = annotated["risk_decision"]
+    
+    assert decision.get("dd_skipped") is True
+    assert annotated.get("dd_skipped_reason") == "invalid_or_empty_equity_curve"
+    assert allow is True
+
+
+def test_filter_signal_dd_skipped_missing_context():
+    """
+    Caso: falta equity_curve o dd_cfg → dd_skipped=True.
+    """
+    rm = make_rm()
+    signal = {"assets": ["BTC"], "deltas": {"BTC": 0.01}}
+    current_weights = {"BTC": 0.01}
+
+    # Sin equity_curve ni dd_cfg
+    allow, annotated = rm.filter_signal(
+        signal,
+        current_weights,
+        nav_eur=10_000.0,
+    )
+
+    decision = annotated["risk_decision"]
+    
+    assert decision.get("dd_skipped") is True
+    assert annotated.get("dd_skipped_reason") == "missing_equity_curve_or_dd_cfg"
+    assert allow is True
+
+
+def test_filter_signal_atr_skipped_empty_ctx():
+    """
+    Caso: atr_ctx vacío → atr_skipped=True, sin excepción.
+    """
+    rm = make_rm()
+    signal = {"assets": ["BTC"], "deltas": {"BTC": 0.01}}
+    current_weights = {"BTC": 0.01}
+    dd_cfg = {"max_dd_soft": 0.05, "max_dd_hard": 0.10, "size_multiplier_soft": 0.5}
+
+    allow, annotated = rm.filter_signal(
+        signal,
+        current_weights,
+        nav_eur=10_000.0,
+        equity_curve=[100.0, 101.0],
+        dd_cfg=dd_cfg,
+        atr_ctx={},
+        last_prices={},
+    )
+
+    decision = annotated["risk_decision"]
+    
+    assert decision.get("atr_skipped") is True
+    assert annotated.get("atr_skipped_reason") == "missing_or_empty_atr_ctx"
+    assert allow is True
+
+
+def test_filter_signal_atr_skipped_missing_ctx():
+    """
+    Caso: atr_ctx no pasado → atr_skipped=True.
+    """
+    rm = make_rm()
+    signal = {"assets": ["BTC"], "deltas": {"BTC": 0.01}}
+    current_weights = {"BTC": 0.01}
+    dd_cfg = {"max_dd_soft": 0.05, "max_dd_hard": 0.10, "size_multiplier_soft": 0.5}
+
+    allow, annotated = rm.filter_signal(
+        signal,
+        current_weights,
+        nav_eur=10_000.0,
+        equity_curve=[100.0, 101.0],
+        dd_cfg=dd_cfg,
+        # atr_ctx no pasado
+    )
+
+    decision = annotated["risk_decision"]
+    
+    assert decision.get("atr_skipped") is True
+    assert allow is True
+
+
+def test_compute_drawdown_skipped_flag():
+    """
+    Verifica que compute_drawdown devuelve skipped=True para curvas vacías/invalidas
+    y skipped=False para curvas válidas.
+    """
+    # Curva vacía
+    result_empty = RiskManagerV05.compute_drawdown([])
+    assert result_empty["skipped"] is True
+    assert result_empty["max_dd"] == 0.0
+    
+    # Curva solo NaN
+    result_nan = RiskManagerV05.compute_drawdown([float('nan'), float('nan')])
+    assert result_nan["skipped"] is True
+    
+    # Curva válida
+    result_valid = RiskManagerV05.compute_drawdown([100.0, 95.0, 98.0])
+    assert result_valid["skipped"] is False
+    assert result_valid["max_dd"] > 0.0
+

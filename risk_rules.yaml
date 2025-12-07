@@ -68,6 +68,7 @@ max_drawdown:
   soft_limit_pct: 0.05
   hard_limit_pct: 0.08
   lookback_days: 90
+  size_multiplier_soft: 0.5
 
 # --- Latencia & Control de comisiones -------------------------------------
 latency_budget_seconds: 1.0
