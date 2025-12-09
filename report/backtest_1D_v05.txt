@@ -1,0 +1,1 @@
+{'cagr': np.float64(0.0), 'total_return': np.float64(0.0), 'max_drawdown': np.float64(0.0), 'sharpe_ratio': 0.0, 'volatility': np.float64(0.0)}
