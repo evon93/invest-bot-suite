@@ -1,0 +1,121 @@
+diff --git a/risk_manager_v0_5.py b/risk_manager_v0_5.py
+index a9928ab..6485be8 100644
+--- a/risk_manager_v0_5.py
++++ b/risk_manager_v0_5.py
+@@ -4,7 +4,23 @@ import math
+ from typing import Dict, Tuple, Union, Any
+ from pathlib import Path
+ import yaml
++from typing import Any, Optional
+ 
++from risk_context_v0_6 import RiskContextV06
++def _ensure_risk_context_v06(risk_ctx: Any) -> Optional[RiskContextV06]:
++    """
++    Adapter para aceptar tanto dict (risk_ctx 1D) como RiskContextV06.
++
++    NO cambia todavía la lógica interna del RiskManager: solo normaliza el tipo
++    y deja preparado el contexto para ser usado por el core de decisión.
++    """
++    if risk_ctx is None:
++        return None
++    if isinstance(risk_ctx, RiskContextV06):
++        return risk_ctx
++    if isinstance(risk_ctx, dict):
++        return RiskContextV06.from_dict(risk_ctx)
++    raise TypeError(f"Unsupported risk_ctx type: {type(risk_ctx)!r}")
+ 
+ class RiskManagerV05:
+     """Gestor de riesgo v0.5 – clon inicial de v0.4 para implementar nuevos guardrails."""
+@@ -170,6 +186,45 @@ class RiskManagerV05:
+ 
+         # Bloque de decisión unificada
+         risk_decision = self._init_risk_decision()
++        
++        # ------------------------------------------------------------------
++        # RiskContext v0.6 adapter (dict o dataclass) — compat con kwargs planos
++        # ------------------------------------------------------------------
++        risk_ctx_obj = _ensure_risk_context_v06(kwargs.get("risk_ctx"))
++        env = {}
++        cfg_block = {}
++
++        if risk_ctx_obj is not None:
++            env = risk_ctx_obj.raw.get("env") or {}
++            cfg_block = risk_ctx_obj.raw.get("config") or {}
++
++        equity_curve = (
++            kwargs.get("equity_curve")
++            or (risk_ctx_obj.raw.get("equity_curve") if risk_ctx_obj is not None else None)
++            or env.get("equity_curve")
++        )
++
++        dd_cfg = (
++            kwargs.get("dd_cfg")
++            or (risk_ctx_obj.raw.get("dd_cfg") if risk_ctx_obj is not None else None)
++            or cfg_block.get("dd_cfg")
++            or cfg_block.get("dd_guardrail")
++        )
++
++        atr_ctx = (
++            kwargs.get("atr_ctx")
++            or (risk_ctx_obj.raw.get("atr_ctx") if risk_ctx_obj is not None else None)
++            or env.get("atr_ctx")
++            or {}
++        )
++
++        last_prices = (
++            kwargs.get("last_prices")
++            or (risk_ctx_obj.raw.get("last_prices") if risk_ctx_obj is not None else None)
++            or env.get("last_prices")
++            or {}
++        )
++
+ 
+         # ------------------------------------------------------------------
+         # 1) Límites de posición (lógica v0.4)
+@@ -194,8 +249,6 @@ class RiskManagerV05:
+         # Prioridad máxima: DD hard_stop → force_close_positions=True,
+         # size_multiplier=0.0, allow_new_trades=False
+         # ------------------------------------------------------------------
+-        equity_curve = kwargs.get("equity_curve")
+-        dd_cfg = kwargs.get("dd_cfg")
+         if equity_curve is not None and dd_cfg is not None:
+             dd_stats = self.compute_drawdown(equity_curve)
+             
+@@ -235,30 +288,27 @@ class RiskManagerV05:
+         # Prioridad secundaria: ATR stop → añade tickers a stop_signals
+         # sin anular DD hard_stop
+         # ------------------------------------------------------------------
+-        atr_ctx = kwargs.get("atr_ctx") or {}
+-        last_prices = kwargs.get("last_prices") or {}
+-        
+         if not atr_ctx:
+             # Contexto ATR faltante → modo degrade-to-safe
+             risk_decision["atr_skipped"] = True
+             annotated["atr_skipped_reason"] = "missing_or_empty_atr_ctx"
+         else:
+-            for ticker, ctx in atr_ctx.items():
+-                entry_price = ctx.get("entry_price")
+-                atr = ctx.get("atr")
+-                side = ctx.get("side")
++            for ticker, ticker_ctx in atr_ctx.items():
++                entry_price = ticker_ctx.get("entry_price")
++                atr = ticker_ctx.get("atr")
++                side = ticker_ctx.get("side")
+                 if entry_price is None or side is None:
+                     continue
+ 
+                 cfg = {
+-                    "atr_multiplier": ctx.get("atr_multiplier", 2.5),
+-                    "min_stop_pct": ctx.get("min_stop_pct", 0.02),
++                    "atr_multiplier": ticker_ctx.get("atr_multiplier", 2.5),
++                    "min_stop_pct": ticker_ctx.get("min_stop_pct", 0.02),
+                 }
+                 stop_price = self.compute_atr_stop(entry_price, atr, side, cfg)
+                 if stop_price is None:
+                     continue
+ 
+-                last_price = ctx.get("last_price", last_prices.get(ticker))
++                last_price = ticker_ctx.get("last_price", last_prices.get(ticker))
+                 if last_price is None:
+                     continue
+ 

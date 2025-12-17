@@ -1,0 +1,37 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+______ test_monitor_does_not_apply_kelly_capping_but_records_would_deltas ______
+
+    def test_monitor_does_not_apply_kelly_capping_but_records_would_deltas():
+        # Fuerza cap muy agresivo para que en active capee el delta
+        rm = RiskManagerV05(
+            {
+                "risk_manager": {"mode": "monitor"},
+                "kelly": {"cap_factor": 0.01},
+            }
+        )
+    
+        signal = {"assets": ["ASSET_X"], "deltas": {"ASSET_X": 0.50}}
+        allow, ann = rm.filter_signal(
+            signal,
+            current_weights={},
+            nav_eur=1000.0,
+            equity_curve=[100.0, 99.0],
+            dd_cfg={"max_dd_soft": 0.50, "max_dd_hard": 0.80, "size_multiplier_soft": 1.0},
+            atr_ctx={},
+            last_prices={},
+        )
+    
+        # Aplicado (monitor) -> no toca deltas
+        assert allow is True
+>       assert ann["deltas"]["ASSET_X"] == 0.50
+E       assert 0.01 == 0.5
+
+tests/test_risk_mode_monitor_v0_5.py:68: AssertionError
+----------------------------- Captured stderr call -----------------------------
+RiskManager initialized with 2 rules
+------------------------------ Captured log call -------------------------------
+INFO     RiskManager:risk_manager_v0_5.py:79 RiskManager initialized with 2 rules
+=========================== short test summary info ============================
+FAILED tests/test_risk_mode_monitor_v0_5.py::test_monitor_does_not_apply_kelly_capping_but_records_would_deltas
+1 failed, 1 passed in 1.01s

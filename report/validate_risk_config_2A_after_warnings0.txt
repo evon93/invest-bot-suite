@@ -1,0 +1,9 @@
+Risk config validation report
+
+- Config path: risk_rules.yaml
+- Generated: 2025-12-17T18:16:22+01:00
+
+Summary:
+- Errors: 0
+- Warnings: 0
+

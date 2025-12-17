@@ -83,8 +83,15 @@ seed:
 # --- Versioning ----------------------------------------------------------
 risk_manager:
   version: "0.4"
+  mode: "active"
 
 meta:
   version: "0.3"
   author: "Kai"
   checksum: TBD
+
+# --- Antigravity placeholders (2A/5.4) ---
+risk_limits: {}
+dd_limits: {}
+atr_stop: {}
+position_sizing: {}

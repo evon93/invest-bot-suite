@@ -322,3 +322,30 @@ Decisión y puente a 2A:
   - Definir el contrato RiskContext v0.5 como base para futuras versiones.
 - El ajuste fino de parámetros (por ejemplo relajación de Kelly para ETF, escenarios alternativos, multi-portfolio, etc.) se delega explícitamente a los planes de la serie 2A/2B, donde se trabajará ya con RiskContext formalizado como dataclass y objetivos cuantitativos de riesgo/retorno.
 
+
+## 2025-12-11 — Workflow Antigravity v0.1 (infraestructura)
+
+- Rama de trabajo: feature/workflow_antigravity_v0_1
+- Objetivo: introducir infraestructura de soporte para agentes (Antigravity / EXECUTOR-BOT)
+  sin modificar la lógica de trading ni de riesgo.
+
+Cambios principales:
+- Carpeta `.ai/`:
+  - `.ai/active_context.md`: estado técnico resumido (rama actual, snapshots de pytest).
+  - `.ai/decisions_log.md`: log de decisiones técnicas (incluye creación de protocolo y tooling).
+  - `.ai/project_map.md`: mapa del repo generado automáticamente.
+  - `.ai/antigravity_operational_protocol.md`: protocolo operativo v0.1 (roles, ciclo A→D, guardrails).
+- Herramientas en `tools/`:
+  - `tools/update_project_map.py`: genera `.ai/project_map.md`.
+  - `tools/validate_risk_config.py`: valida `risk_rules.yaml` y escribe informe en `/report`.
+- Esquema/config:
+  - `config_schema.py`: validación best-effort de `risk_rules.yaml`.
+- Tests:
+  - `tests/test_risk_config_schema.py`: garantiza que `risk_rules.yaml` es estructuralmente válido.
+
+Estado de validación:
+- `python tools/validate_risk_config.py` → Errors: 0, Warnings: 4 (secciones recomendadas ausentes).
+- `python -m pytest -q` → 48 tests OK.
+- Snapshots:
+  - `report/validate_risk_config_step5.txt`
+  - `report/pytest_antigravity_step5.txt`

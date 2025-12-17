@@ -1,10 +1,27 @@
 from __future__ import annotations
 import logging
 import math
-from typing import Dict, Tuple, Union, Any
+from typing import Dict, Tuple, Union, Any, Optional
 from pathlib import Path
 import yaml
 
+from risk_logging import emit_risk_decision_log
+
+from risk_context_v0_6 import RiskContextV06
+def _ensure_risk_context_v06(risk_ctx: Any) -> Optional[RiskContextV06]:
+    """
+    Adapter para aceptar tanto dict (risk_ctx 1D) como RiskContextV06.
+
+    NO cambia todavía la lógica interna del RiskManager: solo normaliza el tipo
+    y deja preparado el contexto para ser usado por el core de decisión.
+    """
+    if risk_ctx is None:
+        return None
+    if isinstance(risk_ctx, RiskContextV06):
+        return risk_ctx
+    if isinstance(risk_ctx, dict):
+        return RiskContextV06.from_dict(risk_ctx)
+    raise TypeError(f"Unsupported risk_ctx type: {type(risk_ctx)!r}")
 
 class RiskManagerV05:
     """Gestor de riesgo v0.5 – clon inicial de v0.4 para implementar nuevos guardrails."""
@@ -52,6 +69,15 @@ class RiskManagerV05:
         if not self.logger.handlers:
             self.logger.addHandler(logging.StreamHandler())
         self.logger.setLevel(logging.INFO)
+
+        # Modo de ejecución del risk_manager: active | monitor
+        rm_cfg = self.rules.get("risk_manager", {}) or {}
+        self.mode = str(rm_cfg.get("mode", "active")).lower()
+        if self.mode not in ("active", "monitor"):
+            self.logger.warning(
+                "Unknown risk_manager.mode=%r; defaulting to 'active'", self.mode
+            )
+            self.mode = "active"
         self.logger.info("RiskManager initialized with %d rules", len(self.rules))
 
     # --------------------------------------------------------------------- #
@@ -167,9 +193,52 @@ class RiskManagerV05:
         allow = True
         reasons: list[str] = []
         annotated = signal.copy()
+        signal_original = signal.copy()
+        # Snapshot de deltas originales (deep copy) para restauración en modo monitor
+        orig_deltas = dict(signal.get("deltas", {}))
 
         # Bloque de decisión unificada
         risk_decision = self._init_risk_decision()
+        risk_decision["mode"] = getattr(self, "mode", "active")
+        
+        # ------------------------------------------------------------------
+        # RiskContext v0.6 adapter (dict o dataclass) — compat con kwargs planos
+        # ------------------------------------------------------------------
+        risk_ctx_obj = _ensure_risk_context_v06(kwargs.get("risk_ctx"))
+        env = {}
+        cfg_block = {}
+
+        if risk_ctx_obj is not None:
+            env = risk_ctx_obj.raw.get("env") or {}
+            cfg_block = risk_ctx_obj.raw.get("config") or {}
+
+        equity_curve = (
+            kwargs.get("equity_curve")
+            or (risk_ctx_obj.raw.get("equity_curve") if risk_ctx_obj is not None else None)
+            or env.get("equity_curve")
+        )
+
+        dd_cfg = (
+            kwargs.get("dd_cfg")
+            or (risk_ctx_obj.raw.get("dd_cfg") if risk_ctx_obj is not None else None)
+            or cfg_block.get("dd_cfg")
+            or cfg_block.get("dd_guardrail")
+        )
+
+        atr_ctx = (
+            kwargs.get("atr_ctx")
+            or (risk_ctx_obj.raw.get("atr_ctx") if risk_ctx_obj is not None else None)
+            or env.get("atr_ctx")
+            or {}
+        )
+
+        last_prices = (
+            kwargs.get("last_prices")
+            or (risk_ctx_obj.raw.get("last_prices") if risk_ctx_obj is not None else None)
+            or env.get("last_prices")
+            or {}
+        )
+
 
         # ------------------------------------------------------------------
         # 1) Límites de posición (lógica v0.4)
@@ -194,8 +263,6 @@ class RiskManagerV05:
         # Prioridad máxima: DD hard_stop → force_close_positions=True,
         # size_multiplier=0.0, allow_new_trades=False
         # ------------------------------------------------------------------
-        equity_curve = kwargs.get("equity_curve")
-        dd_cfg = kwargs.get("dd_cfg")
         if equity_curve is not None and dd_cfg is not None:
             dd_stats = self.compute_drawdown(equity_curve)
             
@@ -235,30 +302,27 @@ class RiskManagerV05:
         # Prioridad secundaria: ATR stop → añade tickers a stop_signals
         # sin anular DD hard_stop
         # ------------------------------------------------------------------
-        atr_ctx = kwargs.get("atr_ctx") or {}
-        last_prices = kwargs.get("last_prices") or {}
-        
         if not atr_ctx:
             # Contexto ATR faltante → modo degrade-to-safe
             risk_decision["atr_skipped"] = True
             annotated["atr_skipped_reason"] = "missing_or_empty_atr_ctx"
         else:
-            for ticker, ctx in atr_ctx.items():
-                entry_price = ctx.get("entry_price")
-                atr = ctx.get("atr")
-                side = ctx.get("side")
+            for ticker, ticker_ctx in atr_ctx.items():
+                entry_price = ticker_ctx.get("entry_price")
+                atr = ticker_ctx.get("atr")
+                side = ticker_ctx.get("side")
                 if entry_price is None or side is None:
                     continue
 
                 cfg = {
-                    "atr_multiplier": ctx.get("atr_multiplier", 2.5),
-                    "min_stop_pct": ctx.get("min_stop_pct", 0.02),
+                    "atr_multiplier": ticker_ctx.get("atr_multiplier", 2.5),
+                    "min_stop_pct": ticker_ctx.get("min_stop_pct", 0.02),
                 }
                 stop_price = self.compute_atr_stop(entry_price, atr, side, cfg)
                 if stop_price is None:
                     continue
 
-                last_price = ctx.get("last_price", last_prices.get(ticker))
+                last_price = ticker_ctx.get("last_price", last_prices.get(ticker))
                 if last_price is None:
                     continue
 
@@ -285,6 +349,28 @@ class RiskManagerV05:
                     annotated["deltas"][asset] = max_weight
 
         # ------------------------------------------------------------------
+        # ------------------------------------------------------------------
+        # 6) Modo monitor: calcular pero NO aplicar (solo anotar) — 2A
+        # ------------------------------------------------------------------
+        if getattr(self, "mode", "active") == "monitor":
+            monitor_payload = {
+                "would_allow": allow,
+                "would_reasons": list(reasons),
+                "would_decision": risk_decision,
+            }
+            if "deltas" in annotated:
+                monitor_payload["would_deltas"] = annotated.get("deltas")
+
+            # Reset: comportamiento aplicado debe ser NO-OP
+            allow = True
+            reasons = []
+            annotated = signal_original.copy()
+            # Restaurar deltas originales (usando snapshot previo a mutación Kelly)
+            annotated["deltas"] = dict(orig_deltas)
+            risk_decision = self._init_risk_decision()
+            risk_decision["mode"] = "monitor"
+            annotated["risk_monitor"] = monitor_payload
+
         # 6) Sincronización final con annotated_signal
         # ------------------------------------------------------------------
         if not risk_decision["allow_new_trades"]:
@@ -293,6 +379,23 @@ class RiskManagerV05:
         annotated["risk_allow"] = allow
         annotated["risk_reasons"] = reasons
         annotated["risk_decision"] = risk_decision
+
+
+        # ------------------------------------------------------------------
+        #  Observabilidad mínima (logging estructurado de decisiones de riesgo)
+        # ------------------------------------------------------------------
+        rm_cfg = (self.rules.get('risk_manager') or {}) if isinstance(self.rules, dict) else {}
+        rm_log = rm_cfg.get('logging') or {}
+        log_enabled = bool(rm_log.get('enabled', False)) if isinstance(rm_log, dict) else False
+        mode = getattr(self, 'mode', rm_cfg.get('mode', 'active'))
+        emit_risk_decision_log(
+            logger=self.logger,
+            enabled=log_enabled,
+            mode=str(mode),
+            risk_ctx=risk_ctx_obj,
+            risk_decision=risk_decision,
+            annotated=annotated,
+        )
 
         return allow, annotated
 
