@@ -231,12 +231,17 @@ def compute_config_hash(config: Dict[str, Any]) -> str:
 def compute_score(row: Dict[str, Any], formula: str) -> float:
     """Calcula score según fórmula. Fallback a sharpe_ratio si hay error."""
     try:
-        # Crear contexto con las métricas
+        # Crear contexto con todas las métricas disponibles
         ctx = {
             "sharpe_ratio": float(row.get("sharpe_ratio", 0) or 0),
             "cagr": float(row.get("cagr", 0) or 0),
             "max_drawdown": float(row.get("max_drawdown", 0) or 0),
             "calmar_ratio": float(row.get("calmar_ratio", 0) or 0),
+            "win_rate": float(row.get("win_rate", 0) or 0),
+            "gross_pnl": float(row.get("gross_pnl", 0) or 0),
+            "atr_stop_count": int(row.get("atr_stop_count", 0) or 0),
+            "hard_stop_trigger_count": int(row.get("hard_stop_trigger_count", 0) or 0),
+            "pct_time_hard_stop": float(row.get("pct_time_hard_stop", 0) or 0),
             "abs": abs,
         }
         return float(eval(formula, {"__builtins__": {}}, ctx))
@@ -248,10 +253,11 @@ def run_calibration(
     mode: str = "quick",
     max_combinations: Optional[int] = None,
     seed: int = 42,
+    output_dir_override: Optional[str] = None,
 ):
     """
     Ejecuta la calibración según el grid definido en el YAML.
-    Escribe todos los artefactos en output_dir (definido en YAML).
+    Escribe todos los artefactos en output_dir (CLI override > YAML).
     """
     run_start = time.time()
     
@@ -259,9 +265,12 @@ def run_calibration(
     config = load_yaml(CONFIG_PATH)
     base_rules = load_yaml(RULES_PATH)
 
-    # Resolver output_dir desde YAML con fallback
-    output_dir_rel = config.get("output", {}).get("dir", DEFAULT_OUTPUT_DIR)
-    output_dir = REPO_ROOT / output_dir_rel
+    # Resolver output_dir: CLI override > YAML > default
+    if output_dir_override:
+        output_dir = Path(output_dir_override)
+    else:
+        output_dir_rel = config.get("output", {}).get("dir", DEFAULT_OUTPUT_DIR)
+        output_dir = REPO_ROOT / output_dir_rel
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Paths de artefactos dentro de output_dir
@@ -419,12 +428,13 @@ def run_calibration(
         "seed": effective_seed,
         "mode": mode,
         "total_grid": total_combos,
+        "num_combos": len(combos),
         "running": len(combos),
         "ok": ok_count,
         "errors": error_count,
         "duration_s": run_duration,
         "timestamp": datetime.now().isoformat(),
-        "output_dir": str(output_dir_rel),
+        "output_dir": str(output_dir),
     }
     with open(meta_file, "w", encoding="utf-8") as f:
         json.dump(meta_data, f, indent=2)
@@ -510,6 +520,12 @@ def main():
         default=42,
         help="Random seed for reproducibility (default: 42)",
     )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Override output directory (default: use YAML output.dir)",
+    )
 
     args = parser.parse_args()
 
@@ -517,6 +533,7 @@ def main():
         mode=args.mode,
         max_combinations=args.max_combinations,
         seed=args.seed,
+        output_dir_override=args.output_dir,
     )
 
 
