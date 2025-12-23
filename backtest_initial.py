@@ -83,6 +83,7 @@ class SimpleBacktester:
         self.trades: List[Dict] = []
         self.closed_trades: List[Dict] = []  # Trades cerrados con PnL
         self._avg_cost: Dict[str, float] = defaultdict(float)  # Coste medio por asset
+        self.risk_events: List[Dict] = []  # Eventos de riesgo por tick (risk_decision)
         
         # Precios efectivos (último precio válido > 0 visto)
         self.last_valid_prices: Dict[str, float] = {}
@@ -138,6 +139,14 @@ class SimpleBacktester:
                 atr_ctx={},
                 last_prices=self.last_valid_prices,
             )
+            
+            # Capturar risk_decision para métricas (ruta 2.2)
+            risk_decision = annotated.get("risk_decision", {})
+            self.risk_events.append({
+                "date": date,
+                "risk_decision": risk_decision,
+            })
+            
             if not allow:
                 logger.warning("Señal rechazada: %s", annotated.get("risk_reasons", []))
                 return

@@ -148,6 +148,51 @@ def run_single_backtest(
     metrics["avg_win"] = sum(wins) / len(wins) if wins else 0.0
     metrics["avg_loss"] = sum(losses) / len(losses) if losses else 0.0
     
+    # --- Métricas de risk_events (ATR/hard_stop counters) ---
+    risk_events = getattr(bt, "risk_events", [])
+    if risk_events:
+        total_ticks = len(risk_events)
+        
+        # Extraer estados por tick
+        hard_stop_flags = []
+        atr_triggered_flags = []
+        
+        for evt in risk_events:
+            rd = evt.get("risk_decision", {})
+            reasons = rd.get("reasons", [])
+            
+            # hard_stop: "dd_hard" en reasons o force_close_positions=True
+            is_hard = "dd_hard" in reasons or rd.get("force_close_positions", False)
+            hard_stop_flags.append(is_hard)
+            
+            # atr_triggered: "stop_loss_atr" en reasons o stop_signals no vacío
+            is_atr = "stop_loss_atr" in reasons or len(rd.get("stop_signals", [])) > 0
+            atr_triggered_flags.append(is_atr)
+        
+        # Contar transiciones False->True
+        hard_stop_trigger_count = sum(
+            1 for i in range(1, len(hard_stop_flags))
+            if hard_stop_flags[i] and not hard_stop_flags[i-1]
+        )
+        atr_stop_count = sum(
+            1 for i in range(1, len(atr_triggered_flags))
+            if atr_triggered_flags[i] and not atr_triggered_flags[i-1]
+        )
+        
+        # pct_time_hard_stop
+        ticks_hard = sum(hard_stop_flags)
+        pct_time_hard_stop = ticks_hard / total_ticks if total_ticks > 0 else 0.0
+        
+        metrics["atr_stop_count"] = atr_stop_count
+        metrics["hard_stop_trigger_count"] = hard_stop_trigger_count
+        metrics["pct_time_hard_stop"] = pct_time_hard_stop
+        metrics["missing_risk_events"] = False
+    else:
+        metrics["atr_stop_count"] = 0
+        metrics["hard_stop_trigger_count"] = 0
+        metrics["pct_time_hard_stop"] = 0.0
+        metrics["missing_risk_events"] = True
+    
     # Calmar ratio
     if metrics.get("max_drawdown", 0) != 0:
         metrics["calmar_ratio"] = metrics.get("cagr", 0) / abs(metrics["max_drawdown"])
@@ -271,6 +316,10 @@ def run_calibration(
         "gross_pnl",
         "avg_win",
         "avg_loss",
+        "atr_stop_count",
+        "hard_stop_trigger_count",
+        "pct_time_hard_stop",
+        "missing_risk_events",
         "score",
     ]
     # Añadir parámetros al header

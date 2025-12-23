@@ -1,6 +1,6 @@
 {
   "config_hash": "0aa0669081dc969a",
-  "git_head": "9815a3e35874",
+  "git_head": "6a0548e6d2e7",
   "seed": 42,
   "mode": "quick",
   "total_grid": 216,
@@ -8,6 +8,6 @@
   "ok": 3,
   "errors": 0,
   "duration_s": 0.09,
-  "timestamp": "2025-12-23T20:05:56.074611",
+  "timestamp": "2025-12-23T21:15:05.451125",
   "output_dir": "report/calibration_2B"
 }
