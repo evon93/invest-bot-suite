@@ -3,6 +3,36 @@
 _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
+
+## Estado Actual (2025-12-23) — Fase 2B: Risk Calibration Runner
+
+- **Rama:** `feature/2B_risk_calibration`
+- **Estado:** ✅ COMPLETADO
+- **Commit HEAD:** `ab39260 2B.4: scoring formula uses risk counters`
+
+**Entregables principales:**
+- Runner de calibración: `tools/run_calibration_2B.py`
+- Configuración: `configs/risk_calibration_2B.yaml`
+- Tests: `tests/test_calibration_runner_2B.py`, `tests/test_backtester_closed_trades.py`
+
+**Nuevas capacidades:**
+- `closed_trades` con `realized_pnl` y `win_rate`
+- `risk_events` con contadores ATR/hard_stop
+- Score formula configurable con métricas de riesgo
+- CLI `--output-dir` para override de directorio de salida
+
+**Métricas añadidas:**
+- `atr_stop_count`, `hard_stop_trigger_count`, `pct_time_hard_stop`, `missing_risk_events`
+- `closed_trades_count`, `wins_count`, `losses_count`, `win_rate`, `gross_pnl`, `avg_win`, `avg_loss`
+
+**Tests:** 57 passed
+
+**Documentación:**
+- `report/risk_calibration_2B_impl_20251223.md`
+- `bridge_2B_to_2C_report.md`
+
+---
+
 ##  Estado Actual (2025-11-27)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).

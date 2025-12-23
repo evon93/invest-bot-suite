@@ -1,11 +1,11 @@
-Calibration run started at 2025-12-23T22:12:24.338625
-[2025-12-23T22:12:24] Mode: quick, Total grid: 216, Running: 3, Seed: 42
-[2025-12-23T22:12:24] Output dir: C:\Users\ivn_b\Desktop\invest-bot-suite\report\calibration_2B
-[2025-12-23T22:12:24] START combo_id=c648aadd02dc (1/3) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
-[2025-12-23T22:12:24] END combo_id=c648aadd02dc status=ok duration_s=0.03
-[2025-12-23T22:12:24] START combo_id=2a7b39f06e64 (2/3) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
-[2025-12-23T22:12:24] END combo_id=2a7b39f06e64 status=ok duration_s=0.03
-[2025-12-23T22:12:24] START combo_id=ffae19fec604 (3/3) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
-[2025-12-23T22:12:24] END combo_id=ffae19fec604 status=ok duration_s=0.01
-[2025-12-23T22:12:24] DONE: 3 ok, 0 errors, total 3, duration 0.09s
-[2025-12-23T22:12:24] Artifacts written to: C:\Users\ivn_b\Desktop\invest-bot-suite\report\calibration_2B
+Calibration run started at 2025-12-23T22:48:06.908145
+[2025-12-23T22:48:06] Mode: quick, Total grid: 216, Running: 3, Seed: 42
+[2025-12-23T22:48:06] Output dir: C:\Users\ivn_b\Desktop\invest-bot-suite\report\calibration_2B
+[2025-12-23T22:48:06] START combo_id=c648aadd02dc (1/3) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-23T22:48:06] END combo_id=c648aadd02dc status=ok duration_s=0.03
+[2025-12-23T22:48:06] START combo_id=2a7b39f06e64 (2/3) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-23T22:48:06] END combo_id=2a7b39f06e64 status=ok duration_s=0.03
+[2025-12-23T22:48:06] START combo_id=ffae19fec604 (3/3) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-23T22:48:06] END combo_id=ffae19fec604 status=ok duration_s=0.01
+[2025-12-23T22:48:06] DONE: 3 ok, 0 errors, total 3, duration 0.08s
+[2025-12-23T22:48:07] Artifacts written to: C:\Users\ivn_b\Desktop\invest-bot-suite\report\calibration_2B
