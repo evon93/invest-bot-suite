@@ -1,9 +1,9 @@
 # Calibration 2B Run Summary
 
-**Timestamp**: 2025-12-23T21:38:13.671423
+**Timestamp**: 2025-12-23T22:12:24.457611
 **Mode**: quick
 **Seed**: 42
-**Git HEAD**: 0ee09d30b8af
+**Git HEAD**: a12ece17f502
 
 ## Results
 
@@ -16,7 +16,7 @@
 ## Score Formula
 
 ```
-1.0*sharpe_ratio + 0.5*cagr - 1.5*abs(max_drawdown)
+1.0*sharpe_ratio + 0.5*cagr + 0.3*win_rate - 1.5*abs(max_drawdown) - 0.5*pct_time_hard_stop
 ```
 
 ## Top-K Candidates

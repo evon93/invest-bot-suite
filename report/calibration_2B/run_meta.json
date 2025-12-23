@@ -1,6 +1,6 @@
 {
-  "config_hash": "0aa0669081dc969a",
-  "git_head": "0ee09d30b8af",
+  "config_hash": "a74985e8a0c2daee",
+  "git_head": "a12ece17f502",
   "seed": 42,
   "mode": "quick",
   "total_grid": 216,
@@ -9,6 +9,6 @@
   "ok": 3,
   "errors": 0,
   "duration_s": 0.09,
-  "timestamp": "2025-12-23T21:38:13.670865",
+  "timestamp": "2025-12-23T22:12:24.457005",
   "output_dir": "C:\\Users\\ivn_b\\Desktop\\invest-bot-suite\\report\\calibration_2B"
 }
