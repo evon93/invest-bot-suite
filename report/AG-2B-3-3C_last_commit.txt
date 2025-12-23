@@ -1,0 +1,1 @@
+﻿957e479 2B.3-4: score_formula compatibility + runner smoke test
