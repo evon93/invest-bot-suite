@@ -1,11 +1,8 @@
 Risk config validation report
 
-- Config path: configs/risk_rules.yaml
-- Generated: 2025-12-23T18:53:24+01:00
+- Config path: risk_rules.yaml
+- Generated: 2025-12-24T16:39:46+01:00
 
 Summary:
-- Errors: 1
+- Errors: 0
 - Warnings: 0
-
-Errors:
-- Config file not found: configs/risk_rules.yaml

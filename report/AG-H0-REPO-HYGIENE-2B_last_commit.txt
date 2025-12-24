@@ -1,0 +1,1 @@
+﻿ecd0599 H0: repo hygiene (.gitattributes, check_repo.py, CI workflow)
