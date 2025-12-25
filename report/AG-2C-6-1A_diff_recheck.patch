@@ -1,0 +1,118 @@
+diff --git a/risk_rules.yaml b/risk_rules_candidate.yaml
+index 7c0541c..fd0f39c 100644
+--- a/risk_rules.yaml
++++ b/risk_rules_candidate.yaml
+@@ -1,40 +1,28 @@
+-# risk_rules.yaml Â· versiÃ³n 0.3 (2025â€‘07â€‘03)
+-# ParÃ¡metros de gestiÃ³n de riesgo y rebalanceo para invest-bot-suite
+-
+-# --- Rebalanceo ------------------------------------------------------------
+ rebalance:
+-  frequency: "monthly"
++  frequency: monthly
+   drift_threshold: 0.03
+   day_of_month: 1
+   execution_window_minutes: 30
+-
+-# --- LÃ­mites de exposiciÃ³n -------------------------------------------------
+ position_limits:
+   max_single_asset_pct: 0.06
+   max_sector_pct: 0.25
+   max_crypto_pct: 0.12
+   max_altcoin_pct: 0.05
+-
+ major_cryptos:
+-  - CRYPTO_BTC
+-  - CRYPTO_ETH
+-  - CRYPTO_USDT
+-
+-# --- Stopâ€‘loss dinÃ¡mico (ATR) ---------------------------------------------
++- CRYPTO_BTC
++- CRYPTO_ETH
++- CRYPTO_USDT
+ stop_loss:
+-  method: "ATR"
+-  atr_multiplier: 2.5
++  method: ATR
++  atr_multiplier: 2.0
+   lookback_days: 30
+   min_stop_pct: 0.02
+-
+ volatility_stop:
+   enabled: true
+   lookback_days: 30
+   percentile: 0.8
+-
+-# --- Kelly capped (gestiÃ³n de tamaÃ±o) --------------------------------------
+ kelly:
+-  cap_factor: 0.50
++  cap_factor: 0.7
+   min_trade_size_eur: 20
+   max_trade_size_eur: 400
+   crypto_overrides:
+@@ -42,55 +30,40 @@ kelly:
+     med_vol: 0.4
+     high_vol: 0.3
+     percentile_thresholds:
+-      low: 0.50
+-      high: 0.80
++      low: 0.5
++      high: 0.8
+   per_asset:
+     CRYPTO_BTC:
+       low_vol: 0.55
+-      high_vol: 0.40
++      high_vol: 0.4
+     CRYPTO_ETH:
+       low_vol: 0.45
+       high_vol: 0.35
+     CRYPTO_SOL:
+-      low_vol: 0.30
++      low_vol: 0.3
+       high_vol: 0.25
+-
+-# --- Liquidez --------------------------------------------------------------
+ liquidity_filter:
+-  min_volume_24h_usd: 10000000     # 10 M USD
+-
+-# --- RecalibraciÃ³n automÃ¡tica ---------------------------------------------
++  min_volume_24h_usd: 10000000
+ recalibration:
+   window_days: 90
+-
+-# --- Drawdown guardrail ----------------------------------------------------
+ max_drawdown:
+   soft_limit_pct: 0.05
+-  hard_limit_pct: 0.08
++  hard_limit_pct: 0.1
+   lookback_days: 90
+   size_multiplier_soft: 0.5
+-
+-# --- Latencia & Control de comisiones -------------------------------------
+ latency_budget_seconds: 1.0
+ max_fee_pct: 0.25
+-
+-# --- Seeds & reproducibilidad ---------------------------------------------
+ seed:
+   python: 42
+   cpp: 42
+   rust: 42
+-
+-# --- Versioning ----------------------------------------------------------
+ risk_manager:
+-  version: "0.4"
+-  mode: "active"
+-
++  version: '0.4'
++  mode: active
+ meta:
+-  version: "0.3"
+-  author: "Kai"
++  version: '0.3'
++  author: Kai
+   checksum: TBD
+-
+-# --- Antigravity placeholders (2A/5.4) ---
+ risk_limits: {}
+ dd_limits: {}
+ atr_stop: {}
