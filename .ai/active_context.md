@@ -1,26 +1,39 @@
-# Active Context — Antigravity Workflow v0.1
+# Active Context — invest-bot-suite
 
-- Proyecto: invest-bot-suite
-- Rama actual: feature/workflow_antigravity_v0_1
-- Última actualización manual: (rellenar fecha YYYY-MM-DD si se desea)
+- **Proyecto**: invest-bot-suite
+- **Rama actual**: `main`
+- **Última actualización**: 2025-12-26
 
-## Estado técnico reciente
+## Estado actual: 2C completado
 
-- Baseline pytest antes de Antigravity: 47 tests OK (rama feature/2A_riskcontext_v0_6_and_monitor)
-- Snapshot guardado en: report/pytest_2A_before.txt
-- Rama de trabajo actual para Antigravity: feature/workflow_antigravity_v0_1
+- **HEAD**: `3c3d74b` (H0: renormalize line endings)
+- **Fase**: 2C completada + EOL hygiene done
+- **Tests**: 77 passed
+- **Validador**: 0 errors, 0 warnings
 
-## Notas rápidas
+## Cómo ejecutar tests
 
-- No incluir en commits de Antigravity:
-  - report/pytest_2A_before.txt
-  - risk_context_v0_6.py
+```powershell
+# Forma recomendada en Windows
+python -m pytest -q
 
-## Paso 5 — Validación de configuración de riesgo (v0.1)
+# Validar configuración de riesgo
+python tools/validate_risk_config.py --config risk_rules.yaml
+```
 
-- Herramientas añadidas:
-  - config_schema.py
-  - tools/validate_risk_config.py
-  - tests/test_risk_config_schema.py
-- Snapshot validador: report/validate_risk_config_step5.txt
-- Pytest global tras Paso 5: 48 tests OK (report/pytest_antigravity_step5.txt)
+## Herramientas 2C añadidas
+
+| Tool | Propósito |
+|------|-----------|
+| `tools/best_params_schema_2C.py` | Schema + selector topk |
+| `tools/build_best_params_2C.py` | Builder CLI |
+| `tools/apply_calibration_topk.py` | Apply params a YAML |
+
+## Configs generados
+
+- `configs/best_params_2C.json` — Parámetros calibrados
+- `risk_rules_candidate.yaml` — Candidato (ya promovido)
+
+## Próximo paso: 2D
+
+Ver `bridge_2C_to_2D_report.md` para roadmap.

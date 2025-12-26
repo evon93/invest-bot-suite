@@ -4,7 +4,37 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
+## Estado Actual (2025-12-26) — Fase 2C: Apply Best Params + EOL Hygiene
+
+- **Rama:** `main`
+- **Estado:** ✅ COMPLETADO
+- **Commit HEAD:** `3c3d74b H0: renormalize line endings (LF)`
+
+**Entregables principales:**
+- Schema/Selector: `tools/best_params_schema_2C.py`
+- Builder CLI: `tools/build_best_params_2C.py`
+- Apply CLI: `tools/apply_calibration_topk.py`
+- Config generado: `configs/best_params_2C.json`
+- Tests: `tests/test_best_params_2C.py`, `tests/test_apply_calibration_topk_2C.py`
+
+**Parámetros calibrados aplicados a risk_rules.yaml:**
+- `stop_loss.atr_multiplier`: 2.5 → 2.0
+- `max_drawdown.hard_limit_pct`: 0.08 → 0.1
+- `kelly.cap_factor`: 0.50 → 0.7
+
+**EOL Hygiene:**
+- Renormalización de 48 archivos a LF
+- Commit: `3c3d74b`
+
+**Tests:** 77 passed
+
+**Documentación:**
+- `bridge_2C_to_2D_report.md`
+
+---
+
 ## Estado Actual (2025-12-23) — Fase 2B: Risk Calibration Runner
+
 
 - **Rama:** `feature/2B_risk_calibration`
 - **Estado:** ✅ COMPLETADO
