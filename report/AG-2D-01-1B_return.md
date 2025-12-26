@@ -29,7 +29,7 @@ Working tree limpio ✓
 ## git log -1 --oneline
 
 ```
-fc8b7b3 (HEAD -> main) chore(report): add 2C artifacts + update validate log + 2D-01-1B return
+2d0b778 (HEAD -> main) chore(report): add 2C artifacts + update validate log + 2D-01-1B return
 ```
 
 > **Nota:** Se usó `--amend` para incluir los artefactos de retorno en el mismo commit.
