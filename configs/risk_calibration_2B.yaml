@@ -1,0 +1,88 @@
+# 2B — Risk Calibration Spec (v0.1)
+# Objetivo: definir un grid reproducible para calibrar parámetros de riesgo
+# sin tocar la lógica del RiskManager salvo wiring/runner.
+# Seed global: 42 (reproducibilidad)
+
+meta:
+  phase: "2B"
+  name: "risk_calibration"
+  version: "v0.1"
+  created_utc_offset: "+01:00"
+
+repro:
+  seed: 42
+  deterministic: true
+
+baseline:
+  # runner actual de baseline (dataset sintético interno)
+  runner: "backtest_initial.py"
+  start_date: "2024-01-01"
+  periods: 252
+  initial_capital: 10000
+
+search:
+  method: "grid"
+  top_k: 20
+
+execution:
+  # Modo de ejecución del RiskManager durante calibración
+  mode: "active"
+  # Limitar combinaciones para smoke tests (null = full grid)
+  max_combinations: null  # set to 12 for quick, null for full
+
+grid:
+  # Nota: este grid se aplicará construyendo variantes de risk_rules.yaml IN-MEMORY
+  # (sin escribir sobre risk_rules.yaml), o mediante overlays temporales.
+  # Mantener rangos pequeños al inicio para smoke (paso 3).
+  # Keys alineadas con risk_rules.yaml real (verificado 2B/2.2):
+  stop_loss:
+    # Maps to: stop_loss.atr_multiplier, stop_loss.min_stop_pct
+    atr_multiplier: [2.0, 2.5, 3.0]
+    min_stop_pct: [0.02, 0.03]
+  max_drawdown:
+    # Maps to: max_drawdown.soft_limit_pct, max_drawdown.hard_limit_pct, max_drawdown.size_multiplier_soft
+    # Calibramos soft y hard juntos para mantener ratio ~2x
+    soft_limit_pct: [0.05, 0.08]
+    hard_limit_pct: [0.10, 0.15]
+    # size_multiplier cuando DD está en zona soft (reduce tamaño)
+    size_multiplier_soft: [0.5, 0.7, 1.0]
+  kelly:
+    # Maps to: kelly.cap_factor (el cap efectivo usado por RiskManager)
+    cap_factor: [0.30, 0.50, 0.70]
+
+constraints:
+  # Hard constraints: si se violan, descartar candidato (score = -inf)
+  max_drawdown_pct_lte: 0.25
+  min_trades_gte: 3
+
+metrics:
+  # Métricas a calcular desde equity_curve/returns y trades
+  compute:
+    - "cagr"
+    - "total_return"
+    - "max_drawdown"
+    - "sharpe_ratio"
+    - "volatility"
+    - "num_trades"
+    - "calmar_ratio"
+    - "win_rate"
+  # Métricas declaradas pero pendientes de implementación en runner:
+  compute_pending:
+    - "atr_stop_count"            # veces que ATR stop triggereó
+    - "hard_stop_trigger_count"   # veces que DD hard_stop se activó
+    - "pct_time_hard_stop"        # % del tiempo en estado hard_stop
+
+score:
+  # Score combinado (mayor es mejor). Incluye métricas de riesgo.
+  # Premia sharpe, cagr, win_rate. Penaliza drawdown y tiempo en hard_stop.
+  formula: "1.0*sharpe_ratio + 0.5*cagr + 0.3*win_rate - 1.5*abs(max_drawdown) - 0.5*pct_time_hard_stop"
+  tie_breakers:
+    - "max_drawdown"      # preferir menos drawdown (más cercano a 0)
+    - "sharpe_ratio"      # luego mayor sharpe
+
+output:
+  dir: "report/calibration_2B"
+  save_csv: true
+  save_md_summary: true
+  save_json_topk: true
+  save_logs: true

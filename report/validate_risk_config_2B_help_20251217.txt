@@ -1,0 +1,12 @@
+usage: validate_risk_config.py [-h] [-c CONFIG] [-o OUTPUT]
+
+Validate risk_rules.yaml configuration.
+
+options:
+  -h, --help            show this help message and exit
+  -c CONFIG, --config CONFIG
+                        Ruta al fichero de configuración de riesgo (por
+                        defecto: risk_rules.yaml).
+  -o OUTPUT, --output OUTPUT
+                        Ruta al fichero de informe (por defecto:
+                        report/validate_risk_config_step5.txt).

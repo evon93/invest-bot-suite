@@ -1,0 +1,28 @@
+## feature/2B_risk_calibration...origin/feature/2B_risk_calibration
+ M backtest_initial.py
+ M report/calibration_2B/results.csv
+ M report/calibration_2B/run_log.txt
+ M report/calibration_2B/run_meta.json
+ M report/calibration_2B/summary.md
+ M report/validate_risk_config_step5.txt
+A  tests/test_backtester_closed_trades.py
+ M tools/run_calibration_2B.py
+?? report/AG-2B-0-2-1_return.md
+?? report/AG-2B-1-1_return.md
+?? report/AG-2B-1-2_diff.patch
+?? report/AG-2B-1-2_pytest.txt
+?? report/AG-2B-1-2_return.md
+?? report/AG-2B-1-3_diff.patch
+?? report/AG-2B-1-3_pytest.txt
+?? report/AG-2B-1-3_return.md
+?? report/AG-2B-1-4A_return.md
+?? report/AG-2B-1-4B_return.md
+?? report/AG-2B-1-4_diff.patch
+?? report/AG-2B-1-4_pytest.txt
+?? report/AG-2B-1-4_return.md
+?? report/AG-2B-1-5_diff.patch
+?? report/AG-2B-1-5_pytest.txt
+?? report/AG-2B-1-5_return.md
+?? report/AG-2B-1-5_run.txt
+?? report/pytest_2B_finalize_baseline.txt
+?? report/validate_risk_config_2B_finalize_baseline.txt

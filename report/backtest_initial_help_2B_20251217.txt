@@ -1,0 +1,1 @@
+{'cagr': np.float64(0.15790395006451363), 'total_return': np.float64(0.15790395006451363), 'max_drawdown': np.float64(-0.09847045115855935), 'sharpe_ratio': np.float64(1.30109905514287), 'volatility': np.float64(0.11853472060855608)}

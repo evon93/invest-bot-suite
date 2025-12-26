@@ -1,0 +1,252 @@
+=== CALL SITES: filter_signal(
+./audit/audit_1C_v0_5/backtest_initial.py:125:            allow, annotated = risk_manager.filter_signal(
+./audit/audit_1C_v0_5/risk_decision_v0_5_spec_1C_20251201.md:174:- Ejecutar `.filter_signal(...)`
+./audit/audit_1C_v0_5/risk_manager_v0_5.py:133:    def filter_signal(
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:34:    allow, annotated = rm.filter_signal(
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:81:    allow, annotated = rm.filter_signal(
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:125:    allow, annotated = rm.filter_signal(
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:179:    allow, annotated = rm.filter_signal(
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:245:    allow, annotated = rm.filter_signal(
+./backtest_initial.py:129:            allow, annotated = risk_manager.filter_signal(
+./backtest_initial.py.bak_0A:113:            allow, annotated = risk_manager.filter_signal(
+./backtest_initial.py.bak_0C:113:            allow, annotated = risk_manager.filter_signal(
+./registro_de_estado_invest_bot.md:309:  - Se define el contrato lógico risk_ctx consumido por filter_signal(...) en v0.5:
+./report/backtest_20251207_1d_core_walkthrough.md:46:    allow, annotated = risk_manager.filter_signal(
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:17:  - Asegurar que el backtester pasa un `risk_ctx` consistente a `risk_manager.filter_signal(...)`.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:27:- `_rebalance(...)` ahora construye y pasa un contexto de riesgo ampliado a `risk_manager.filter_signal(...)`:
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:40:  - Si `filter_signal(...)` devuelve `allow=False`, se registran las razones de riesgo y se aborta el rebalanceo.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:44:- `filter_signal(...)` consolida la decisión de riesgo en un flujo único, con orden de prioridad:
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:170:     - `risk_manager.filter_signal(signal, current_weights, risk_ctx=dict)` (tal y como está ahora), o
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:171:     - `risk_manager.filter_signal(signal, current_weights, risk_ctx=RiskContext)` (nueva firma, manteniendo compatibilidad vía adapter).
+./report/grep_call_sites_2A.txt:1:=== CALL SITES: filter_signal(
+./report/risk_advanced_guardrails_spec_1B_20251127.md:173:allow, annotated = risk_manager.filter_signal(
+./report/risk_context_v0_5_spec_1D_20251207.md:5:- Definir el contrato de contexto de riesgo que consume RiskManagerV05.filter_signal(...) en v0.5.
+./report/risk_context_v0_5_spec_1D_20251207.md:248:  - filter_signal(signal, current_weights, nav_eur=None, **kwargs) sigue siendo la firma pública.
+./report/risk_decision_v0_5_spec_1C_20251201.md:174:- Ejecutar `.filter_signal(...)`
+./report/risk_manager_1A_auditoria_20251126.md:216:**`filter_signal(signal: dict, current_weights: dict, nav_eur: float | None = None, **kwargs) -> (bool, dict)`**
+./report/risk_manager_1A_auditoria_20251126.md:379:allow, annotated = rm.filter_signal(
+./report/risk_manager_contract_1A_20251126.md:135:    filter_signal(
+./risk_manager_v0_5.py:168:    def filter_signal(
+./risk_manager_v_0_4.py:106:    def filter_signal(
+./risk_manager_v_0_4_backup.py:126:    def filter_signal(
+./tests/test_risk_decision_v0_5.py:34:    allow, annotated = rm.filter_signal(
+./tests/test_risk_decision_v0_5.py:81:    allow, annotated = rm.filter_signal(
+./tests/test_risk_decision_v0_5.py:125:    allow, annotated = rm.filter_signal(
+./tests/test_risk_decision_v0_5.py:179:    allow, annotated = rm.filter_signal(
+./tests/test_risk_decision_v0_5.py:245:    allow, annotated = rm.filter_signal(
+./tests/test_risk_suite.py:77:    allow, enriched = rm.filter_signal(
+./tests/test_risk_v0_5_extended.py:113:    allow, annotated = rm.filter_signal(
+./tests/test_risk_v0_5_extended.py:141:    allow, annotated = rm.filter_signal(
+./tests/test_risk_v0_5_extended.py:167:    allow, annotated = rm.filter_signal(
+./tests/test_risk_v0_5_extended.py:189:    allow, annotated = rm.filter_signal(
+./tests/test_risk_v0_5_extended.py:215:    allow, annotated = rm.filter_signal(
+
+=== KEYS: dd_cfg
+./audit/audit_1C_v0_5/risk_decision_v0_5_spec_1C_20251201.md:91:- `dd_cfg` con:
+./audit/audit_1C_v0_5/risk_decision_v0_5_spec_1C_20251201.md:172:  - `dd_cfg`
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:69:2. Con el valor de DD (`dd_value`) y la config `dd_cfg`:
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:72:   dd_cfg = {
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:209:En la versión actual, DD y ATR se configuran principalmente vía kwargs (`dd_cfg`, `atr_ctx`), simulando el wiring futuro desde config centralizada.
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:247:   - Para E2E futuros, se puede construir `equity_curve` y `dd_cfg` para alimentar DD.
+./audit/audit_1C_v0_5/risk_manager_v0_5.py:176:        dd_cfg = kwargs.get("dd_cfg")
+./audit/audit_1C_v0_5/risk_manager_v0_5.py:177:        if equity_curve is not None and dd_cfg is not None:
+./audit/audit_1C_v0_5/risk_manager_v0_5.py:180:            dd_eval = self.eval_dd_guardrail(dd_val, dd_cfg)
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:28:    dd_cfg = {
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:39:        dd_cfg=dd_cfg,
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:75:    dd_cfg = {
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:86:        dd_cfg=dd_cfg,
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:119:    dd_cfg = {
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:130:        dd_cfg=dd_cfg,
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:162:    dd_cfg = {
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:184:        dd_cfg=dd_cfg,
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:239:    dd_cfg = {
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:250:        dd_cfg=dd_cfg,
+./backtest_initial.py:125:            # Construir risk_ctx completo (dd_cfg desde yaml, no hardcodeado)
+./backtest_initial.py:127:            dd_cfg = risk_manager.get_dd_cfg()
+./backtest_initial.py:134:                dd_cfg=dd_cfg,
+./registro_de_estado_invest_bot.md:314:  - Se documentan reglas de degradación y flags recomendados cuando falta información (dd_disabled, atr_disabled, dd_cfg_default, partial_prices, atr_fallback:{ticker}, etc.).
+./report/backtest_20251207_1d_core_walkthrough.md:14:| `risk_manager_v0_5.py` | compute_drawdown robusto (NaN/inf), flags dd_skipped/atr_skipped, método get_dd_cfg() |
+./report/backtest_20251207_1d_core_walkthrough.md:15:| `backtest_initial.py` | Wiring de filter_signal con dd_cfg desde yaml |
+./report/backtest_20251207_1d_core_walkthrough.md:35:**get_dd_cfg():**
+./report/backtest_20251207_1d_core_walkthrough.md:44:    dd_cfg = risk_manager.get_dd_cfg()  # Desde yaml
+./report/backtest_20251207_1d_core_walkthrough.md:51:        dd_cfg=dd_cfg,
+./report/backtest_20251207_1d_core_walkthrough.md:75:| test_filter_signal_dd_skipped_missing_context | sin equity/dd_cfg → dd_skipped=True |
+./report/backtest_20251207_1d_core_walkthrough.md:106:- Hardening del núcleo 1D.core: robustez ante NaN/inf en DD, flags para contexto faltante, wiring de dd_cfg desde yaml.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:35:  - `dd_cfg`: parámetros de guardrail DD obtenidos de configuración (no hardcodeados).
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:48:     - Usa `compute_drawdown(equity_curve)` y `eval_dd_guardrail(dd_value, dd_cfg)`.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:84:  - `eval_dd_guardrail(dd_value, dd_cfg)`:
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:149:     - `risk_ctx` (nav, equity_curve, dd_cfg, atr_ctx, last_prices, portfolio_id, etc.).
+./report/grep_call_sites_2A.txt:44:=== KEYS: dd_cfg
+./report/risk_1C_audit_deepseek.md:36:- **H11 (Sev. 2)** — Wiring incompleto en backtest: `backtest_initial.py` instancia v0.5 pero no pasa `equity_curve`, `dd_cfg`, `atr_ctx`, `last_prices` a `filter_signal`, dejando los guardrails de riesgo inactivos en la práctica.
+./report/risk_1C_audit_deepseek.md:51:  - `dd_cfg` (derivado del YAML),
+./report/risk_1C_issues_matrix.md:24:| S1 | Wiring | `backtest_initial.py` no pasa equity_curve, atr_ctx, dd_cfg → guardrails inactivos | backtest_initial.py | 1 | DeepSeek, Gemini, Grok | Pendiente | Bloquea 1D |
+./report/risk_1C_multiIA_findings_template.md:41:- **H11 (Sev. 2)** — Wiring incompleto en backtest: `backtest_initial.py` instancia v0.5 pero no pasa `equity_curve`, `dd_cfg`, `atr_ctx`, `last_prices` a `filter_signal`, dejando los guardrails de riesgo inactivos en la práctica.
+./report/risk_1C_multiIA_findings_template.md:56:  - `dd_cfg` (derivado del YAML),
+./report/risk_1C_multiIA_findings_template.md:129:- **[R1] (prioritaria)** — Reparar wiring y pasar `equity_curve`, `atr_ctx`, `dd_cfg`, `last_prices` en todas las llamadas.
+./report/risk_context_v0_5_spec_1D_20251207.md:13:- dd_cfg
+./report/risk_context_v0_5_spec_1D_20251207.md:50:    - eval_dd_guardrail(max_dd, dd_cfg) -> estado "normal" / "risk_off_light" / "hard_stop".
+./report/risk_context_v0_5_spec_1D_20251207.md:177:    - Flag sugerido: risk_warnings += ["dd_cfg_default"].
+./report/risk_context_v0_5_spec_1D_20251207.md:207:- Falta dd_cfg:
+./report/risk_context_v0_5_spec_1D_20251207.md:209:  - Flag: risk_warnings += ["dd_cfg_default"].
+./report/risk_decision_v0_5_spec_1C_20251201.md:91:- `dd_cfg` con:
+./report/risk_decision_v0_5_spec_1C_20251201.md:172:  - `dd_cfg`
+./report/risk_guardrails_impl_1C_20251201.md:69:2. Con el valor de DD (`dd_value`) y la config `dd_cfg`:
+./report/risk_guardrails_impl_1C_20251201.md:72:   dd_cfg = {
+./report/risk_guardrails_impl_1C_20251201.md:209:En la versión actual, DD y ATR se configuran principalmente vía kwargs (`dd_cfg`, `atr_ctx`), simulando el wiring futuro desde config centralizada.
+./report/risk_guardrails_impl_1C_20251201.md:247:   - Para E2E futuros, se puede construir `equity_curve` y `dd_cfg` para alimentar DD.
+./risk_manager_v0_5.py:76:    def get_dd_cfg(self) -> Dict[str, Any]:
+./risk_manager_v0_5.py:214:        dd_cfg = kwargs.get("dd_cfg")
+./risk_manager_v0_5.py:215:        if equity_curve is not None and dd_cfg is not None:
+./risk_manager_v0_5.py:227:                dd_eval = self.eval_dd_guardrail(dd_val, dd_cfg)
+./risk_manager_v0_5.py:246:            annotated["dd_skipped_reason"] = "missing_equity_curve_or_dd_cfg"
+./tests/test_risk_decision_v0_5.py:28:    dd_cfg = {
+./tests/test_risk_decision_v0_5.py:39:        dd_cfg=dd_cfg,
+./tests/test_risk_decision_v0_5.py:75:    dd_cfg = {
+./tests/test_risk_decision_v0_5.py:86:        dd_cfg=dd_cfg,
+./tests/test_risk_decision_v0_5.py:119:    dd_cfg = {
+./tests/test_risk_decision_v0_5.py:130:        dd_cfg=dd_cfg,
+./tests/test_risk_decision_v0_5.py:162:    dd_cfg = {
+./tests/test_risk_decision_v0_5.py:184:        dd_cfg=dd_cfg,
+./tests/test_risk_decision_v0_5.py:239:    dd_cfg = {
+./tests/test_risk_decision_v0_5.py:250:        dd_cfg=dd_cfg,
+./tests/test_risk_v0_5_extended.py:111:    dd_cfg = {"max_dd_soft": 0.05, "max_dd_hard": 0.10, "size_multiplier_soft": 0.5}
+./tests/test_risk_v0_5_extended.py:118:        dd_cfg=dd_cfg,
+./tests/test_risk_v0_5_extended.py:139:    dd_cfg = {"max_dd_soft": 0.05, "max_dd_hard": 0.10, "size_multiplier_soft": 0.5}
+./tests/test_risk_v0_5_extended.py:146:        dd_cfg=dd_cfg,
+./tests/test_risk_v0_5_extended.py:160:    Caso: falta equity_curve o dd_cfg → dd_skipped=True.
+./tests/test_risk_v0_5_extended.py:166:    # Sin equity_curve ni dd_cfg
+./tests/test_risk_v0_5_extended.py:176:    assert annotated.get("dd_skipped_reason") == "missing_equity_curve_or_dd_cfg"
+./tests/test_risk_v0_5_extended.py:187:    dd_cfg = {"max_dd_soft": 0.05, "max_dd_hard": 0.10, "size_multiplier_soft": 0.5}
+./tests/test_risk_v0_5_extended.py:194:        dd_cfg=dd_cfg,
+./tests/test_risk_v0_5_extended.py:213:    dd_cfg = {"max_dd_soft": 0.05, "max_dd_hard": 0.10, "size_multiplier_soft": 0.5}
+./tests/test_risk_v0_5_extended.py:220:        dd_cfg=dd_cfg,
+
+=== KEYS: atr_ctx
+./audit/audit_1C_v0_5/risk_decision_v0_5_spec_1C_20251201.md:121:- `atr_ctx[ticker] = { "atr", "entry_price", "side", "atr_multiplier", "min_stop_pct" }`
+./audit/audit_1C_v0_5/risk_decision_v0_5_spec_1C_20251201.md:173:  - `atr_ctx`
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:121:Inputs esperados por ticker (`atr_ctx`):
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:124:atr_ctx = {
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:204:atr_stop:           # (estructura lógica; wiring vía atr_ctx)
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:209:En la versión actual, DD y ATR se configuran principalmente vía kwargs (`dd_cfg`, `atr_ctx`), simulando el wiring futuro desde config centralizada.
+./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:248:   - `atr_ctx` y `last_prices` se pueden derivar de posiciones y precios en tests más avanzados.
+./audit/audit_1C_v0_5/risk_manager_v0_5.py:200:        atr_ctx = kwargs.get("atr_ctx") or {}
+./audit/audit_1C_v0_5/risk_manager_v0_5.py:202:        for ticker, ctx in atr_ctx.items():
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:40:        atr_ctx={},
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:87:        atr_ctx={},
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:131:        atr_ctx={},
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:168:    atr_ctx = {
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:185:        atr_ctx=atr_ctx,
+./audit/audit_1C_v0_5/test_risk_decision_v0_5.py:251:        atr_ctx={},
+./backtest_initial.py:135:                atr_ctx={},
+./registro_de_estado_invest_bot.md:312:    - Bloque atr_ctx: contexto por ticker para stop-loss ATR (entry_price, side, atr, atr_multiplier, min_stop_pct, last_price).
+./report/backtest_20251207_1d_core_walkthrough.md:32:- Flag `atr_skipped` cuando atr_ctx vacío/faltante
+./report/backtest_20251207_1d_core_walkthrough.md:52:        atr_ctx={},
+./report/backtest_20251207_1d_core_walkthrough.md:76:| test_filter_signal_atr_skipped_empty_ctx | atr_ctx vacío → atr_skipped=True |
+./report/backtest_20251207_1d_core_walkthrough.md:77:| test_filter_signal_atr_skipped_missing_ctx | sin atr_ctx → atr_skipped=True |
+./report/backtest_20251207_1d_core_walkthrough.md:92:1. **ATR dinámico**: Actualmente atr_ctx se pasa vacío desde backtest. Sería deseable calcularlo automáticamente.
+./report/backtest_20251207_1d_core_walkthrough.md:109:- atr_ctx no se calcula automáticamente en backtest (se pasa vacío).
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:36:  - `atr_ctx`: contexto por ticker para stop-loss ATR (entry_price, atr, side, multiplicadores y mínimos).
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:56:     - Recorre `atr_ctx` por ticker.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:74:    - Si `atr_ctx` no tiene datos suficientes o faltan precios, el guardrail ATR se salta de forma segura.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:112:  - Comportamiento de ATR cuando falta contexto (`atr_ctx` vacío, atr nulo, precios incompletos).
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:149:     - `risk_ctx` (nav, equity_curve, dd_cfg, atr_ctx, last_prices, portfolio_id, etc.).
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:155:   - Definición de `risk_ctx v0.5` con secciones `portfolio`, `config`, `atr_ctx`, `last_prices`, `env`.
+./report/grep_call_sites_2A.txt:49:./audit/audit_1C_v0_5/risk_guardrails_impl_1C_20251201.md:209:En la versión actual, DD y ATR se configuran principalmente vía kwargs (`dd_cfg`, `atr_ctx`), simulando el wiring futuro desde config centralizada.
+./report/grep_call_sites_2A.txt:78:./report/EXECUTOR_PLAN_1D_core_status_20251207.md:149:     - `risk_ctx` (nav, equity_curve, dd_cfg, atr_ctx, last_prices, portfolio_id, etc.).
+./report/grep_call_sites_2A.txt:80:./report/risk_1C_audit_deepseek.md:36:- **H11 (Sev. 2)** — Wiring incompleto en backtest: `backtest_initial.py` instancia v0.5 pero no pasa `equity_curve`, `dd_cfg`, `atr_ctx`, `last_prices` a `filter_signal`, dejando los guardrails de riesgo inactivos en la práctica.
+./report/grep_call_sites_2A.txt:82:./report/risk_1C_issues_matrix.md:24:| S1 | Wiring | `backtest_initial.py` no pasa equity_curve, atr_ctx, dd_cfg → guardrails inactivos | backtest_initial.py | 1 | DeepSeek, Gemini, Grok | Pendiente | Bloquea 1D |
+./report/grep_call_sites_2A.txt:83:./report/risk_1C_multiIA_findings_template.md:41:- **H11 (Sev. 2)** — Wiring incompleto en backtest: `backtest_initial.py` instancia v0.5 pero no pasa `equity_curve`, `dd_cfg`, `atr_ctx`, `last_prices` a `filter_signal`, dejando los guardrails de riesgo inactivos en la práctica.
+./report/grep_call_sites_2A.txt:85:./report/risk_1C_multiIA_findings_template.md:129:- **[R1] (prioritaria)** — Reparar wiring y pasar `equity_curve`, `atr_ctx`, `dd_cfg`, `last_prices` en todas las llamadas.
+./report/grep_call_sites_2A.txt:95:./report/risk_guardrails_impl_1C_20251201.md:209:En la versión actual, DD y ATR se configuran principalmente vía kwargs (`dd_cfg`, `atr_ctx`), simulando el wiring futuro desde config centralizada.
+./report/grep_call_sites_2A.txt:124:=== KEYS: atr_ctx
+./report/risk_1C_audit_deepseek.md:7:- El **wiring en backtest** no alimenta correctamente los contextos de riesgo (equity_curve, atr_ctx, etc.), por lo que los guardrails no se ejercen en backtests E2E.
+./report/risk_1C_audit_deepseek.md:36:- **H11 (Sev. 2)** — Wiring incompleto en backtest: `backtest_initial.py` instancia v0.5 pero no pasa `equity_curve`, `dd_cfg`, `atr_ctx`, `last_prices` a `filter_signal`, dejando los guardrails de riesgo inactivos en la práctica.
+./report/risk_1C_audit_deepseek.md:52:  - `atr_ctx` (ATR y contexto por activo),
+./report/risk_1C_issues_matrix.md:24:| S1 | Wiring | `backtest_initial.py` no pasa equity_curve, atr_ctx, dd_cfg → guardrails inactivos | backtest_initial.py | 1 | DeepSeek, Gemini, Grok | Pendiente | Bloquea 1D |
+./report/risk_1C_multiIA_findings_template.md:12:- El **wiring en backtest** no alimenta correctamente los contextos de riesgo (equity_curve, atr_ctx, etc.), por lo que los guardrails no se ejercen en backtests E2E.
+./report/risk_1C_multiIA_findings_template.md:41:- **H11 (Sev. 2)** — Wiring incompleto en backtest: `backtest_initial.py` instancia v0.5 pero no pasa `equity_curve`, `dd_cfg`, `atr_ctx`, `last_prices` a `filter_signal`, dejando los guardrails de riesgo inactivos en la práctica.
+./report/risk_1C_multiIA_findings_template.md:57:  - `atr_ctx` (ATR y contexto por activo),
+./report/risk_1C_multiIA_findings_template.md:107:- Fallo crítico de wiring: el backtester no inyecta `equity_curve` ni `atr_ctx`, dejando los guardrails inactivos.
+./report/risk_1C_multiIA_findings_template.md:115:- **[H2] (Severidad 2)** — Falta de validación/alertas: si faltan `equity_curve` o `atr_ctx`, el sistema falla silenciosamente.
+./report/risk_1C_multiIA_findings_template.md:129:- **[R1] (prioritaria)** — Reparar wiring y pasar `equity_curve`, `atr_ctx`, `dd_cfg`, `last_prices` en todas las llamadas.
+./report/risk_context_v0_5_spec_1D_20251207.md:14:- atr_ctx
+./report/risk_context_v0_5_spec_1D_20251207.md:22:  atr_ctx: ...
+./report/risk_context_v0_5_spec_1D_20251207.md:77:    - Requerido si atr_ctx está presente.
+./report/risk_context_v0_5_spec_1D_20251207.md:82:    - Con atr_ctx presente:
+./report/risk_context_v0_5_spec_1D_20251207.md:85:    - Sin atr_ctx:
+./report/risk_context_v0_5_spec_1D_20251207.md:89:3. Bloque atr_ctx
+./report/risk_context_v0_5_spec_1D_20251207.md:96:atr_ctx:
+./report/risk_context_v0_5_spec_1D_20251207.md:138:- Falta atr_ctx completo:
+./report/risk_context_v0_5_spec_1D_20251207.md:210:- Falta atr_ctx completo:
+./report/risk_decision_v0_5_spec_1C_20251201.md:121:- `atr_ctx[ticker] = { "atr", "entry_price", "side", "atr_multiplier", "min_stop_pct" }`
+./report/risk_decision_v0_5_spec_1C_20251201.md:173:  - `atr_ctx`
+./report/risk_guardrails_impl_1C_20251201.md:121:Inputs esperados por ticker (`atr_ctx`):
+./report/risk_guardrails_impl_1C_20251201.md:124:atr_ctx = {
+./report/risk_guardrails_impl_1C_20251201.md:204:atr_stop:           # (estructura lógica; wiring vía atr_ctx)
+./report/risk_guardrails_impl_1C_20251201.md:209:En la versión actual, DD y ATR se configuran principalmente vía kwargs (`dd_cfg`, `atr_ctx`), simulando el wiring futuro desde config centralizada.
+./report/risk_guardrails_impl_1C_20251201.md:248:   - `atr_ctx` y `last_prices` se pueden derivar de posiciones y precios en tests más avanzados.
+./risk_context_v0_6.py:68:    - portfolio, atr_ctx, cfg: bloques estructurados para guardrails y sizing.
+./risk_context_v0_6.py:72:    atr_ctx: ATRContext = field(default_factory=ATRContext)
+./risk_context_v0_6.py:98:        atr_ctx = ATRContext(
+./risk_context_v0_6.py:126:        return cls(raw=d, portfolio=portfolio, atr_ctx=atr_ctx, cfg=cfg)
+./risk_context_v0_6.py:151:        if self.atr_ctx.atr is not None:
+./risk_context_v0_6.py:152:            result.setdefault("atr", self.atr_ctx.atr)
+./risk_context_v0_6.py:153:        if self.atr_ctx.atr_window is not None:
+./risk_context_v0_6.py:154:            result.setdefault("atr_window", self.atr_ctx.atr_window)
+./risk_context_v0_6.py:155:        if self.atr_ctx.atr_mult is not None:
+./risk_context_v0_6.py:156:            result.setdefault("atr_mult", self.atr_ctx.atr_mult)
+./risk_context_v0_6.py:157:        if self.atr_ctx.atr_stop_price is not None:
+./risk_context_v0_6.py:158:            result.setdefault("atr_stop_price", self.atr_ctx.atr_stop_price)
+./risk_manager_v0_5.py:254:        atr_ctx = kwargs.get("atr_ctx") or {}
+./risk_manager_v0_5.py:257:        if not atr_ctx:
+./risk_manager_v0_5.py:260:            annotated["atr_skipped_reason"] = "missing_or_empty_atr_ctx"
+./risk_manager_v0_5.py:262:            for ticker, ctx in atr_ctx.items():
+./tests/test_risk_decision_v0_5.py:40:        atr_ctx={},
+./tests/test_risk_decision_v0_5.py:87:        atr_ctx={},
+./tests/test_risk_decision_v0_5.py:131:        atr_ctx={},
+./tests/test_risk_decision_v0_5.py:168:    atr_ctx = {
+./tests/test_risk_decision_v0_5.py:185:        atr_ctx=atr_ctx,
+./tests/test_risk_decision_v0_5.py:251:        atr_ctx={},
+./tests/test_risk_v0_5_extended.py:119:        atr_ctx={},
+./tests/test_risk_v0_5_extended.py:147:        atr_ctx={},
+./tests/test_risk_v0_5_extended.py:182:    Caso: atr_ctx vacío → atr_skipped=True, sin excepción.
+./tests/test_risk_v0_5_extended.py:195:        atr_ctx={},
+./tests/test_risk_v0_5_extended.py:202:    assert annotated.get("atr_skipped_reason") == "missing_or_empty_atr_ctx"
+./tests/test_risk_v0_5_extended.py:208:    Caso: atr_ctx no pasado → atr_skipped=True.
+./tests/test_risk_v0_5_extended.py:221:        # atr_ctx no pasado
+
+=== KEYS: risk_ctx
+./backtest_initial.py:125:            # Construir risk_ctx completo (dd_cfg desde yaml, no hardcodeado)
+./registro_de_estado_invest_bot.md:309:  - Se define el contrato lógico risk_ctx consumido por filter_signal(...) en v0.5:
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:17:  - Asegurar que el backtester pasa un `risk_ctx` consistente a `risk_manager.filter_signal(...)`.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:149:     - `risk_ctx` (nav, equity_curve, dd_cfg, atr_ctx, last_prices, portfolio_id, etc.).
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:155:   - Definición de `risk_ctx v0.5` con secciones `portfolio`, `config`, `atr_ctx`, `last_prices`, `env`.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:167:1. **Integración de contrato `risk_ctx` formalizado**
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:170:     - `risk_manager.filter_signal(signal, current_weights, risk_ctx=dict)` (tal y como está ahora), o
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:171:     - `risk_manager.filter_signal(signal, current_weights, risk_ctx=RiskContext)` (nueva firma, manteniendo compatibilidad vía adapter).
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:203:  - Con un `risk_ctx` explícito desde el backtester, alineado con el marco 1D.
+./report/EXECUTOR_PLAN_1D_core_status_20251207.md:209:  - Servir como base para formalizar el contrato `risk_ctx` y la configuración canónica de riesgo en versiones posteriores.
+./report/grep_call_sites_2A.txt:13:./registro_de_estado_invest_bot.md:309:  - Se define el contrato lógico risk_ctx consumido por filter_signal(...) en v0.5:
+./report/grep_call_sites_2A.txt:15:./report/EXECUTOR_PLAN_1D_core_status_20251207.md:17:  - Asegurar que el backtester pasa un `risk_ctx` consistente a `risk_manager.filter_signal(...)`.
+./report/grep_call_sites_2A.txt:19:./report/EXECUTOR_PLAN_1D_core_status_20251207.md:170:     - `risk_manager.filter_signal(signal, current_weights, risk_ctx=dict)` (tal y como está ahora), o
+./report/grep_call_sites_2A.txt:20:./report/EXECUTOR_PLAN_1D_core_status_20251207.md:171:     - `risk_manager.filter_signal(signal, current_weights, risk_ctx=RiskContext)` (nueva firma, manteniendo compatibilidad vía adapter).
+./report/grep_call_sites_2A.txt:64:./backtest_initial.py:125:            # Construir risk_ctx completo (dd_cfg desde yaml, no hardcodeado)
+./report/grep_call_sites_2A.txt:78:./report/EXECUTOR_PLAN_1D_core_status_20251207.md:149:     - `risk_ctx` (nav, equity_curve, dd_cfg, atr_ctx, last_prices, portfolio_id, etc.).
+./report/grep_call_sites_2A.txt:152:./report/EXECUTOR_PLAN_1D_core_status_20251207.md:149:     - `risk_ctx` (nav, equity_curve, dd_cfg, atr_ctx, last_prices, portfolio_id, etc.).
+./report/grep_call_sites_2A.txt:153:./report/EXECUTOR_PLAN_1D_core_status_20251207.md:155:   - Definición de `risk_ctx v0.5` con secciones `portfolio`, `config`, `atr_ctx`, `last_prices`, `env`.
+./report/grep_call_sites_2A.txt:155:./report/grep_call_sites_2A.txt:78:./report/EXECUTOR_PLAN_1D_core_status_20251207.md:149:     - `risk_ctx` (nav, equity_curve, dd_cfg, atr_ctx, last_prices, portfolio_id, etc.).
+./report/grep_call_sites_2A.txt:218:=== KEYS: risk_ctx
+./report/risk_context_v0_5_spec_1D_20251207.md:6:- Mantener firma pública estable (kwargs planos en v0.5) pero documentando ya la estructura conceptual risk_ctx que se formalizará como dataclass en Plan 2A/v0.6.
+./report/risk_context_v0_5_spec_1D_20251207.md:19:risk_ctx:
+./report/risk_context_v0_5_spec_1D_20251207.md:200:Resumen de comportamiento cuando faltan campos en risk_ctx:
+./report/risk_context_v0_5_spec_1D_20251207.md:249:  - risk_ctx existe como contrato lógico, no como tipo explícito.
+./report/risk_context_v0_5_spec_1D_20251207.md:252:    - risk_ctx podrá ser RiskContext o dict para mantener compatibilidad.
+./risk_context_v0_6.py:78:        Adaptador desde el dict actual de risk_ctx a la vista tipada v0.6.
+./risk_manager_v0_5.py:10:def _ensure_risk_context_v06(risk_ctx: Any) -> Optional[RiskContextV06]:
+./risk_manager_v0_5.py:12:    Adapter para aceptar tanto dict (risk_ctx 1D) como RiskContextV06.
+./risk_manager_v0_5.py:17:    if risk_ctx is None:
+./risk_manager_v0_5.py:19:    if isinstance(risk_ctx, RiskContextV06):
+./risk_manager_v0_5.py:20:        return risk_ctx
+./risk_manager_v0_5.py:21:    if isinstance(risk_ctx, dict):
+./risk_manager_v0_5.py:22:        return RiskContextV06.from_dict(risk_ctx)
+./risk_manager_v0_5.py:23:    raise TypeError(f"Unsupported risk_ctx type: {type(risk_ctx)!r}")

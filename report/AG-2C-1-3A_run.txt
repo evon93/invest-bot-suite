@@ -1,0 +1,27 @@
+# AG-2C-1-3A Command Transcript
+# Date: 2025-12-25 17:08 CET
+# Purpose: Baseline snapshot before creating 2C branch
+
+## 1. Context
+$ git branch --show-current
+feature/2B_risk_calibration
+
+$ git log -1 --oneline
+d180cb6 H0: repo hygiene (.gitattributes, check_repo.py, CI workflow)
+
+$ git status -sb
+## feature/2B_risk_calibration...origin/feature/2B_risk_calibration
+(+ untracked report files from previous tasks)
+
+## 2. Pytest baseline
+$ python -m pytest -q
+57 passed in 4.99s
+
+## 3. Validate risk config
+$ python tools/validate_risk_config.py --config risk_rules.yaml
+Risk config validation report
+- Config path: risk_rules.yaml
+- Generated: 2025-12-25T17:09:06+01:00
+Summary:
+- Errors: 0
+- Warnings: 0

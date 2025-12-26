@@ -9,7 +9,6 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from collections import defaultdict
 from typing import Dict, List, Union
 
 import numpy as np
@@ -81,9 +80,6 @@ class SimpleBacktester:
         self.portfolio_value: List[float] = [initial_capital]
         self.positions: Dict[str, float] = {c: 0.0 for c in self.prices.columns}
         self.trades: List[Dict] = []
-        self.closed_trades: List[Dict] = []  # Trades cerrados con PnL
-        self._avg_cost: Dict[str, float] = defaultdict(float)  # Coste medio por asset
-        self.risk_events: List[Dict] = []  # Eventos de riesgo por tick (risk_decision)
         
         # Precios efectivos (último precio válido > 0 visto)
         self.last_valid_prices: Dict[str, float] = {}
@@ -126,27 +122,11 @@ class SimpleBacktester:
         }
 
         if risk_manager:
-            # Construir risk_ctx completo (dd_cfg desde yaml, no hardcodeado)
-            equity_curve = self.portfolio_value if self.portfolio_value else []
-            dd_cfg = risk_manager.get_dd_cfg()
-            
             allow, annotated = risk_manager.filter_signal(
                 {"deltas": deltas, "assets": list(self.prices.columns)},
                 current_w,
                 nav,
-                equity_curve=equity_curve,
-                dd_cfg=dd_cfg,
-                atr_ctx={},
-                last_prices=self.last_valid_prices,
             )
-            
-            # Capturar risk_decision para métricas (ruta 2.2)
-            risk_decision = annotated.get("risk_decision", {})
-            self.risk_events.append({
-                "date": date,
-                "risk_decision": risk_decision,
-            })
-            
             if not allow:
                 logger.warning("Señal rechazada: %s", annotated.get("risk_reasons", []))
                 return
@@ -159,41 +139,7 @@ class SimpleBacktester:
 
             target_val = self.target_weights.get(asset, 0) * nav
             target_shares = target_val / price
-            prev_shares = self.positions.get(asset, 0)
-            shares_delta = target_shares - prev_shares
-            
-            # --- Tracking de avg_cost y closed_trades (long-only) ---
-            # Nota: Este sistema asume posiciones long-only (shares >= 0).
-            # Short selling no está soportado actualmente.
-            
-            if shares_delta > 0:
-                # Compra: apertura o scale-in
-                if prev_shares == 0:
-                    # Nueva posición: avg_cost = precio de entrada
-                    self._avg_cost[asset] = price
-                else:
-                    # Scale-in: actualizar avg_cost ponderado
-                    total_cost = self._avg_cost[asset] * prev_shares + price * shares_delta
-                    self._avg_cost[asset] = total_cost / target_shares
-                    
-            elif shares_delta < 0 and prev_shares > 0:
-                # Venta: cierre parcial o total
-                closed_qty = min(abs(shares_delta), prev_shares)
-                entry_cost = self._avg_cost[asset]
-                realized_pnl = (price - entry_cost) * closed_qty
-                
-                self.closed_trades.append({
-                    "date": date,
-                    "asset": asset,
-                    "qty": closed_qty,
-                    "entry_cost": entry_cost,
-                    "exit_price": price,
-                    "realized_pnl": realized_pnl,
-                })
-                
-                # Si cierre total, reset avg_cost
-                if target_shares == 0:
-                    self._avg_cost[asset] = 0.0
+            shares_delta = target_shares - self.positions.get(asset, 0)
             
             # Registrar trade si hay cambio O si es necesario para cumplir requisitos de frecuencia (logging)
             # Para single asset 100%, delta suele ser 0, pero el test espera "actividad".

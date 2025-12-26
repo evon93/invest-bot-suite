@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.bak_0A
+*.bak_*
+
+# Ignorar bundle pesado de auditoría 1C
+report/audit_1C_v0_5_bundle_20251204.tar.gz

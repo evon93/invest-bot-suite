@@ -1,0 +1,181 @@
+   150	            "allow_new_trades": True,
+   151	            "force_close_positions": False,
+   152	            "size_multiplier": 1.0,
+   153	            "stop_signals": [],
+   154	            "reasons": [],
+   155	        }
+   156	
+   157	    @staticmethod
+   158	    def _add_reason(risk_decision: Dict[str, Any], reasons: list[str], tag: str) -> None:
+   159	        """Añade un motivo a ambas listas evitando duplicados."""
+   160	        if tag not in reasons:
+   161	            reasons.append(tag)
+   162	        if tag not in risk_decision["reasons"]:
+   163	            risk_decision["reasons"].append(tag)
+   164	
+   165	    # --------------------------------------------------------------------- #
+   166	    #  Filtro principal de señales                                          #
+   167	    # --------------------------------------------------------------------- #
+   168	    def filter_signal(
+   169	        self,
+   170	        signal: dict,
+   171	        current_weights: dict,
+   172	        nav_eur: float | None = None,
+   173	        **kwargs,
+   174	    ) -> Tuple[bool, dict]:
+   175	        """Filtra señales; devuelve (allow, annotated_signal) – compatible con tests.
+   176	
+   177	        === RiskDecision v0.5: agregación de guardrails (DD, ATR, reglas v0.4) ===
+   178	        - Mantiene contrato público de v0.4: (allow, annotated_signal).
+   179	        - El comportamiento sin guardrails activos es equivalente a v0.4.
+   180	        - risk_decision unifica DD, ATR, límites y Kelly en una estructura única.
+   181	        === Fin bloque RiskDecision v0.5 ===
+   182	        """
+   183	        allow = True
+   184	        reasons: list[str] = []
+   185	        annotated = signal.copy()
+   186	
+   187	        # Bloque de decisión unificada
+   188	        risk_decision = self._init_risk_decision()
+   189	        
+   190	        # ------------------------------------------------------------------
+   191	# RiskContext v0.6 adapter (dict o dataclass) — compat con kwargs planos
+   192	# ------------------------------------------------------------------
+   193	ctx = _ensure_risk_context_v06(kwargs.get("risk_ctx"))
+   194	env = {}
+   195	cfg_block = {}
+   196	
+   197	if ctx is not None:
+   198	    env = ctx.raw.get("env") or {}
+   199	    cfg_block = ctx.raw.get("config") or {}
+   200	
+   201	equity_curve = (
+   202	    kwargs.get("equity_curve")
+   203	    or (ctx.raw.get("equity_curve") if ctx is not None else None)
+   204	    or env.get("equity_curve")
+   205	)
+   206	
+   207	dd_cfg = (
+   208	    kwargs.get("dd_cfg")
+   209	    or (ctx.raw.get("dd_cfg") if ctx is not None else None)
+   210	    or cfg_block.get("dd_cfg")
+   211	    or cfg_block.get("dd_guardrail")
+   212	)
+   213	
+   214	atr_ctx = (
+   215	    kwargs.get("atr_ctx")
+   216	    or (ctx.raw.get("atr_ctx") if ctx is not None else None)
+   217	    or env.get("atr_ctx")
+   218	    or {}
+   219	)
+   220	
+   221	last_prices = (
+   222	    kwargs.get("last_prices")
+   223	    or (ctx.raw.get("last_prices") if ctx is not None else None)
+   224	    or env.get("last_prices")
+   225	    or {}
+   226	)
+   227	
+   228	        # ------------------------------------------------------------------
+   229	        # 1) Límites de posición (lógica v0.4)
+   230	        # ------------------------------------------------------------------
+   231	        if not self.within_position_limits(current_weights):
+   232	            allow = False
+   233	            risk_decision["allow_new_trades"] = False
+   234	            self._add_reason(risk_decision, reasons, "position_limits")
+   235	
+   236	        # ------------------------------------------------------------------
+   237	        # 2) Filtros de liquidez (stub v0.4)
+   238	        # ------------------------------------------------------------------
+   239	        for asset in signal.get("assets", []):
+   240	            if not self._check_liquidity(asset):
+   241	                allow = False
+   242	                risk_decision["allow_new_trades"] = False
+   243	                self._add_reason(risk_decision, reasons, f"liquidity:{asset}")
+   244	
+   245	        # ------------------------------------------------------------------
+   246	        # 3) Guardrail de Drawdown (DD) global
+   247	        # ------------------------------------------------------------------
+   248	        # Prioridad máxima: DD hard_stop → force_close_positions=True,
+   249	        # size_multiplier=0.0, allow_new_trades=False
+   250	        # ------------------------------------------------------------------
+   251	        equity_curve = kwargs.get("equity_curve")
+   252	        dd_cfg = kwargs.get("dd_cfg")
+   253	        if equity_curve is not None and dd_cfg is not None:
+   254	            dd_stats = self.compute_drawdown(equity_curve)
+   255	            
+   256	            # Caso: curva inválida (vacía o solo NaN/inf)
+   257	            if dd_stats.get("skipped", False):
+   258	                risk_decision["dd_skipped"] = True
+   259	                annotated["dd_skipped_reason"] = "invalid_or_empty_equity_curve"
+   260	                self.logger.warning(
+   261	                    "DD guardrail desactivado: equity_curve sin datos válidos"
+   262	                )
+   263	            else:
+   264	                dd_val = dd_stats.get("max_dd", 0.0)
+   265	                dd_eval = self.eval_dd_guardrail(dd_val, dd_cfg)
+   266	
+   267	                state = dd_eval.get("state", "normal")
+   268	                if state == "risk_off_light":
+   269	                    # Reducimos tamaño global de forma conservadora
+   270	                    dd_mult = float(dd_eval.get("size_multiplier", 1.0))
+   271	                    risk_decision["size_multiplier"] = min(
+   272	                        risk_decision["size_multiplier"], dd_mult
+   273	                    )
+   274	                    self._add_reason(risk_decision, reasons, "dd_soft")
+   275	                elif state == "hard_stop":
+   276	                    risk_decision["allow_new_trades"] = False
+   277	                    risk_decision["force_close_positions"] = True
+   278	                    risk_decision["size_multiplier"] = 0.0
+   279	                    allow = False
+   280	                    self._add_reason(risk_decision, reasons, "dd_hard")
+   281	        else:
+   282	            # Contexto DD faltante → modo degrade-to-safe
+   283	            risk_decision["dd_skipped"] = True
+   284	            annotated["dd_skipped_reason"] = "missing_equity_curve_or_dd_cfg"
+   285	
+   286	        # ------------------------------------------------------------------
+   287	        # 4) Stop-loss ATR por posición
+   288	        # ------------------------------------------------------------------
+   289	        # Prioridad secundaria: ATR stop → añade tickers a stop_signals
+   290	        # sin anular DD hard_stop
+   291	        # ------------------------------------------------------------------
+   292	        atr_ctx = kwargs.get("atr_ctx") or {}
+   293	        last_prices = kwargs.get("last_prices") or {}
+   294	        
+   295	        if not atr_ctx:
+   296	            # Contexto ATR faltante → modo degrade-to-safe
+   297	            risk_decision["atr_skipped"] = True
+   298	            annotated["atr_skipped_reason"] = "missing_or_empty_atr_ctx"
+   299	        else:
+   300	            for ticker, ctx in atr_ctx.items():
+   301	                entry_price = ctx.get("entry_price")
+   302	                atr = ctx.get("atr")
+   303	                side = ctx.get("side")
+   304	                if entry_price is None or side is None:
+   305	                    continue
+   306	
+   307	                cfg = {
+   308	                    "atr_multiplier": ctx.get("atr_multiplier", 2.5),
+   309	                    "min_stop_pct": ctx.get("min_stop_pct", 0.02),
+   310	                }
+   311	                stop_price = self.compute_atr_stop(entry_price, atr, side, cfg)
+   312	                if stop_price is None:
+   313	                    continue
+   314	
+   315	                last_price = ctx.get("last_price", last_prices.get(ticker))
+   316	                if last_price is None:
+   317	                    continue
+   318	
+   319	                if self.is_stop_triggered(side, stop_price, last_price):
+   320	                    if ticker not in risk_decision["stop_signals"]:
+   321	                        risk_decision["stop_signals"].append(ticker)
+   322	                    self._add_reason(risk_decision, reasons, "stop_loss_atr")
+   323	
+   324	        # ------------------------------------------------------------------
+   325	        # 5) Kelly sizing (lógica v0.4, integrada en risk_decision)
+   326	        # ------------------------------------------------------------------
+   327	        if nav_eur:
+   328	            deltas = signal.get("deltas", {})
+   329	            annotated.setdefault("deltas", dict(deltas))
+   330	            for asset, target_weight in deltas.items():

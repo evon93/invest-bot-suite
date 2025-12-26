@@ -1,0 +1,24 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.1, pluggy-1.6.0 -- /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/c/Users/ivn_b/Desktop/invest-bot-suite
+plugins: anyio-4.10.0
+collecting ... collected 1 item
+
+tests/test_backtest_deepseek.py::test_zero_prices FAILED                 [100%]
+
+=================================== FAILURES ===================================
+_______________________________ test_zero_prices _______________________________
+
+    def test_zero_prices():
+        dates = pd.date_range(datetime(2023, 1, 1), periods=10)
+        prices = pd.Series([100, 0, -5, 150, 200, 0, 180, 190, 200, 210], index=dates)
+        backtester = SimpleBacktester(prices)
+        portfolio = backtester.run()
+>       assert portfolio.iloc[-1]['value'] > 0
+E       assert np.float64(0.0) > 0
+
+tests/test_backtest_deepseek.py:74: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_backtest_deepseek.py::test_zero_prices - assert np.float64(0.0) > 0
+============================== 1 failed in 4.86s ===============================

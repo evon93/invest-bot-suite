@@ -1,0 +1,85 @@
+FFF.F.....                                                               [100%]
+=================================== FAILURES ===================================
+___________________________ test_metrics_calculation ___________________________
+
+synthetic_prices = 2023-01-01    102.483571
+2023-01-02     99.813729
+2023-01-03    104.248544
+2023-01-04    109.130301
+2023-01-05    100....04-08    150.295175
+2023-04-09    149.520517
+2023-04-10    148.827064
+Freq: D, Name: price, Length: 100, dtype: float64
+
+    def test_metrics_calculation(synthetic_prices):
+        backtester = SimpleBacktester(synthetic_prices)
+        portfolio = backtester.run()
+        metrics = calculate_metrics(portfolio)
+>       assert -0.5 < metrics['max_drawdown'] < 0
+E       assert -0.5 < np.float64(nan)
+
+tests/test_backtest_deepseek.py:37: AssertionError
+___________________________ test_metrics_after_crash ___________________________
+
+crash_prices = 2023-01-01    100.000000
+2023-01-02    100.505051
+2023-01-03    101.010101
+2023-01-04    101.515152
+2023-01-05    102....04-08     89.393939
+2023-04-09     89.696970
+2023-04-10     90.000000
+Freq: D, Name: price, Length: 100, dtype: float64
+
+    def test_metrics_after_crash(crash_prices):
+        backtester = SimpleBacktester(crash_prices)
+        portfolio = backtester.run()
+        metrics = calculate_metrics(portfolio)
+>       assert metrics['max_drawdown'] <= -0.35
+E       assert np.float64(nan) <= -0.35
+
+tests/test_backtest_deepseek.py:44: AssertionError
+___________________________ test_rebalance_frequency ___________________________
+
+synthetic_prices = 2023-01-01     92.923146
+2023-01-02     98.401824
+2023-01-03     99.296528
+2023-01-04     97.503765
+2023-01-05    101....04-08    149.758525
+2023-04-09    149.785993
+2023-04-10    144.285149
+Freq: D, Name: price, Length: 100, dtype: float64
+
+    def test_rebalance_frequency(synthetic_prices):
+        backtester = SimpleBacktester(synthetic_prices)
+        backtester.run()
+        trade_days = sorted({t['date'] for t in backtester.trades})
+>       assert len(trade_days) >= 3        # al menos 3 rebalanceos en 100 días
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 0 >= 3
+E        +  where 0 = len([])
+
+tests/test_backtest_deepseek.py:54: AssertionError
+_______________________________ test_zero_prices _______________________________
+
+    def test_zero_prices():
+        dates = pd.date_range(datetime(2023, 1, 1), periods=10)
+        prices = pd.Series([100, 0, -5, 150, 200, 0, 180, 190, 200, 210], index=dates)
+        backtester = SimpleBacktester(prices)
+        portfolio = backtester.run()
+>       assert portfolio.iloc[-1]['value'] > 0
+E       assert np.float64(0.0) > 0
+
+tests/test_backtest_deepseek.py:74: AssertionError
+=============================== warnings summary ===============================
+tests/test_backtest_deepseek.py::test_metrics_calculation
+tests/test_backtest_deepseek.py::test_metrics_after_crash
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/backtest_initial.py:166: RuntimeWarning: invalid value encountered in scalar divide
+    total_return = df["value"].iloc[-1] / df["value"].iloc[0] - 1
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_backtest_deepseek.py::test_metrics_calculation - assert -0....
+FAILED tests/test_backtest_deepseek.py::test_metrics_after_crash - assert np....
+FAILED tests/test_backtest_deepseek.py::test_rebalance_frequency - assert 0 >= 3
+FAILED tests/test_backtest_deepseek.py::test_zero_prices - assert np.float64(...
+4 failed, 6 passed, 2 warnings in 4.98s
