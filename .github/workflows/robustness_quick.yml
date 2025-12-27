@@ -1,0 +1,90 @@
+name: Robustness Quick CI
+
+on:
+  pull_request:
+    branches: ['*']
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  robustness-quick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run pytest
+        run: python -m pytest -q
+      
+      - name: Validate robustness config
+        run: python tools/validate_robustness_2D_config.py --config configs/robustness_2D.yaml
+      
+      - name: Run robustness 2D (quick mode)
+        run: |
+          python tools/run_robustness_2D.py \
+            --config configs/robustness_2D.yaml \
+            --mode quick \
+            --outdir report/runs/ci_2D_quick
+      
+      - name: Validate run results
+        run: |
+          python -c "
+          import json
+          import sys
+          
+          with open('report/runs/ci_2D_quick/run_meta.json') as f:
+              meta = json.load(f)
+          
+          print('=== Run Meta ===')
+          print(json.dumps(meta, indent=2))
+          print()
+          
+          errors = []
+          
+          # Check no errors
+          if meta.get('scenarios_error', 0) != 0:
+              errors.append(f\"scenarios_error={meta['scenarios_error']} (expected 0)\")
+          
+          # Check pass_rate == 1.0
+          pass_rate = meta.get('pass_rate', 0)
+          if pass_rate != 1.0:
+              errors.append(f\"pass_rate={pass_rate} (expected 1.0)\")
+          
+          # Check candidate params applied
+          candidate_count = meta.get('candidate_params_applied_count', 0)
+          if candidate_count == 0:
+              errors.append(f\"candidate_params_applied_count=0 (expected >0)\")
+          
+          if errors:
+              print('FAILED:')
+              for e in errors:
+                  print(f'  - {e}')
+              sys.exit(1)
+          
+          print('✅ All checks passed!')
+          print(f'  - scenarios_total: {meta.get(\"scenarios_total\")}')
+          print(f'  - pass_rate: {pass_rate}')
+          print(f'  - candidate_params_applied_count: {candidate_count}')
+          "
+      
+      - name: Upload run artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: robustness-quick-results
+          path: report/runs/ci_2D_quick/
+          retention-days: 7
