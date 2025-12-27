@@ -27,6 +27,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
+      - name: Verify PyYAML installed
+        run: python -c "import yaml; print('PyYAML OK', yaml.__version__)"
+      
       - name: Run pytest
         run: python -m pytest -q
       
