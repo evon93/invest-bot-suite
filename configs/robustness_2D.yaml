@@ -1,0 +1,187 @@
+# Robustness 2D Configuration Contract
+# Schema for parameter robustness testing in invest-bot-suite
+# DO NOT modify risk_rules.yaml directly - use candidate overrides
+
+meta:
+  schema_version: "1.0.0"
+  description: "Parameter robustness testing contract for Phase 2D"
+  created: "2025-12-27"
+  author: "Antigravity Agent"
+  references:
+    - "report/external_ai/2D_02_2.1/DeepSeek_DS-2D-02-2.1_contract.pdf"
+    - "report/external_ai/2D_02_2.1/Grok4_GR-2D-02-2.1_research.pdf"
+    - "report/external_ai/2D_02_2.1/Gemini3Pro_GM-2D-02-2.1_schema.pdf"
+
+# ==============================================================================
+# BASELINE: Source of truth references (read-only)
+# ==============================================================================
+baseline:
+  risk_rules_path: "risk_rules.yaml"
+  candidate_params_path: "configs/best_params_2C.json"
+  dataset:
+    source: "binance"
+    symbols: ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+    start_date: "2022-01-01"
+    end_date: "2024-12-31"
+    frequency: "1d"
+
+# ==============================================================================
+# ENGINE: Reproducibility and execution modes
+# ==============================================================================
+engine:
+  reproducibility:
+    default_seed: 42
+    seed_list: [42, 123, 456, 789, 1337]
+    deterministic_scenario_id: true
+  
+  modes:
+    quick:
+      description: "Fast CI gate - minimal scenarios"
+      max_scenarios: 20
+      seed_count: 1
+      param_perturbations_sample: 0.2
+      data_perturbations_sample: 0.2
+      timeout_minutes: 10
+    
+    full:
+      description: "Nightly deep robustness sweep"
+      max_scenarios: 500
+      seed_count: 5
+      param_perturbations_sample: 1.0
+      data_perturbations_sample: 1.0
+      timeout_minutes: 120
+
+# ==============================================================================
+# RISK CONSTRAINTS: Gates and thresholds (overlay, does NOT modify risk_rules)
+# ==============================================================================
+risk_constraints:
+  # Hard gates - scenario fails if violated
+  gates:
+    max_drawdown_absolute: -0.15
+    min_sharpe: 0.3
+    min_cagr: 0.05
+    max_pct_time_hard_stop: 0.25
+  
+  # Soft warnings - logged but scenario continues
+  warnings:
+    max_drawdown_soft: -0.10
+    min_win_rate: 0.45
+    max_consecutive_losses: 10
+
+# ==============================================================================
+# SWEEP: Parameter and data perturbations
+# ==============================================================================
+sweep:
+  # Parameter perturbations (applied to candidate params in-memory)
+  param_perturbations:
+    stop_loss.atr_multiplier:
+      type: "range"
+      base: 2.0
+      min: 1.5
+      max: 3.0
+      step: 0.25
+    
+    stop_loss.min_stop_pct:
+      type: "range"
+      base: 0.02
+      min: 0.01
+      max: 0.05
+      step: 0.005
+    
+    max_drawdown.soft_limit_pct:
+      type: "range"
+      base: 0.05
+      min: 0.03
+      max: 0.08
+      step: 0.01
+    
+    max_drawdown.hard_limit_pct:
+      type: "range"
+      base: 0.10
+      min: 0.08
+      max: 0.15
+      step: 0.01
+    
+    kelly.cap_factor:
+      type: "range"
+      base: 0.7
+      min: 0.5
+      max: 0.9
+      step: 0.1
+  
+  # Data perturbations (temporal window shifts)
+  data_perturbations:
+    window_shifts:
+      type: "range"
+      unit: "days"
+      min: -30
+      max: 30
+      step: 15
+    
+    subsample_ratios:
+      type: "list"
+      values: [0.7, 0.8, 0.9, 1.0]
+
+# ==============================================================================
+# SCENARIO ID: Deterministic identification
+# ==============================================================================
+scenario_id:
+  format: "{mode}_{seed}_{param_hash}_{data_hash}"
+  components:
+    mode: "string:quick|full"
+    seed: "int"
+    param_hash: "sha256_short:8"
+    data_hash: "sha256_short:8"
+  max_label_length: 128
+  use_hash_if_exceeds: true
+
+# ==============================================================================
+# OUTPUT: Expected layout for results
+# ==============================================================================
+output:
+  directory: "report/robustness_2D"
+  files:
+    results: "results.csv"
+    summary: "summary.md"
+    run_meta: "run_meta.json"
+    errors: "errors.jsonl"
+  
+  results_csv_columns:
+    - "scenario_id"
+    - "scenario_label"
+    - "mode"
+    - "seed"
+    - "params_json"
+    - "sharpe_ratio"
+    - "cagr"
+    - "max_drawdown"
+    - "calmar_ratio"
+    - "win_rate"
+    - "pct_time_hard_stop"
+    - "score"
+    - "gate_pass"
+    - "warnings"
+    - "duration_seconds"
+    - "error"
+
+# ==============================================================================
+# SCORING: Knobs and weights (formula defined in spec)
+# ==============================================================================
+scoring:
+  enabled: true
+  weights:
+    sharpe_ratio: 1.0
+    cagr: 0.5
+    win_rate: 0.3
+    max_drawdown_penalty: 1.5
+    hard_stop_penalty: 0.5
+  
+  normalization:
+    method: "minmax"
+    clip_outliers: true
+    outlier_percentile: 0.05
+  
+  aggregation:
+    method: "mean"
+    confidence_interval: 0.95
+    min_passing_scenarios: 0.8
