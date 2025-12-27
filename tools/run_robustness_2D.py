@@ -218,32 +218,51 @@ def generate_data_perturbations(sweep: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 def check_gates(metrics: Dict[str, Any], gates: Dict[str, Any]) -> tuple[bool, List[str]]:
-    """Check if metrics pass all gates. Returns (passed, list of failed gates)."""
+    """
+    Check if metrics pass all gates. Returns (passed, list of failed gates).
+    
+    Gates can include:
+    - max_drawdown_absolute: max allowed drawdown (negative)
+    - min_sharpe: minimum sharpe ratio
+    - min_cagr: minimum CAGR
+    - max_pct_time_hard_stop: max % time in hard stop
+    - min_trades: minimum number of trades
+    """
     failures = []
     
     # max_drawdown_absolute (drawdown is negative, gate is negative threshold)
     dd = metrics.get("max_drawdown", 0)
-    dd_gate = gates.get("max_drawdown_absolute", -1.0)
-    if dd < dd_gate:  # e.g., -0.20 < -0.15 = fail
+    dd_gate = gates.get("max_drawdown_absolute")
+    if dd_gate is not None and dd < dd_gate:  # e.g., -0.20 < -0.15 = fail
         failures.append(f"max_drawdown {dd:.4f} < {dd_gate}")
     
-    # min_sharpe
-    sharpe = metrics.get("sharpe_ratio", 0)
-    min_sharpe = gates.get("min_sharpe", 0)
-    if sharpe < min_sharpe:
-        failures.append(f"sharpe {sharpe:.4f} < {min_sharpe}")
+    # min_sharpe (only if specified)
+    min_sharpe = gates.get("min_sharpe")
+    if min_sharpe is not None:
+        sharpe = metrics.get("sharpe_ratio", 0)
+        if sharpe < min_sharpe:
+            failures.append(f"sharpe {sharpe:.4f} < {min_sharpe}")
     
-    # min_cagr
-    cagr = metrics.get("cagr", 0)
-    min_cagr = gates.get("min_cagr", 0)
-    if cagr < min_cagr:
-        failures.append(f"cagr {cagr:.4f} < {min_cagr}")
+    # min_cagr (only if specified)
+    min_cagr = gates.get("min_cagr")
+    if min_cagr is not None:
+        cagr = metrics.get("cagr", 0)
+        if cagr < min_cagr:
+            failures.append(f"cagr {cagr:.4f} < {min_cagr}")
     
-    # max_pct_time_hard_stop
-    pct_hard = metrics.get("pct_time_hard_stop", 0)
-    max_hard = gates.get("max_pct_time_hard_stop", 1.0)
-    if pct_hard > max_hard:
-        failures.append(f"pct_time_hard_stop {pct_hard:.4f} > {max_hard}")
+    # max_pct_time_hard_stop (only if specified)
+    max_hard = gates.get("max_pct_time_hard_stop")
+    if max_hard is not None:
+        pct_hard = metrics.get("pct_time_hard_stop", 0)
+        if pct_hard > max_hard:
+            failures.append(f"pct_time_hard_stop {pct_hard:.4f} > {max_hard}")
+    
+    # min_trades (only if specified)
+    min_trades = gates.get("min_trades")
+    if min_trades is not None:
+        num_trades = metrics.get("num_trades", 0)
+        if num_trades < min_trades:
+            failures.append(f"num_trades {num_trades} < {min_trades}")
     
     return (len(failures) == 0, failures)
 
@@ -415,8 +434,10 @@ def run_robustness(
         if len(scenarios) >= max_scenarios:
             break
     
-    # Gates and scoring config
-    gates = config.get("risk_constraints", {}).get("gates", {})
+    # Gates and scoring config - select by mode
+    all_gates = config.get("risk_constraints", {}).get("gates", {})
+    gates = all_gates.get(mode, all_gates)  # Fallback to root if mode not found
+    gates_profile = mode if mode in all_gates else "default"
     weights = config.get("scoring", {}).get("weights", {})
     
     # Output files
@@ -437,6 +458,7 @@ def run_robustness(
         "max_drawdown",
         "calmar_ratio",
         "win_rate",
+        "num_trades",
         "pct_time_hard_stop",
         "score",
         "gate_pass",
@@ -492,6 +514,7 @@ def run_robustness(
             row["max_drawdown"] = metrics.get("max_drawdown", 0)
             row["calmar_ratio"] = metrics.get("calmar_ratio", 0)
             row["win_rate"] = metrics.get("win_rate", 0)
+            row["num_trades"] = metrics.get("num_trades", 0)
             row["pct_time_hard_stop"] = metrics.get("pct_time_hard_stop", 0)
             
             # Score
@@ -542,6 +565,7 @@ def run_robustness(
         "start_time": datetime.now().isoformat(),
         "end_time": datetime.now().isoformat(),
         "mode": mode,
+        "gates_profile": gates_profile,
         "git_head": get_git_head(),
         "python_version": sys.version.split()[0],
         "config_hash": compute_hash(config, 16),
@@ -557,12 +581,18 @@ def run_robustness(
     with open(meta_file, "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2)
     
+    # Calculate trade statistics
+    total_trades = sum(r.get("num_trades", 0) for r in results if not r.get("error"))
+    scenarios_with_zero_trades = sum(1 for r in results if not r.get("error") and r.get("num_trades", 0) == 0)
+    pct_zero_trades = scenarios_with_zero_trades / len(results) * 100 if results else 0
+    
     # Generate summary.md
     summary_lines = [
         "# Robustness 2D Run Summary",
         "",
         f"**Timestamp**: {datetime.now().isoformat()}",
         f"**Mode**: {mode}",
+        f"**Gates Profile**: {gates_profile}",
         f"**Git HEAD**: {get_git_head()}",
         f"**Duration**: {run_duration}s",
         "",
@@ -573,6 +603,11 @@ def run_robustness(
         f"- Failed gates: {failed_count}",
         f"- Errors: {error_count}",
         f"- **Pass rate**: {meta['pass_rate']:.1%}",
+        "",
+        "## Trade Statistics",
+        "",
+        f"- Total trades: {total_trades}",
+        f"- Scenarios with 0 trades: {scenarios_with_zero_trades} ({pct_zero_trades:.1f}%)",
         "",
         "## Top Scenarios by Score",
         "",

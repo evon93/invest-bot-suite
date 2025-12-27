@@ -55,12 +55,25 @@ engine:
 # RISK CONSTRAINTS: Gates and thresholds (overlay, does NOT modify risk_rules)
 # ==============================================================================
 risk_constraints:
-  # Hard gates - scenario fails if violated
+  # Gates by mode - scenario fails if violated
   gates:
-    max_drawdown_absolute: -0.15
-    min_sharpe: 0.3
-    min_cagr: 0.05
-    max_pct_time_hard_stop: 0.25
+    # Quick mode: sanity check (loose thresholds)
+    quick:
+      max_errors: 0
+      require_candidate_params: true
+      min_trades: 0  # sanity: allow 0 trades
+      max_drawdown_absolute: -0.50  # very loose
+      # No sharpe/cagr requirements for sanity
+    
+    # Full mode: quality gate (strict thresholds)
+    full:
+      max_errors: 0
+      require_candidate_params: true
+      min_trades: 1  # at least 1 trade
+      max_drawdown_absolute: -0.15
+      min_sharpe: 0.3
+      min_cagr: 0.05
+      max_pct_time_hard_stop: 0.25
   
   # Soft warnings - logged but scenario continues
   warnings:
@@ -157,6 +170,7 @@ output:
     - "max_drawdown"
     - "calmar_ratio"
     - "win_rate"
+    - "num_trades"
     - "pct_time_hard_stop"
     - "score"
     - "gate_pass"
