@@ -4,11 +4,33 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2025-12-26) — Fase 2C: Apply Best Params + EOL Hygiene
+## Estado Actual (2025-12-27) — Fase 2D: Parameter Robustness Testing
 
-- **Rama:** `main`
+- **Rama:** `feature/2D_param_robustness`
 - **Estado:** ✅ COMPLETADO
-- **Commit HEAD:** `3c3d74b H0: renormalize line endings (LF)`
+- **Commit HEAD:** `f663e18 docs(report): add AG-2D-03-3.7A return artifacts`
+
+**Entregables principales:**
+- Contrato: `configs/robustness_2D.yaml`
+- Spec: `report/robustness_2D_spec.md`
+- Runner: `tools/run_robustness_2D.py`
+- Validator: `tools/validate_robustness_2D_config.py`
+- CI workflow: `.github/workflows/robustness_quick.yml`
+
+**Gates por modo:**
+- `quick`: sanity check (no exige sharpe/cagr, permite 0 trades)
+- `full`: quality gate (min_sharpe=0.3, min_cagr=0.05, min_trades=1)
+
+**Tests:** 114 passed
+
+**Documentación:**
+- `report/bridge_2D_to_2E_orchestrator.md`
+
+**Limitación conocida:** ~50% escenarios con 0 trades en full (señal sintética débil)
+
+---
+
+## Estado Actual (2025-12-26) — Fase 2C: Apply Best Params + EOL Hygiene
 
 **Entregables principales:**
 - Schema/Selector: `tools/best_params_schema_2C.py`
