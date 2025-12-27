@@ -102,6 +102,47 @@ def apply_flat_params(base: Dict[str, Any], flat_params: Dict[str, Any]) -> Dict
     return result
 
 
+def flatten_nested_params(params: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Flatten nested params dict to dotted format.
+    
+    Example:
+        {"kelly": {"cap_factor": 0.7}} -> {"kelly.cap_factor": 0.7}
+    """
+    flat = {}
+    for section, values in params.items():
+        if isinstance(values, dict):
+            for key, val in values.items():
+                flat[f"{section}.{key}"] = val
+    return flat
+
+
+def extract_params_dotted(best_params: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Extract params in dotted format from best_params.
+    
+    Priority:
+    1. If params_dotted exists and is non-empty dict -> use it
+    2. Elif params exists and is non-empty dict -> flatten to dotted
+    3. Else -> return empty dict
+    
+    Returns:
+        Dict with dotted keys (e.g., {"kelly.cap_factor": 0.7})
+    """
+    # Try params_dotted first
+    params_dotted = best_params.get("params_dotted")
+    if isinstance(params_dotted, dict) and params_dotted:
+        return params_dotted
+    
+    # Try nested params
+    params = best_params.get("params")
+    if isinstance(params, dict) and params:
+        return flatten_nested_params(params)
+    
+    # No params found
+    return {}
+
+
 def generate_param_perturbations(sweep: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Generate all parameter perturbation combinations from sweep config."""
     param_defs = sweep.get("param_perturbations", {})
@@ -313,11 +354,13 @@ def run_robustness(
     
     # Apply best_params to get candidate rules (in memory only)
     candidate_rules = deepcopy(base_rules)
-    if "params" in best_params:
-        candidate_rules = apply_flat_params(
-            candidate_rules,
-            best_params.get("params_dotted", {})
-        )
+    params_dotted = extract_params_dotted(best_params)
+    candidate_params_count = len(params_dotted)
+    
+    if params_dotted:
+        candidate_rules = apply_flat_params(candidate_rules, params_dotted)
+    else:
+        print("WARNING: No candidate params found in best_params_2C.json (empty params_dotted and params)")
     
     # Resolve output dir
     if outdir_override:
@@ -509,6 +552,7 @@ def run_robustness(
         "pass_rate": passed_count / len(scenarios) if scenarios else 0,
         "duration_seconds": run_duration,
         "default_seed": default_seed,
+        "candidate_params_applied_count": candidate_params_count,
     }
     with open(meta_file, "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2)
