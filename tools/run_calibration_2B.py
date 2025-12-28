@@ -375,6 +375,7 @@ def run_calibration(
     seed: int = 42,
     output_dir_override: Optional[str] = None,
     strict_gate: bool = False,
+    profile_override: Optional[str] = None,
 ) -> int:
     """
     Ejecuta la calibración según el grid definido en el YAML.
@@ -410,9 +411,21 @@ def run_calibration(
     score_formula = config.get("score", {}).get("formula", "sharpe_ratio")
     top_k = config.get("search", {}).get("top_k", 20)
     
-    # Cargar profile según modo
+    # Cargar profile según modo y override
     profiles = config.get("profiles", {})
-    profile = profiles.get(mode, {})
+    
+    # Determinar profile efectivo:
+    # 1. Si profile_override especificado -> usar ese
+    # 2. Si mode=="full" sin override -> usar "full_demo" por defecto
+    # 3. En otro caso -> usar mode como profile name
+    if profile_override:
+        effective_profile_name = profile_override
+    elif mode == "full":
+        effective_profile_name = "full_demo"
+    else:
+        effective_profile_name = mode
+    
+    profile = profiles.get(effective_profile_name, {})
     activity_gate = profile.get("activity_gate")
     quality_gate = profile.get("quality_gate")
 
@@ -480,7 +493,7 @@ def run_calibration(
         writer = csv.DictWriter(f, fieldnames=csv_headers, extrasaction="ignore")
         writer.writeheader()
 
-    log(f"Mode: {mode}, Total grid: {total_combos}, Running: {len(combos)}, Seed: {effective_seed}", log_file)
+    log(f"Mode: {mode}, Profile: {effective_profile_name}, Total grid: {total_combos}, Running: {len(combos)}, Seed: {effective_seed}", log_file)
     log(f"Output dir: {output_dir}", log_file)
 
     results = []
@@ -606,6 +619,7 @@ def run_calibration(
         "git_head": get_git_head(),
         "seed": effective_seed,
         "mode": mode,
+        "gate_profile": effective_profile_name,
         "total_grid": total_combos,
         "num_combos": len(combos),
         "running": len(combos),
@@ -740,6 +754,12 @@ def main():
         default=False,
         help="Exit with code 1 if gate fails in full mode (default: false)",
     )
+    parser.add_argument(
+        "--profile",
+        type=str,
+        default=None,
+        help="Gate profile to use (quick, full_demo, full). Default: auto (full->full_demo)",
+    )
 
     args = parser.parse_args()
 
@@ -749,6 +769,7 @@ def main():
         seed=args.seed,
         output_dir_override=args.output_dir,
         strict_gate=args.strict_gate,
+        profile_override=args.profile,
     )
     
     sys.exit(exit_code)

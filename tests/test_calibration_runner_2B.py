@@ -199,12 +199,13 @@ class TestCalibrationRunner2B:
         """
         output_dir = tmp_path / "calibration_output"
         
-        # Ejecutar en full mode que aplica gates
+        # Ejecutar en full mode con profile strict
         result = subprocess.run(
             [
                 sys.executable,
                 "tools/run_calibration_2B.py",
                 "--mode", "full",
+                "--profile", "full",  # Use strict thresholds
                 "--max-combinations", "12",  # Suficiente para tener mix
                 "--seed", "42",
                 "--output-dir", str(output_dir),
@@ -236,6 +237,7 @@ class TestCalibrationRunner2B:
                 sys.executable,
                 "tools/run_calibration_2B.py",
                 "--mode", "full",
+                "--profile", "full",  # Use strict thresholds
                 "--max-combinations", "9",
                 "--seed", "42",
                 "--output-dir", str(output_dir),
@@ -274,6 +276,7 @@ class TestCalibrationRunner2B:
                 sys.executable,
                 "tools/run_calibration_2B.py",
                 "--mode", "full",
+                "--profile", "full",  # Use strict thresholds
                 "--max-combinations", "12",
                 "--seed", "42",
                 "--strict-gate",
@@ -291,4 +294,86 @@ class TestCalibrationRunner2B:
         if not meta_data["gate_passed"]:
             assert result.returncode == 1, \
                 f"With --strict-gate and gate_passed=false, exit code should be 1, got {result.returncode}"
+
+    def test_mode_full_uses_full_demo_profile(self, tmp_path):
+        """Verifica que --mode full usa profile full_demo y PASS en entorno sintético."""
+        output_dir = tmp_path / "calibration_output"
+        
+        result = subprocess.run(
+            [
+                sys.executable,
+                "tools/run_calibration_2B.py",
+                "--mode", "full",
+                "--max-combinations", "40",
+                "--seed", "42",
+                "--output-dir", str(output_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=120,
+            cwd=REPO_ROOT,
+        )
+        
+        assert result.returncode == 0, f"Runner failed: {result.stderr}"
+        
+        meta_data = json.loads((output_dir / "run_meta.json").read_text())
+        
+        # Debe usar full_demo profile
+        assert meta_data.get("gate_profile") == "full_demo", \
+            f"Expected gate_profile='full_demo', got: {meta_data.get('gate_profile')}"
+        
+        # Con full_demo thresholds (30% min), ~33% active rate debe PASS
+        assert meta_data["gate_passed"] is True, \
+            f"Gate should pass with full_demo profile, got fail_reasons: {meta_data.get('gate_fail_reasons')}"
+
+    def test_profile_full_strict_fails(self, tmp_path):
+        """Verifica que --profile full usa thresholds strict y FAIL."""
+        output_dir = tmp_path / "calibration_output"
+        
+        result = subprocess.run(
+            [
+                sys.executable,
+                "tools/run_calibration_2B.py",
+                "--mode", "full",
+                "--profile", "full",
+                "--max-combinations", "40",
+                "--seed", "42",
+                "--output-dir", str(output_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=120,
+            cwd=REPO_ROOT,
+        )
+        
+        assert result.returncode == 0, f"Runner failed: {result.stderr}"
+        
+        meta_data = json.loads((output_dir / "run_meta.json").read_text())
+        
+        # Debe usar full profile (strict)
+        assert meta_data.get("gate_profile") == "full", \
+            f"Expected gate_profile='full', got: {meta_data.get('gate_profile')}"
+        
+        # Con full thresholds (60% min), ~33% active rate debe FAIL
+        assert meta_data["gate_passed"] is False, \
+            "Gate should fail with strict full profile"
+        assert "active_rate_below_min" in meta_data["gate_fail_reasons"], \
+            f"Should include active_rate_below_min, got: {meta_data['gate_fail_reasons']}"
+
+    def test_profile_flag_in_help(self, tmp_path):
+        """Verifica que --profile flag está documentado en help."""
+        result = subprocess.run(
+            [
+                sys.executable,
+                "tools/run_calibration_2B.py",
+                "--help",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=REPO_ROOT,
+        )
+        
+        assert "--profile" in result.stdout, "--profile flag should be in help"
+        assert "full_demo" in result.stdout, "full_demo should be mentioned in --profile help"
 
