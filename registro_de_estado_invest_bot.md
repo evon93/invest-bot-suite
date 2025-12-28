@@ -60,30 +60,41 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 - **Rama:** `feature/2B_risk_calibration`
 - **Estado:** ✅ COMPLETADO
-- **Commit HEAD:** `ab39260 2B.4: scoring formula uses risk counters`
+- **Commit HEAD:** `0611785 2E: make full calibration gate useful (active/inactive + activity gate + diagnostics)`
 
 **Entregables principales:**
-- Runner de calibración: `tools/run_calibration_2B.py`
-- Configuración: `configs/risk_calibration_2B.yaml`
-- Tests: `tests/test_calibration_runner_2B.py`, `tests/test_backtester_closed_trades.py`
+- Runner de calibración actualizado: `tools/run_calibration_2B.py`
+- Configuración con profiles: `configs/risk_calibration_2B.yaml`
+- Tests ampliados: `tests/test_calibration_runner_2B.py` (5 tests)
 
-**Nuevas capacidades:**
-- `closed_trades` con `realized_pnl` y `win_rate`
-- `risk_events` con contadores ATR/hard_stop
-- Score formula configurable con métricas de riesgo
-- CLI `--output-dir` para override de directorio de salida
+**Nuevas capacidades 2E:**
+- Semántica `is_active`: `num_trades > 0`
+- Columnas diagnóstico: `rejection_no_signal`, `rejection_blocked_risk`, `rejection_size_zero`, `rejection_price_missing`, `rejection_other`
+- Activity gate: valida `min_active_n`, `min_active_rate`, `min_active_pass_rate`
+- Quality gate: valida `min_trades`, `min_sharpe`, `min_cagr`, `max_drawdown_absolute`
+- Flag `--strict-gate` para exit 1 si gate falla
+- Línea GATE en stdout: `GATE full: PASS/FAIL | active_n=.. active_rate=.. reasons=[..]`
 
-**Métricas añadidas:**
-- `atr_stop_count`, `hard_stop_trigger_count`, `pct_time_hard_stop`, `missing_risk_events`
-- `closed_trades_count`, `wins_count`, `losses_count`, `win_rate`, `gross_pnl`, `avg_win`, `avg_loss`
+**Campos añadidos en run_meta.json:**
+- `active_n`, `inactive_n`, `active_rate`, `inactive_rate`
+- `active_pass_rate`
+- `gate_passed`, `insufficient_activity`, `gate_fail_reasons`, `suggested_exit_code`
+- `rejection_reasons_agg`, `top_inactive_reasons`
 
-**Tests:** 57 passed
+**Hallazgo clave (AG-2E-1-2-extract):**
+- 66.7% de combinaciones producen 0 trades
+- Causa: `kelly.cap_factor < 0.7` → inactividad total
+- El gate detecta correctamente `insufficient_activity` cuando `active_rate < 60%`
+
+**Tests:** 61 passed
 
 **Documentación:**
-- `report/risk_calibration_2B_impl_20251223.md`
-- `bridge_2B_to_2C_report.md`
+- `report/AG-2E-2-1_return.md`
+- `report/bridge_2E_full_gate_useful.md`
 
 ---
+
+## Estado Anterior (2025-12-23) — Fase 2B: Risk Calibration Runner
 
 ##  Estado Actual (2025-11-27)
 

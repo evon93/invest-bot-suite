@@ -46,3 +46,12 @@ Notas:
   - report/diff_2A_4.3_risk_logging_tests.patch
 
 - [2025-12-17 18:18] [ANTIGRAVITY/EXECUTOR] [feature/2A_riskcontext_v0_6_and_monitor] — 2A/5.4: placeholders añadidos en risk_rules.yaml para eliminar warnings del validador. Evidencia: report/validate_risk_config_2A_after_warnings0.txt (Warnings:0) + report/diff_2A_5.4_remove_config_warnings.patch.
+
+## 2025-12-28 — Decisiones 2E: Full Calibration Gate Useful
+
+- [2025-12-28 13:45] [ANTIGRAVITY/EXECUTOR] [feature/2E_full_gate_useful] — **Decisión**: comportamiento default de exit code es **silencioso** (exit 0 siempre), con `gate_passed=false` y `suggested_exit_code=1` expuestos en `run_meta.json`. Esto permite que CI/Orchestrator decida si bloquear sin romper flujos actuales ni perder evidencia (artefactos siempre se generan).
+
+- [2025-12-28 13:45] [ANTIGRAVITY/EXECUTOR] [feature/2E_full_gate_useful] — **Decisión**: añadido flag `--strict-gate` para modo estricto. Si `--strict-gate` y `--mode full` y `gate_passed=false` → exit 1. Esto permite backwards compatibility por defecto + opción de bloqueo explícito en CI.
+
+- [2025-12-28 13:52] [ANTIGRAVITY/EXECUTOR] [feature/2E_full_gate_useful] — Commit `0611785`: implementación completa de activity/quality gates con columnas `is_active`, `rejection_*`, campos en meta, línea GATE en stdout. 61 tests pasando.
+
