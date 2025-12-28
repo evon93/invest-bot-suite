@@ -1,6 +1,6 @@
 {
   "config_hash": "d2e0694fc41507e5",
-  "git_head": "21c56b419422",
+  "git_head": "12f8e03e4cb8",
   "seed": 42,
   "mode": "full",
   "gate_profile": "full_demo",
@@ -9,8 +9,8 @@
   "running": 40,
   "ok": 40,
   "errors": 0,
-  "duration_s": 3.96,
-  "timestamp": "2025-12-28T17:45:27.957255",
+  "duration_s": 0.64,
+  "timestamp": "2025-12-28T18:15:23.726210",
   "output_dir": "report\\out_2E_4_1_full_demo_smoke",
   "active_n": 13,
   "inactive_n": 27,

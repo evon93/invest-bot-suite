@@ -1,9 +1,9 @@
 # Calibration 2B Run Summary
 
-**Timestamp**: 2025-12-28T17:45:27.958652
+**Timestamp**: 2025-12-28T18:15:23.726779
 **Mode**: full
 **Seed**: 42
-**Git HEAD**: 21c56b419422
+**Git HEAD**: 12f8e03e4cb8
 
 ## Results
 
@@ -11,7 +11,7 @@
 - Combinations run: 40
 - OK: 40
 - Errors: 0
-- Duration: 3.96s
+- Duration: 0.64s
 
 ## Activity Analysis
 
