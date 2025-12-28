@@ -1,0 +1,438 @@
+[2025-12-28T15:30:58] Mode: full, Total grid: 216, Running: 216, Seed: 42
+[2025-12-28T15:30:58] Output dir: report/out_2E_3_1_full
+[2025-12-28T15:30:59] START combo_id=c648aadd02dc (1/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:30:59] END combo_id=c648aadd02dc status=ok duration_s=0.09
+[2025-12-28T15:30:59] START combo_id=2a7b39f06e64 (2/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:30:59] END combo_id=2a7b39f06e64 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=ffae19fec604 (3/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:30:59] END combo_id=ffae19fec604 status=ok duration_s=0.01
+[2025-12-28T15:30:59] START combo_id=96764a80cf0c (4/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:30:59] END combo_id=96764a80cf0c status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=c7a8cf081f41 (5/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:30:59] END combo_id=c7a8cf081f41 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=fa94dabfc7d9 (6/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:30:59] END combo_id=fa94dabfc7d9 status=ok duration_s=0.01
+[2025-12-28T15:30:59] START combo_id=a4e7cc151807 (7/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:30:59] END combo_id=a4e7cc151807 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=e1d02956d405 (8/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:30:59] END combo_id=e1d02956d405 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=abd891f17a53 (9/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:30:59] END combo_id=abd891f17a53 status=ok duration_s=0.01
+[2025-12-28T15:30:59] START combo_id=2085bdf81368 (10/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:30:59] END combo_id=2085bdf81368 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=370b03ff2333 (11/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:30:59] END combo_id=370b03ff2333 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=9daf5a15114e (12/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:30:59] END combo_id=9daf5a15114e status=ok duration_s=0.01
+[2025-12-28T15:30:59] START combo_id=cbfa90914978 (13/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:30:59] END combo_id=cbfa90914978 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=baa19893d67a (14/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:30:59] END combo_id=baa19893d67a status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=7a63e2010a20 (15/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:30:59] END combo_id=7a63e2010a20 status=ok duration_s=0.01
+[2025-12-28T15:30:59] START combo_id=9409213516bb (16/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:30:59] END combo_id=9409213516bb status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=57fbef400acf (17/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:30:59] END combo_id=57fbef400acf status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=dc3c983f74bc (18/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:30:59] END combo_id=dc3c983f74bc status=ok duration_s=0.01
+[2025-12-28T15:30:59] START combo_id=a59d81de4d61 (19/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:30:59] END combo_id=a59d81de4d61 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=71830c57acad (20/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:30:59] END combo_id=71830c57acad status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=c2d7b03329c4 (21/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:30:59] END combo_id=c2d7b03329c4 status=ok duration_s=0.01
+[2025-12-28T15:30:59] START combo_id=0fa76f9e0eb0 (22/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:30:59] END combo_id=0fa76f9e0eb0 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=1ae7fa5b3a41 (23/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:30:59] END combo_id=1ae7fa5b3a41 status=ok duration_s=0.03
+[2025-12-28T15:30:59] START combo_id=59aac2ce9c2d (24/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:30:59] END combo_id=59aac2ce9c2d status=ok duration_s=0.01
+[2025-12-28T15:30:59] START combo_id=83578a30c17d (25/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:00] END combo_id=83578a30c17d status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=90f7a4cd3164 (26/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:00] END combo_id=90f7a4cd3164 status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=a7ba7b95a053 (27/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:00] END combo_id=a7ba7b95a053 status=ok duration_s=0.01
+[2025-12-28T15:31:00] START combo_id=cdf13abadc48 (28/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:00] END combo_id=cdf13abadc48 status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=7f8a4cb5236b (29/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:00] END combo_id=7f8a4cb5236b status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=34ae485cdeaf (30/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:00] END combo_id=34ae485cdeaf status=ok duration_s=0.01
+[2025-12-28T15:31:00] START combo_id=3ba5a13a4e2d (31/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:00] END combo_id=3ba5a13a4e2d status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=401f78d99db3 (32/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:00] END combo_id=401f78d99db3 status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=0e736050c5cd (33/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:00] END combo_id=0e736050c5cd status=ok duration_s=0.01
+[2025-12-28T15:31:00] START combo_id=ed6c4cb15e85 (34/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:00] END combo_id=ed6c4cb15e85 status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=8398c5eed2aa (35/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:00] END combo_id=8398c5eed2aa status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=586d92e8ecce (36/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:00] END combo_id=586d92e8ecce status=ok duration_s=0.01
+[2025-12-28T15:31:00] START combo_id=a6f45441198b (37/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:00] END combo_id=a6f45441198b status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=14ffa0618ebe (38/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:00] END combo_id=14ffa0618ebe status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=7d64c9d4ac97 (39/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:00] END combo_id=7d64c9d4ac97 status=ok duration_s=0.01
+[2025-12-28T15:31:00] START combo_id=a1fb37867b63 (40/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:00] END combo_id=a1fb37867b63 status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=a04dcce7e47c (41/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:00] END combo_id=a04dcce7e47c status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=ad0d9dbc478a (42/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:00] END combo_id=ad0d9dbc478a status=ok duration_s=0.01
+[2025-12-28T15:31:00] START combo_id=3b08932e700e (43/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:00] END combo_id=3b08932e700e status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=4815de677507 (44/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:00] END combo_id=4815de677507 status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=48b8e8614b63 (45/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:00] END combo_id=48b8e8614b63 status=ok duration_s=0.01
+[2025-12-28T15:31:00] START combo_id=547eac98b5b2 (46/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:00] END combo_id=547eac98b5b2 status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=f64c452c9232 (47/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:00] END combo_id=f64c452c9232 status=ok duration_s=0.03
+[2025-12-28T15:31:00] START combo_id=d6c210a1cb33 (48/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:00] END combo_id=d6c210a1cb33 status=ok duration_s=0.01
+[2025-12-28T15:31:00] START combo_id=6bce128cc97d (49/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=6bce128cc97d status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=c493d6a8286a (50/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=c493d6a8286a status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=cd16c334caa4 (51/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=cd16c334caa4 status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=d2b79f90cb77 (52/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=d2b79f90cb77 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=e23c7db16587 (53/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=e23c7db16587 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=4bb25ba14e62 (54/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=4bb25ba14e62 status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=7c885ebffa63 (55/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=7c885ebffa63 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=937fc7556688 (56/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=937fc7556688 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=cc0b60c2d494 (57/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=cc0b60c2d494 status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=0ed444ef7575 (58/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=0ed444ef7575 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=be7ef0771865 (59/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=be7ef0771865 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=adee803c6cd8 (60/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=adee803c6cd8 status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=085e471d9243 (61/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=085e471d9243 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=1749275cee89 (62/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=1749275cee89 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=ec9976a0def2 (63/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=ec9976a0def2 status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=8f35fd0065a6 (64/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=8f35fd0065a6 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=c96a2966b541 (65/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=c96a2966b541 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=e386ec8bdcea (66/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=e386ec8bdcea status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=3d24b5eeaf59 (67/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=3d24b5eeaf59 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=33777a52c823 (68/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=33777a52c823 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=a8659805777d (69/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=a8659805777d status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=16f13ecbf0ca (70/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=16f13ecbf0ca status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=61c72af9d121 (71/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=61c72af9d121 status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=234cbe89272f (72/216) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=234cbe89272f status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=59f7bb070e3d (73/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:01] END combo_id=59f7bb070e3d status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=1b69b36c9a8d (74/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:01] END combo_id=1b69b36c9a8d status=ok duration_s=0.03
+[2025-12-28T15:31:01] START combo_id=dbb11ea647ea (75/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:01] END combo_id=dbb11ea647ea status=ok duration_s=0.01
+[2025-12-28T15:31:01] START combo_id=634647c54f0d (76/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=634647c54f0d status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=843fb65c837d (77/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=843fb65c837d status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=c737ee461210 (78/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=c737ee461210 status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=2351b882cb2a (79/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=2351b882cb2a status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=a46e903e7699 (80/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=a46e903e7699 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=c9374d5f6de8 (81/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=c9374d5f6de8 status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=1f568ba2a6a7 (82/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=1f568ba2a6a7 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=72148a6125a5 (83/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=72148a6125a5 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=4056e2358633 (84/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=4056e2358633 status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=ba642e93aea5 (85/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=ba642e93aea5 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=6877ea5241ac (86/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=6877ea5241ac status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=1605082efecc (87/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=1605082efecc status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=e766b989e847 (88/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=e766b989e847 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=bb4d0aa4337a (89/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=bb4d0aa4337a status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=ec84742fd80c (90/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=ec84742fd80c status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=4e067f3e3456 (91/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=4e067f3e3456 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=3a899b30cf39 (92/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=3a899b30cf39 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=5c86fec2aa8d (93/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=5c86fec2aa8d status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=787d8febe8ce (94/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=787d8febe8ce status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=e0a42532211c (95/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=e0a42532211c status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=ad11448803c1 (96/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=ad11448803c1 status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=138d9d3ac6fb (97/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=138d9d3ac6fb status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=92b252da6800 (98/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=92b252da6800 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=53bcdeb6f32d (99/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=53bcdeb6f32d status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=28c1f7f2015f (100/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:02] END combo_id=28c1f7f2015f status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=b5e4e7146798 (101/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:02] END combo_id=b5e4e7146798 status=ok duration_s=0.03
+[2025-12-28T15:31:02] START combo_id=74ac200396ea (102/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:02] END combo_id=74ac200396ea status=ok duration_s=0.01
+[2025-12-28T15:31:02] START combo_id=f4c724766cd6 (103/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=f4c724766cd6 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=90453a4646e9 (104/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=90453a4646e9 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=767563ba6e90 (105/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=767563ba6e90 status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=0e8649180a91 (106/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=0e8649180a91 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=e43cb9f94728 (107/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=e43cb9f94728 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=e25336c19599 (108/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=e25336c19599 status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=0628b2602df0 (109/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=0628b2602df0 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=fe82d6bb76d1 (110/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=fe82d6bb76d1 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=91933765d21b (111/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=91933765d21b status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=7b6da49792cd (112/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=7b6da49792cd status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=633697a38dc4 (113/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=633697a38dc4 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=d0d56642089b (114/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=d0d56642089b status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=289809529b26 (115/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=289809529b26 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=c748f2b4a1b8 (116/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=c748f2b4a1b8 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=0fa15c43f57b (117/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=0fa15c43f57b status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=160aedde2bfe (118/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=160aedde2bfe status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=cf556f66a980 (119/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=cf556f66a980 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=db6fe6432d1f (120/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=db6fe6432d1f status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=51dff0a75498 (121/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=51dff0a75498 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=27077a4a21c0 (122/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=27077a4a21c0 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=95568d4d6fe0 (123/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=95568d4d6fe0 status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=c05c91a589e7 (124/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=c05c91a589e7 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=6600cd7a2ef8 (125/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=6600cd7a2ef8 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=9584106d1216 (126/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=9584106d1216 status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=995f2c5f173c (127/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=995f2c5f173c status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=4e08cf57f8e8 (128/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:03] END combo_id=4e08cf57f8e8 status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=2388bf77bc27 (129/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:03] END combo_id=2388bf77bc27 status=ok duration_s=0.01
+[2025-12-28T15:31:03] START combo_id=5a1accffcebf (130/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:03] END combo_id=5a1accffcebf status=ok duration_s=0.03
+[2025-12-28T15:31:03] START combo_id=8578ef591d43 (131/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=8578ef591d43 status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=3a8132bdda05 (132/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=3a8132bdda05 status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=78919ba2629d (133/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:04] END combo_id=78919ba2629d status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=605eb0631c9e (134/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=605eb0631c9e status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=c34a384d02e0 (135/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=c34a384d02e0 status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=6ed85ecb1731 (136/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:04] END combo_id=6ed85ecb1731 status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=671c086c556e (137/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=671c086c556e status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=302515ab53e5 (138/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=302515ab53e5 status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=16559d79c3be (139/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:04] END combo_id=16559d79c3be status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=7714eb80b969 (140/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=7714eb80b969 status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=50de9d239c09 (141/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=50de9d239c09 status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=1889cb9263d7 (142/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:04] END combo_id=1889cb9263d7 status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=2ebb61a4809a (143/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=2ebb61a4809a status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=7376d5ca8d37 (144/216) params={'stop_loss.atr_multiplier': 2.5, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=7376d5ca8d37 status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=42455134019f (145/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:04] END combo_id=42455134019f status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=1dffe0e2c591 (146/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=1dffe0e2c591 status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=1efdbc6fae2d (147/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=1efdbc6fae2d status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=b441aa69f310 (148/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:04] END combo_id=b441aa69f310 status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=05a81d0486cc (149/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=05a81d0486cc status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=449c9ed2a29e (150/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=449c9ed2a29e status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=0eb7b5848e6c (151/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:04] END combo_id=0eb7b5848e6c status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=87e1a5fd92dd (152/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=87e1a5fd92dd status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=ff15bef09524 (153/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=ff15bef09524 status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=1f91c4ee0d6e (154/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:04] END combo_id=1f91c4ee0d6e status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=1dc7cec168c1 (155/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:04] END combo_id=1dc7cec168c1 status=ok duration_s=0.03
+[2025-12-28T15:31:04] START combo_id=ab4b25c4ea54 (156/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:04] END combo_id=ab4b25c4ea54 status=ok duration_s=0.01
+[2025-12-28T15:31:04] START combo_id=31c89f309259 (157/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=31c89f309259 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=cde5c58a7b43 (158/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=cde5c58a7b43 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=6b555d2d5d26 (159/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=6b555d2d5d26 status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=3f347327b747 (160/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=3f347327b747 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=e0a8c9bea3d7 (161/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=e0a8c9bea3d7 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=4028ec410277 (162/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=4028ec410277 status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=b9a37288ac63 (163/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=b9a37288ac63 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=094265b571a5 (164/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=094265b571a5 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=09fd99d77833 (165/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=09fd99d77833 status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=3d1d091a2291 (166/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=3d1d091a2291 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=72cf41716025 (167/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=72cf41716025 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=201c97f9ded2 (168/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=201c97f9ded2 status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=c370b4bf6839 (169/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=c370b4bf6839 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=e632f582a271 (170/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=e632f582a271 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=f73af60aaf28 (171/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=f73af60aaf28 status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=6fc8565d86b3 (172/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=6fc8565d86b3 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=58fd39d2a8c4 (173/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=58fd39d2a8c4 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=76f8dd380199 (174/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=76f8dd380199 status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=b150dbb9ae64 (175/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=b150dbb9ae64 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=6ca7c530a4ec (176/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=6ca7c530a4ec status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=41bae1d6f134 (177/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=41bae1d6f134 status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=1326c5f5ec1b (178/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=1326c5f5ec1b status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=99825eddb5fb (179/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=99825eddb5fb status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=9e61b32b2738 (180/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=9e61b32b2738 status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=b4b0c4aee280 (181/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:05] END combo_id=b4b0c4aee280 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=40c887088ef8 (182/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:05] END combo_id=40c887088ef8 status=ok duration_s=0.03
+[2025-12-28T15:31:05] START combo_id=7821ba8fc31c (183/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:05] END combo_id=7821ba8fc31c status=ok duration_s=0.01
+[2025-12-28T15:31:05] START combo_id=754163e55339 (184/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=754163e55339 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=6109ee5ede7c (185/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=6109ee5ede7c status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=ad3789957952 (186/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:06] END combo_id=ad3789957952 status=ok duration_s=0.01
+[2025-12-28T15:31:06] START combo_id=b71b2a6fabba (187/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=b71b2a6fabba status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=a6061a3189c8 (188/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=a6061a3189c8 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=ed157283e7b2 (189/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:06] END combo_id=ed157283e7b2 status=ok duration_s=0.01
+[2025-12-28T15:31:06] START combo_id=d0414682501d (190/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=d0414682501d status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=7004e5eb90c0 (191/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=7004e5eb90c0 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=e91017a88ca9 (192/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:06] END combo_id=e91017a88ca9 status=ok duration_s=0.01
+[2025-12-28T15:31:06] START combo_id=7501aae16e38 (193/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=7501aae16e38 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=a1bfc7d21b04 (194/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=a1bfc7d21b04 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=8ed18fe9d1b4 (195/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:06] END combo_id=8ed18fe9d1b4 status=ok duration_s=0.01
+[2025-12-28T15:31:06] START combo_id=1ca894bdbd6f (196/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=1ca894bdbd6f status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=c5276f5fc3af (197/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=c5276f5fc3af status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=731bb1db8e15 (198/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:06] END combo_id=731bb1db8e15 status=ok duration_s=0.01
+[2025-12-28T15:31:06] START combo_id=db3a8dc223b7 (199/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=db3a8dc223b7 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=61ca11746003 (200/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=61ca11746003 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=080dc8952523 (201/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:06] END combo_id=080dc8952523 status=ok duration_s=0.01
+[2025-12-28T15:31:06] START combo_id=e8ba4b3cd27f (202/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=e8ba4b3cd27f status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=76203ebc5c47 (203/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=76203ebc5c47 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=86683bef73d4 (204/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:06] END combo_id=86683bef73d4 status=ok duration_s=0.01
+[2025-12-28T15:31:06] START combo_id=60c639f091fc (205/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=60c639f091fc status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=5d69fb566631 (206/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=5d69fb566631 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=00ffa287d721 (207/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:06] END combo_id=00ffa287d721 status=ok duration_s=0.01
+[2025-12-28T15:31:06] START combo_id=17b50774d5c4 (208/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:06] END combo_id=17b50774d5c4 status=ok duration_s=0.03
+[2025-12-28T15:31:06] START combo_id=33597b87c4d7 (209/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:06] END combo_id=33597b87c4d7 status=ok duration_s=0.03
+[2025-12-28T15:31:07] START combo_id=bcb9aef94078 (210/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:07] END combo_id=bcb9aef94078 status=ok duration_s=0.01
+[2025-12-28T15:31:07] START combo_id=c3c185954b7c (211/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:07] END combo_id=c3c185954b7c status=ok duration_s=0.03
+[2025-12-28T15:31:07] START combo_id=940f16707eb2 (212/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:07] END combo_id=940f16707eb2 status=ok duration_s=0.03
+[2025-12-28T15:31:07] START combo_id=da172c473f22 (213/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:07] END combo_id=da172c473f22 status=ok duration_s=0.01
+[2025-12-28T15:31:07] START combo_id=ded462a34819 (214/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:31:07] END combo_id=ded462a34819 status=ok duration_s=0.03
+[2025-12-28T15:31:07] START combo_id=947abdcd7ae2 (215/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:31:07] END combo_id=947abdcd7ae2 status=ok duration_s=0.03
+[2025-12-28T15:31:07] START combo_id=ef28d9586ba9 (216/216) params={'stop_loss.atr_multiplier': 3.0, 'stop_loss.min_stop_pct': 0.03, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:31:07] END combo_id=ef28d9586ba9 status=ok duration_s=0.01
+[2025-12-28T15:31:07] DONE: 216 ok, 0 errors, total 216, duration 8.29s
+GATE full: PASS | active_n=72 active_rate=33.33% active_pass_rate=100.00% reasons=[none]
+[2025-12-28T15:31:07] GATE full: PASS | active_n=72 active_rate=33.33% active_pass_rate=100.00% reasons=[none]
+[2025-12-28T15:31:07] Artifacts written to: report/out_2E_3_1_full

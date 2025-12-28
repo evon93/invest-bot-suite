@@ -262,20 +262,29 @@ def evaluate_gates(
     gate_fail_reasons = []
     insufficient_activity = False
     
-    # Evaluar activity gate
+    # Evaluar activity gate - cada threshold independiente
     if activity_gate:
-        min_active_n = activity_gate.get("min_active_n", 0)
-        min_active_rate = activity_gate.get("min_active_rate", 0.0)
-        min_active_pass_rate = activity_gate.get("min_active_pass_rate", 0.0)
+        min_active_n = activity_gate.get("min_active_n")
+        min_active_rate = activity_gate.get("min_active_rate")
+        max_inactive_rate = activity_gate.get("max_inactive_rate")
+        min_active_pass_rate = activity_gate.get("min_active_pass_rate")
         
-        # Insufficient activity si AMBOS thresholds fallan
-        if active_n < min_active_n and active_rate < min_active_rate:
+        # Check cada threshold de actividad si está definido
+        if min_active_n is not None and active_n < min_active_n:
+            gate_fail_reasons.append("active_n_below_min")
             insufficient_activity = True
-            gate_fail_reasons.append("insufficient_activity")
         
-        # Quality pass rate entre activos
-        if active_pass_rate < min_active_pass_rate and not insufficient_activity:
-            gate_fail_reasons.append("quality_gate_failed")
+        if min_active_rate is not None and active_rate < min_active_rate:
+            gate_fail_reasons.append("active_rate_below_min")
+            insufficient_activity = True
+        
+        if max_inactive_rate is not None and inactive_rate > max_inactive_rate:
+            gate_fail_reasons.append("inactive_rate_above_max")
+            insufficient_activity = True
+        
+        # Check quality pass rate entre activos
+        if min_active_pass_rate is not None and active_pass_rate < min_active_pass_rate:
+            gate_fail_reasons.append("active_pass_rate_below_min")
     
     gate_passed = len(gate_fail_reasons) == 0
     
