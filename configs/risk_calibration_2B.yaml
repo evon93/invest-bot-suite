@@ -93,8 +93,20 @@ profiles:
     # Sin gates, solo smoke test rápido
     activity_gate: null
     quality_gate: null
+  full_demo:
+    # Thresholds compatibles con entorno sintético (~33% actividad)
+    activity_gate:
+      min_active_n: 10
+      min_active_rate: 0.30
+      max_inactive_rate: 0.70
+      min_active_pass_rate: 0.70
+    quality_gate:
+      min_trades: 1
+      min_sharpe: 0.3
+      min_cagr: 0.05
+      max_drawdown_absolute: -0.25
   full:
-    # Activity gate: detecta si hay suficientes escenarios activos
+    # Strict thresholds para producción
     activity_gate:
       min_active_n: 20           # mínimo de escenarios con trades
       min_active_rate: 0.60      # mínimo 60% activos
@@ -106,3 +118,4 @@ profiles:
       min_sharpe: 0.3            # Sharpe mínimo
       min_cagr: 0.05             # CAGR mínimo 5%
       max_drawdown_absolute: -0.25  # MaxDD no peor que -25%
+
