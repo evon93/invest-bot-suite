@@ -199,7 +199,14 @@ def run_single_backtest(
         metrics["calmar_ratio"] = metrics.get("cagr", 0) / abs(metrics["max_drawdown"])
     else:
         metrics["calmar_ratio"] = 0.0
-    
+
+    # Extract diagnostics from backtester
+    diagnostics = getattr(bt, "diagnostics", {})
+    metrics["signal_count"] = diagnostics.get("signal_count", 0)
+    metrics["signal_rejected_count"] = diagnostics.get("signal_rejected_count", 0)
+    metrics["price_missing_count"] = diagnostics.get("price_missing_count", 0)
+    metrics["size_zero_count"] = 0  # Placeholder if not tracked in backtester yet
+
     return metrics
 
 
@@ -320,6 +327,40 @@ def aggregate_rejection_reasons(results: List[Dict[str, Any]]) -> Tuple[Dict[str
     top_reasons = [k for k, v in sorted_reasons]
     
     return agg, top_reasons
+
+
+def classify_inactive_reason(num_trades: int, diag: Dict[str, int]) -> Dict[str, int]:
+    """
+    Clasifica razón de inactividad (1-hot) basándose en diagnósticos.
+    """
+    result = {
+        "rejection_no_signal": 0,
+        "rejection_blocked_risk": 0,
+        "rejection_size_zero": 0,
+        "rejection_price_missing": 0,
+        "rejection_other": 0,
+    }
+    if num_trades > 0:
+        return result
+    
+    # Jerarquía de razones
+    # 1. Price missing (datos sucios/insuficientes)
+    if diag.get("price_missing_count", 0) > 0:
+        result["rejection_price_missing"] = 1
+    # 2. No signal (nunca se intentó rebalancear)
+    elif diag.get("signal_count", 0) == 0:
+        result["rejection_no_signal"] = 1
+    # 3. Blocked by risk (intentos rechazados)
+    elif diag.get("signal_rejected_count", 0) > 0:
+        result["rejection_blocked_risk"] = 1
+    # 4. Size zero (intentos aceptados pero tamaño 0, requiere soporte en BT)
+    elif diag.get("size_zero_count", 0) > 0:
+        result["rejection_size_zero"] = 1
+    # 5. Other (fallback)
+    else:
+        result["rejection_other"] = 1
+    
+    return result
 
 
 # -------------------------------------------------------------------
@@ -535,9 +576,15 @@ def run_calibration(
             num_trades = row.get("num_trades", 0)
             row["is_active"] = num_trades > 0
             
-            # Diagnóstico fallback: si 0 trades sin causa detectable, rejection_other=1
-            if num_trades == 0:
-                row["rejection_other"] = 1
+            # Clasificar razón de inactividad usando diagnósticos reales
+            diag_data = {
+                "signal_count": row.get("signal_count", 0),
+                "signal_rejected_count": row.get("signal_rejected_count", 0),
+                "price_missing_count": row.get("price_missing_count", 0),
+                "size_zero_count": row.get("size_zero_count", 0),
+            }
+            rejection_flags = classify_inactive_reason(num_trades, diag_data)
+            row.update(rejection_flags)
 
         except Exception as e:
             row["status"] = "error"

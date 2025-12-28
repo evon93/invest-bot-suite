@@ -12,7 +12,11 @@ from pathlib import Path
 import pytest
 
 # Repo root para ejecutar el runner
+# Repo root para ejecutar el runner
 REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
+
+from tools.run_calibration_2B import classify_inactive_reason
 
 
 class TestCalibrationRunner2B:
@@ -376,4 +380,78 @@ class TestCalibrationRunner2B:
         
         assert "--profile" in result.stdout, "--profile flag should be in help"
         assert "full_demo" in result.stdout, "full_demo should be mentioned in --profile help"
+
+    def test_classify_inactive_reason_logic(self):
+        """Unit test para la lógica de clasificación de inactividad."""
+        # 1. Active trade > 0 -> all zeros
+        res = classify_inactive_reason(1, {"price_missing_count": 5})
+        assert sum(res.values()) == 0, f"Active trade should have 0 flags, got {res}"
+        
+        # 2. Priority: Price missing
+        res = classify_inactive_reason(0, {"price_missing_count": 1, "signal_count": 0})
+        assert res["rejection_price_missing"] == 1
+        assert sum(res.values()) == 1
+        
+        # 3. Priority: No signal
+        res = classify_inactive_reason(0, {"price_missing_count": 0, "signal_count": 0})
+        assert res["rejection_no_signal"] == 1
+        assert sum(res.values()) == 1
+        
+        # 4. Priority: Blocked risk
+        res = classify_inactive_reason(0, {"signal_count": 5, "signal_rejected_count": 5})
+        assert res["rejection_blocked_risk"] == 1
+        assert sum(res.values()) == 1
+        
+        # 5. Priority: Size zero
+        res = classify_inactive_reason(0, {"signal_count": 5, "signal_rejected_count": 0, "size_zero_count": 5})
+        assert res["rejection_size_zero"] == 1
+        assert sum(res.values()) == 1
+        
+        # 6. Fallback: Other
+        res = classify_inactive_reason(0, {"signal_count": 5, "signal_rejected_count": 0, "size_zero_count": 0})
+        assert res["rejection_other"] == 1
+        assert sum(res.values()) == 1
+
+    def test_inactive_rows_have_exactly_one_rejection_flag(self, tmp_path):
+        """Verifica que filas inactivas tengan exactamente 1 flag de rechazo activado."""
+        output_dir = tmp_path / "calibration_output"
+        
+        subprocess.run(
+            [
+                sys.executable,
+                "tools/run_calibration_2B.py",
+                "--mode", "quick",
+                "--max-combinations", "6",
+                "--seed", "42",
+                "--output-dir", str(output_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=REPO_ROOT,
+        )
+        
+        results_file = output_dir / "results.csv"
+        # Leer como dict
+        import csv
+        with open(results_file, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            rows = list(reader)
+        
+        rejection_cols = [
+            "rejection_no_signal",
+            "rejection_blocked_risk",
+            "rejection_size_zero",
+            "rejection_price_missing",
+            "rejection_other",
+        ]
+        
+        for row in rows:
+            is_active = row.get("is_active", "False") == "True"
+            flags_sum = sum(int(row.get(c, 0)) for c in rejection_cols)
+            
+            if is_active:
+                assert flags_sum == 0, f"Active row {row['combo_id']} has active rejection flags"
+            else:
+                assert flags_sum == 1, f"Inactive row {row['combo_id']} should have exactly 1 rejection flag, got {flags_sum}"
 

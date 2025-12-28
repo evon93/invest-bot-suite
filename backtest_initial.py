@@ -85,6 +85,13 @@ class SimpleBacktester:
         self._avg_cost: Dict[str, float] = defaultdict(float)  # Coste medio por asset
         self.risk_events: List[Dict] = []  # Eventos de riesgo por tick (risk_decision)
         
+        # Diagnósticos de inactividad (para 2E instrumentación)
+        self.diagnostics = {
+            "signal_count": 0,            # Señales (intentos de rebalanceo)
+            "signal_rejected_count": 0,   # Rechazadas por risk_manager
+            "price_missing_count": 0,     # Assets sin precio válido
+        }
+        
         # Precios efectivos (último precio válido > 0 visto)
         self.last_valid_prices: Dict[str, float] = {}
 
@@ -126,6 +133,9 @@ class SimpleBacktester:
         }
 
         if risk_manager:
+            # Incrementar contador de señales
+            self.diagnostics["signal_count"] += 1
+            
             # Construir risk_ctx completo (dd_cfg desde yaml, no hardcodeado)
             equity_curve = self.portfolio_value if self.portfolio_value else []
             dd_cfg = risk_manager.get_dd_cfg()
@@ -148,6 +158,7 @@ class SimpleBacktester:
             })
             
             if not allow:
+                self.diagnostics["signal_rejected_count"] += 1
                 logger.warning("Señal rechazada: %s", annotated.get("risk_reasons", []))
                 return
 
@@ -155,6 +166,7 @@ class SimpleBacktester:
             # Usar precio efectivo
             price = self.last_valid_prices.get(asset, 0)
             if price <= 0:
+                self.diagnostics["price_missing_count"] += 1
                 continue  # No podemos operar sin precio válido
 
             target_val = self.target_weights.get(asset, 0) * nav
