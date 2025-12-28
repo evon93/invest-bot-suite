@@ -7,3 +7,6 @@ __pycache__/
 
 # Ignorar bundle pesado de auditoría 1C
 report/audit_1C_v0_5_bundle_20251204.tar.gz
+
+# Ignorar runs temporales de robustness (CI genera en cada run)
+report/runs/

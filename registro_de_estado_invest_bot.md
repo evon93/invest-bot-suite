@@ -4,9 +4,61 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2025-12-28) — Fase 2E: Full Calibration Gate Useful
+## Estado Actual (2025-12-27) — Fase 2D: Parameter Robustness Testing
 
-- **Rama:** `feature/2E_full_gate_useful`
+- **Rama:** `feature/2D_param_robustness`
+- **Estado:** ✅ COMPLETADO
+- **Commit HEAD:** `f663e18 docs(report): add AG-2D-03-3.7A return artifacts`
+
+**Entregables principales:**
+- Contrato: `configs/robustness_2D.yaml`
+- Spec: `report/robustness_2D_spec.md`
+- Runner: `tools/run_robustness_2D.py`
+- Validator: `tools/validate_robustness_2D_config.py`
+- CI workflow: `.github/workflows/robustness_quick.yml`
+
+**Gates por modo:**
+- `quick`: sanity check (no exige sharpe/cagr, permite 0 trades)
+- `full`: quality gate (min_sharpe=0.3, min_cagr=0.05, min_trades=1)
+
+**Tests:** 114 passed
+
+**Documentación:**
+- `report/bridge_2D_to_2E_orchestrator.md`
+
+**Limitación conocida:** ~50% escenarios con 0 trades en full (señal sintética débil)
+
+---
+
+## Estado Actual (2025-12-26) — Fase 2C: Apply Best Params + EOL Hygiene
+
+**Entregables principales:**
+- Schema/Selector: `tools/best_params_schema_2C.py`
+- Builder CLI: `tools/build_best_params_2C.py`
+- Apply CLI: `tools/apply_calibration_topk.py`
+- Config generado: `configs/best_params_2C.json`
+- Tests: `tests/test_best_params_2C.py`, `tests/test_apply_calibration_topk_2C.py`
+
+**Parámetros calibrados aplicados a risk_rules.yaml:**
+- `stop_loss.atr_multiplier`: 2.5 → 2.0
+- `max_drawdown.hard_limit_pct`: 0.08 → 0.1
+- `kelly.cap_factor`: 0.50 → 0.7
+
+**EOL Hygiene:**
+- Renormalización de 48 archivos a LF
+- Commit: `3c3d74b`
+
+**Tests:** 77 passed
+
+**Documentación:**
+- `bridge_2C_to_2D_report.md`
+
+---
+
+## Estado Actual (2025-12-23) — Fase 2B: Risk Calibration Runner
+
+
+- **Rama:** `feature/2B_risk_calibration`
 - **Estado:** ✅ COMPLETADO
 - **Commit HEAD:** `0611785 2E: make full calibration gate useful (active/inactive + activity gate + diagnostics)`
 

@@ -1,3 +1,4 @@
 ﻿pytest
 numpy
 pandas
+PyYAML>=6.0.0
