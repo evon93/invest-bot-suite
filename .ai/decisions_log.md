@@ -55,3 +55,9 @@ Notas:
 
 - [2025-12-28 13:52] [ANTIGRAVITY/EXECUTOR] [feature/2E_full_gate_useful] — Commit `0611785`: implementación completa de activity/quality gates con columnas `is_active`, `rejection_*`, campos en meta, línea GATE en stdout. 61 tests pasando.
 
+## 2025-12-28 — Instrumentación 2E-4: Inactive Reasons + Structured Risk Rejection
+
+- [2025-12-28 17:48] [ANTIGRAVITY/EXECUTOR] [feature/2E_inactive_instrumentation] — **2E-4-1**: Añadida instrumentación de inactive reasons (`signal_count`, `signal_rejected_count`, `price_missing_count`) en backtester. Función `classify_inactive_reason()` para 1-hot encoding. PR #7 merged (db8f355).
+
+- [2025-12-28 19:50] [ANTIGRAVITY/EXECUTOR] [feature/2E_structured_risk_reasons] — **2E-4-2**: Añadido `risk_reject_reasons_counter: Counter` en backtester. Columna CSV `risk_reject_reasons_top`, campo meta `risk_reject_reasons_topk`. Elimina dependencia de parseo de logs. PR #8 merged (6a225ef).
+
