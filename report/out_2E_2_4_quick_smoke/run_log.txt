@@ -1,0 +1,29 @@
+Calibration run started at 2025-12-28T15:00:40.287288
+[2025-12-28T15:00:40] Mode: quick, Total grid: 216, Running: 12, Seed: 42
+[2025-12-28T15:00:40] Output dir: report\out_2E_2_4_quick_smoke
+[2025-12-28T15:00:40] START combo_id=c648aadd02dc (1/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:00:40] END combo_id=c648aadd02dc status=ok duration_s=0.03
+[2025-12-28T15:00:40] START combo_id=2a7b39f06e64 (2/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:00:40] END combo_id=2a7b39f06e64 status=ok duration_s=0.03
+[2025-12-28T15:00:40] START combo_id=ffae19fec604 (3/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:00:40] END combo_id=ffae19fec604 status=ok duration_s=0.01
+[2025-12-28T15:00:40] START combo_id=96764a80cf0c (4/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:00:40] END combo_id=96764a80cf0c status=ok duration_s=0.04
+[2025-12-28T15:00:40] START combo_id=c7a8cf081f41 (5/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:00:40] END combo_id=c7a8cf081f41 status=ok duration_s=0.03
+[2025-12-28T15:00:40] START combo_id=fa94dabfc7d9 (6/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:00:40] END combo_id=fa94dabfc7d9 status=ok duration_s=0.01
+[2025-12-28T15:00:40] START combo_id=a4e7cc151807 (7/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:00:40] END combo_id=a4e7cc151807 status=ok duration_s=0.03
+[2025-12-28T15:00:40] START combo_id=e1d02956d405 (8/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:00:40] END combo_id=e1d02956d405 status=ok duration_s=0.04
+[2025-12-28T15:00:40] START combo_id=abd891f17a53 (9/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:00:40] END combo_id=abd891f17a53 status=ok duration_s=0.01
+[2025-12-28T15:00:40] START combo_id=2085bdf81368 (10/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.3}
+[2025-12-28T15:00:40] END combo_id=2085bdf81368 status=ok duration_s=0.03
+[2025-12-28T15:00:40] START combo_id=370b03ff2333 (11/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.5}
+[2025-12-28T15:00:40] END combo_id=370b03ff2333 status=ok duration_s=0.03
+[2025-12-28T15:00:40] START combo_id=9daf5a15114e (12/12) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-28T15:00:40] END combo_id=9daf5a15114e status=ok duration_s=0.01
+[2025-12-28T15:00:40] DONE: 12 ok, 0 errors, total 12, duration 0.34s
+[2025-12-28T15:00:40] Artifacts written to: report\out_2E_2_4_quick_smoke

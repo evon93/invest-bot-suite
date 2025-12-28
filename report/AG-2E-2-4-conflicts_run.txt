@@ -1,0 +1,25 @@
+# AG-2E-2-4-conflicts: Comandos ejecutados
+
+## Git
+git fetch --all --prune
+git checkout feature/2E_full_gate_useful
+git reset --hard aa64f28
+git merge origin/main --no-edit -X theirs
+git checkout 0611785 -- tools/run_calibration_2B.py tests/test_calibration_runner_2B.py configs/risk_calibration_2B.yaml
+
+## Pytest
+python -m pytest -q
+# Result: 118 passed in 4.48s
+
+## Quick smoke
+python tools/run_calibration_2B.py --mode quick --output-dir report/out_2E_2_4_quick_smoke
+# Result: 12 combos OK
+
+## Full smoke (40 combos)
+python tools/run_calibration_2B.py --mode full --max-combinations 40 --output-dir report/out_2E_2_4_full_smoke
+# Result: 40 combos OK
+# GATE full: FAIL | active_n=13 active_rate=32.50% active_pass_rate=100.00% reasons=[insufficient_activity]
+
+## Full strict smoke
+python tools/run_calibration_2B.py --mode full --max-combinations 40 --strict-gate --output-dir report/out_2E_2_4_full_strict_smoke
+# Result: exit code 1 (gate failed as expected)
