@@ -1,0 +1,33 @@
+{
+  "config_hash": "79d83a2fb74f0cee",
+  "git_head": "26fb0e137f86",
+  "seed": 42,
+  "mode": "full",
+  "total_grid": 216,
+  "num_combos": 216,
+  "running": 216,
+  "ok": 216,
+  "errors": 0,
+  "duration_s": 8.29,
+  "timestamp": "2025-12-28T15:31:07.333908",
+  "output_dir": "report/out_2E_3_1_full",
+  "active_n": 72,
+  "inactive_n": 144,
+  "active_rate": 0.3333,
+  "inactive_rate": 0.6667,
+  "active_pass_rate": 1.0,
+  "gate_passed": true,
+  "insufficient_activity": false,
+  "gate_fail_reasons": [],
+  "suggested_exit_code": 0,
+  "rejection_reasons_agg": {
+    "rejection_no_signal": 0,
+    "rejection_blocked_risk": 0,
+    "rejection_size_zero": 0,
+    "rejection_price_missing": 0,
+    "rejection_other": 144
+  },
+  "top_inactive_reasons": [
+    "rejection_other"
+  ]
+}

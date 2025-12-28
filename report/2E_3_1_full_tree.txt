@@ -1,0 +1,8 @@
+total 132
+drwxrwxrwx 1 ivn_b ivn_b  4096 Dec 28 15:31 .
+drwxrwxrwx 1 ivn_b ivn_b  4096 Dec 28 15:31 ..
+-rwxrwxrwx 1 ivn_b ivn_b 36756 Dec 28 15:31 results.csv
+-rwxrwxrwx 1 ivn_b ivn_b 75387 Dec 28 15:31 run_log.txt
+-rwxrwxrwx 1 ivn_b ivn_b   771 Dec 28 15:31 run_meta.json
+-rwxrwxrwx 1 ivn_b ivn_b  1617 Dec 28 15:31 summary.md
+-rwxrwxrwx 1 ivn_b ivn_b 11473 Dec 28 15:31 topk.json

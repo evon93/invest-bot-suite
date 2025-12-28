@@ -188,3 +188,107 @@ class TestCalibrationRunner2B:
         )
         
         assert "--strict-gate" in result.stdout, "--strict-gate flag should be in help"
+
+    def test_gate_fail_active_rate_below_min(self, tmp_path):
+        """
+        Verifica que el gate falla con active_rate_below_min cuando 
+        active_rate < min_active_rate (60%).
+        
+        Con kelly grid [0.3, 0.5, 0.7], solo kelly=0.7 produce trades,
+        resultando en ~33% active_rate < 60% threshold.
+        """
+        output_dir = tmp_path / "calibration_output"
+        
+        # Ejecutar en full mode que aplica gates
+        result = subprocess.run(
+            [
+                sys.executable,
+                "tools/run_calibration_2B.py",
+                "--mode", "full",
+                "--max-combinations", "12",  # Suficiente para tener mix
+                "--seed", "42",
+                "--output-dir", str(output_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=REPO_ROOT,
+        )
+        
+        assert result.returncode == 0, f"Runner failed: {result.stderr}"
+        
+        meta_data = json.loads((output_dir / "run_meta.json").read_text())
+        
+        # Con ~33% active_rate y 60% threshold, debe fallar
+        assert meta_data["gate_passed"] is False, "Gate should fail with low active_rate"
+        assert "active_rate_below_min" in meta_data["gate_fail_reasons"], \
+            f"Should include active_rate_below_min, got: {meta_data['gate_fail_reasons']}"
+        assert meta_data["insufficient_activity"] is True, "Should flag insufficient_activity"
+
+    def test_gate_granular_fail_reasons(self, tmp_path):
+        """
+        Verifica que gate_fail_reasons contiene razones granulares específicas.
+        """
+        output_dir = tmp_path / "calibration_output"
+        
+        result = subprocess.run(
+            [
+                sys.executable,
+                "tools/run_calibration_2B.py",
+                "--mode", "full",
+                "--max-combinations", "9",
+                "--seed", "42",
+                "--output-dir", str(output_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=REPO_ROOT,
+        )
+        
+        assert result.returncode == 0, f"Runner failed: {result.stderr}"
+        
+        meta_data = json.loads((output_dir / "run_meta.json").read_text())
+        
+        # Verificar que las razones son específicas (no genéricas)
+        valid_reasons = {
+            "active_n_below_min",
+            "active_rate_below_min", 
+            "inactive_rate_above_max",
+            "active_pass_rate_below_min",
+            "no_results",
+        }
+        
+        for reason in meta_data["gate_fail_reasons"]:
+            assert reason in valid_reasons, \
+                f"Unexpected fail reason: {reason}, expected one of {valid_reasons}"
+
+    def test_strict_gate_exit_code_on_fail(self, tmp_path):
+        """
+        Verifica que --strict-gate produce exit code 1 cuando gate falla.
+        """
+        output_dir = tmp_path / "calibration_output"
+        
+        result = subprocess.run(
+            [
+                sys.executable,
+                "tools/run_calibration_2B.py",
+                "--mode", "full",
+                "--max-combinations", "12",
+                "--seed", "42",
+                "--strict-gate",
+                "--output-dir", str(output_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=REPO_ROOT,
+        )
+        
+        # Con 33% active_rate < 60%, gate falla, y con --strict-gate debe ser exit 1
+        meta_data = json.loads((output_dir / "run_meta.json").read_text())
+        
+        if not meta_data["gate_passed"]:
+            assert result.returncode == 1, \
+                f"With --strict-gate and gate_passed=false, exit code should be 1, got {result.returncode}"
+
