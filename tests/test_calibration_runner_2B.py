@@ -455,3 +455,39 @@ class TestCalibrationRunner2B:
             else:
                 assert flags_sum == 1, f"Inactive row {row['combo_id']} should have exactly 1 rejection flag, got {flags_sum}"
 
+    def test_risk_reject_reasons_in_csv_and_meta(self, tmp_path):
+        """Verifica que risk_reject_reasons aparece en CSV y run_meta.json (2E-4-2)."""
+        output_dir = tmp_path / "calibration_output"
+        
+        subprocess.run(
+            [
+                sys.executable,
+                "tools/run_calibration_2B.py",
+                "--mode", "full",
+                "--max-combinations", "12",
+                "--seed", "42",
+                "--output-dir", str(output_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=REPO_ROOT,
+        )
+        
+        # Check CSV column exists
+        results_file = output_dir / "results.csv"
+        import csv
+        with open(results_file, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            rows = list(reader)
+        
+        assert "risk_reject_reasons_top" in rows[0], "CSV should have risk_reject_reasons_top column"
+        
+        # Check run_meta.json has topk
+        meta_data = json.loads((output_dir / "run_meta.json").read_text())
+        assert "risk_reject_reasons_topk" in meta_data, "run_meta should have risk_reject_reasons_topk"
+        
+        # With synthetic data, we expect some rejections
+        topk = meta_data["risk_reject_reasons_topk"]
+        assert isinstance(topk, dict), f"Expected dict, got {type(topk)}"
+

@@ -206,6 +206,14 @@ def run_single_backtest(
     metrics["signal_rejected_count"] = diagnostics.get("signal_rejected_count", 0)
     metrics["price_missing_count"] = diagnostics.get("price_missing_count", 0)
     metrics["size_zero_count"] = 0  # Placeholder if not tracked in backtester yet
+    
+    # Extract structured risk rejection reasons
+    risk_counter = getattr(bt, "risk_reject_reasons_counter", {})
+    # Serialize top reasons as pipe-separated string for CSV
+    top_reasons = sorted(risk_counter.items(), key=lambda x: -x[1])[:5]
+    metrics["risk_reject_reasons_top"] = "|".join(f"{r}:{c}" for r, c in top_reasons) if top_reasons else ""
+    # Keep raw dict for aggregation
+    metrics["_risk_reject_reasons_dict"] = dict(risk_counter)
 
     return metrics
 
@@ -327,6 +335,24 @@ def aggregate_rejection_reasons(results: List[Dict[str, Any]]) -> Tuple[Dict[str
     top_reasons = [k for k, v in sorted_reasons]
     
     return agg, top_reasons
+
+
+def aggregate_risk_reject_reasons(results: List[Dict[str, Any]]) -> Dict[str, int]:
+    """
+    Agrega todos los risk_reject_reasons de todos los combos en un Counter global.
+    Retorna dict ordenado por conteo descendente (top 10).
+    """
+    from collections import Counter
+    global_counter: Counter = Counter()
+    
+    for r in results:
+        combo_reasons = r.get("_risk_reject_reasons_dict", {})
+        for reason, count in combo_reasons.items():
+            global_counter[reason] += count
+    
+    # Top 10 ordenados
+    top = dict(global_counter.most_common(10))
+    return top
 
 
 def classify_inactive_reason(num_trades: int, diag: Dict[str, int]) -> Dict[str, int]:
@@ -524,6 +550,7 @@ def run_calibration(
         "rejection_size_zero",
         "rejection_price_missing",
         "rejection_other",
+        "risk_reject_reasons_top",  # Structured risk reasons (2E-4-2)
     ]
     # Añadir parámetros al header
     if combos:
@@ -687,6 +714,7 @@ def run_calibration(
         "suggested_exit_code": suggested_exit_code,
         "rejection_reasons_agg": rejection_agg,
         "top_inactive_reasons": top_inactive_reasons,
+        "risk_reject_reasons_topk": aggregate_risk_reject_reasons(results),
     }
     with open(meta_file, "w", encoding="utf-8") as f:
         json.dump(meta_data, f, indent=2)

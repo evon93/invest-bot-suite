@@ -9,7 +9,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from collections import defaultdict
+from collections import defaultdict, Counter
 from typing import Dict, List, Union
 
 import numpy as np
@@ -91,6 +91,7 @@ class SimpleBacktester:
             "signal_rejected_count": 0,   # Rechazadas por risk_manager
             "price_missing_count": 0,     # Assets sin precio válido
         }
+        self.risk_reject_reasons_counter: Counter = Counter()  # Motivos estructurados
         
         # Precios efectivos (último precio válido > 0 visto)
         self.last_valid_prices: Dict[str, float] = {}
@@ -159,7 +160,10 @@ class SimpleBacktester:
             
             if not allow:
                 self.diagnostics["signal_rejected_count"] += 1
-                logger.warning("Señal rechazada: %s", annotated.get("risk_reasons", []))
+                reasons = annotated.get("risk_reasons", [])
+                for r in reasons:
+                    self.risk_reject_reasons_counter[r] += 1
+                logger.warning("Señal rechazada: %s", reasons)
                 return
 
         for asset, delta in deltas.items():
