@@ -1,21 +1,21 @@
 # Calibration 2B Run Summary
 
-**Timestamp**: 2025-12-29T19:07:48.618445
+**Timestamp**: 2025-12-29T20:35:55.163794
 **Mode**: full
 **Seed**: 42
-**Git HEAD**: 8da7f9d687c1
+**Git HEAD**: 1ad7c3898683
 
 ## Results
 
 - Total grid size: 288
-- Combinations run: 12
-- OK: 12
+- Combinations run: 40
+- OK: 40
 - Errors: 0
-- Duration: 0.12s
+- Duration: 0.47s
 
 ## Activity Analysis
 
-- Active scenarios: 12 (100.00%)
+- Active scenarios: 40 (100.00%)
 - Inactive scenarios: 0 (0.00%)
 - Active pass rate: 100.00%
 - **Gate passed**: YES
@@ -52,5 +52,5 @@
 ## Reproducibility
 
 ```bash
-python tools/run_calibration_2B.py --mode full --max-combinations 12 --seed 42
+python tools/run_calibration_2B.py --mode full --max-combinations 40 --seed 42
 ```

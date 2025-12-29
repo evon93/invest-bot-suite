@@ -217,6 +217,150 @@
         "max_drawdown.size_multiplier_soft": 1.0,
         "kelly.cap_factor": 1.3
       }
+    },
+    {
+      "rank": 13,
+      "combo_id": "9daf5a15114e",
+      "score": 0.9925660477444758,
+      "sharpe_ratio": 1.0701731221533384,
+      "cagr": 0.14256043935313234,
+      "max_drawdown": -0.09925819605695263,
+      "calmar_ratio": 1.4362586165814824,
+      "is_active": true,
+      "params": {
+        "stop_loss.atr_multiplier": 2.0,
+        "stop_loss.min_stop_pct": 0.02,
+        "max_drawdown.soft_limit_pct": 0.05,
+        "max_drawdown.hard_limit_pct": 0.15,
+        "max_drawdown.size_multiplier_soft": 0.5,
+        "kelly.cap_factor": 0.7
+      }
+    },
+    {
+      "rank": 14,
+      "combo_id": "671ea044ad47",
+      "score": 0.9925660477444758,
+      "sharpe_ratio": 1.0701731221533384,
+      "cagr": 0.14256043935313234,
+      "max_drawdown": -0.09925819605695263,
+      "calmar_ratio": 1.4362586165814824,
+      "is_active": true,
+      "params": {
+        "stop_loss.atr_multiplier": 2.0,
+        "stop_loss.min_stop_pct": 0.02,
+        "max_drawdown.soft_limit_pct": 0.05,
+        "max_drawdown.hard_limit_pct": 0.15,
+        "max_drawdown.size_multiplier_soft": 0.5,
+        "kelly.cap_factor": 0.9
+      }
+    },
+    {
+      "rank": 15,
+      "combo_id": "55f9ee043f57",
+      "score": 0.9925660477444758,
+      "sharpe_ratio": 1.0701731221533384,
+      "cagr": 0.14256043935313234,
+      "max_drawdown": -0.09925819605695263,
+      "calmar_ratio": 1.4362586165814824,
+      "is_active": true,
+      "params": {
+        "stop_loss.atr_multiplier": 2.0,
+        "stop_loss.min_stop_pct": 0.02,
+        "max_drawdown.soft_limit_pct": 0.05,
+        "max_drawdown.hard_limit_pct": 0.15,
+        "max_drawdown.size_multiplier_soft": 0.5,
+        "kelly.cap_factor": 1.1
+      }
+    },
+    {
+      "rank": 16,
+      "combo_id": "e5c570b4dcef",
+      "score": 0.9925660477444758,
+      "sharpe_ratio": 1.0701731221533384,
+      "cagr": 0.14256043935313234,
+      "max_drawdown": -0.09925819605695263,
+      "calmar_ratio": 1.4362586165814824,
+      "is_active": true,
+      "params": {
+        "stop_loss.atr_multiplier": 2.0,
+        "stop_loss.min_stop_pct": 0.02,
+        "max_drawdown.soft_limit_pct": 0.05,
+        "max_drawdown.hard_limit_pct": 0.15,
+        "max_drawdown.size_multiplier_soft": 0.5,
+        "kelly.cap_factor": 1.3
+      }
+    },
+    {
+      "rank": 17,
+      "combo_id": "7a63e2010a20",
+      "score": 0.9925660477444758,
+      "sharpe_ratio": 1.0701731221533384,
+      "cagr": 0.14256043935313234,
+      "max_drawdown": -0.09925819605695263,
+      "calmar_ratio": 1.4362586165814824,
+      "is_active": true,
+      "params": {
+        "stop_loss.atr_multiplier": 2.0,
+        "stop_loss.min_stop_pct": 0.02,
+        "max_drawdown.soft_limit_pct": 0.05,
+        "max_drawdown.hard_limit_pct": 0.15,
+        "max_drawdown.size_multiplier_soft": 0.7,
+        "kelly.cap_factor": 0.7
+      }
+    },
+    {
+      "rank": 18,
+      "combo_id": "fe30318401ff",
+      "score": 0.9925660477444758,
+      "sharpe_ratio": 1.0701731221533384,
+      "cagr": 0.14256043935313234,
+      "max_drawdown": -0.09925819605695263,
+      "calmar_ratio": 1.4362586165814824,
+      "is_active": true,
+      "params": {
+        "stop_loss.atr_multiplier": 2.0,
+        "stop_loss.min_stop_pct": 0.02,
+        "max_drawdown.soft_limit_pct": 0.05,
+        "max_drawdown.hard_limit_pct": 0.15,
+        "max_drawdown.size_multiplier_soft": 0.7,
+        "kelly.cap_factor": 0.9
+      }
+    },
+    {
+      "rank": 19,
+      "combo_id": "5c455bd3ac35",
+      "score": 0.9925660477444758,
+      "sharpe_ratio": 1.0701731221533384,
+      "cagr": 0.14256043935313234,
+      "max_drawdown": -0.09925819605695263,
+      "calmar_ratio": 1.4362586165814824,
+      "is_active": true,
+      "params": {
+        "stop_loss.atr_multiplier": 2.0,
+        "stop_loss.min_stop_pct": 0.02,
+        "max_drawdown.soft_limit_pct": 0.05,
+        "max_drawdown.hard_limit_pct": 0.15,
+        "max_drawdown.size_multiplier_soft": 0.7,
+        "kelly.cap_factor": 1.1
+      }
+    },
+    {
+      "rank": 20,
+      "combo_id": "00701c56debb",
+      "score": 0.9925660477444758,
+      "sharpe_ratio": 1.0701731221533384,
+      "cagr": 0.14256043935313234,
+      "max_drawdown": -0.09925819605695263,
+      "calmar_ratio": 1.4362586165814824,
+      "is_active": true,
+      "params": {
+        "stop_loss.atr_multiplier": 2.0,
+        "stop_loss.min_stop_pct": 0.02,
+        "max_drawdown.soft_limit_pct": 0.05,
+        "max_drawdown.hard_limit_pct": 0.15,
+        "max_drawdown.size_multiplier_soft": 0.7,
+        "kelly.cap_factor": 1.3
+      }
     }
   ]
 }
