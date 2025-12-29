@@ -61,3 +61,9 @@ Notas:
 
 - [2025-12-28 19:50] [ANTIGRAVITY/EXECUTOR] [feature/2E_structured_risk_reasons] — **2E-4-2**: Añadido `risk_reject_reasons_counter: Counter` en backtester. Columna CSV `risk_reject_reasons_top`, campo meta `risk_reject_reasons_topk`. Elimina dependencia de parseo de logs. PR #8 merged (6a225ef).
 
+## 2025-12-29 — Kelly Floor Promotion (2B-3.5/3.6)
+
+- [2025-12-28 21:02] [ANTIGRAVITY/EXECUTOR] [feature/2B_kelly_grid_expand] — **2B-3.5**: Validación multi-seed (seeds 42,43,44) de Kelly cap_factor. Resultado: `cap_factor=0.5` → 0% activity (FAIL), `cap_factor=0.7` → 100% activity (PASS). Robustez confirmada.
+
+- [2025-12-29 16:20] [ANTIGRAVITY/EXECUTOR] [feature/2B_kelly_floor_promotion] — **2B-3.6**: Promovido floor `kelly.cap_factor >= 0.70` a baseline config. Grid actualizado a `[0.70, 0.90, 1.10, 1.30]`. Valores sub-óptimos (0.30, 0.50) eliminados.
+

@@ -210,7 +210,8 @@ class TestCalibrationRunner2B:
                 "tools/run_calibration_2B.py",
                 "--mode", "full",
                 "--profile", "full",  # Use strict thresholds
-                "--max-combinations", "12",  # Suficiente para tener mix
+                "--config", "configs/risk_calibration_2B_candidate_kelly05.yaml",  # Control config for gate failure
+                "--max-combinations", "12",
                 "--seed", "42",
                 "--output-dir", str(output_dir),
             ],
@@ -242,6 +243,7 @@ class TestCalibrationRunner2B:
                 "tools/run_calibration_2B.py",
                 "--mode", "full",
                 "--profile", "full",  # Use strict thresholds
+                "--config", "configs/risk_calibration_2B_candidate_kelly05.yaml",  # Control config for gate failure
                 "--max-combinations", "9",
                 "--seed", "42",
                 "--output-dir", str(output_dir),
@@ -340,6 +342,7 @@ class TestCalibrationRunner2B:
                 "tools/run_calibration_2B.py",
                 "--mode", "full",
                 "--profile", "full",
+                "--config", "configs/risk_calibration_2B_candidate_kelly05.yaml",  # Control config for gate failure
                 "--max-combinations", "40",
                 "--seed", "42",
                 "--output-dir", str(output_dir),

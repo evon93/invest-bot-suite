@@ -443,6 +443,7 @@ def run_calibration(
     output_dir_override: Optional[str] = None,
     strict_gate: bool = False,
     profile_override: Optional[str] = None,
+    config_path_override: Optional[str] = None,
 ) -> int:
     """
     Ejecuta la calibración según el grid definido en el YAML.
@@ -454,7 +455,8 @@ def run_calibration(
     run_start = time.time()
     
     # Cargar configs
-    config = load_yaml(CONFIG_PATH)
+    effective_config_path = Path(config_path_override) if config_path_override else CONFIG_PATH
+    config = load_yaml(effective_config_path)
     base_rules = load_yaml(RULES_PATH)
 
     # Resolver output_dir: CLI override > YAML > default
@@ -835,6 +837,12 @@ def main():
         default=None,
         help="Gate profile to use (quick, full_demo, full). Default: auto (full->full_demo)",
     )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=None,
+        help="Path to config YAML (default: configs/risk_calibration_2B.yaml)",
+    )
 
     args = parser.parse_args()
 
@@ -845,6 +853,7 @@ def main():
         output_dir_override=args.output_dir,
         strict_gate=args.strict_gate,
         profile_override=args.profile,
+        config_path_override=args.config,
     )
     
     sys.exit(exit_code)
