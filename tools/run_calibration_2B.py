@@ -799,13 +799,74 @@ def run_calibration(
 # -------------------------------------------------------------------
 # CLI
 # -------------------------------------------------------------------
+def normalize_args(argv: Optional[List[str]] = None) -> List[str]:
+    """
+    Pre-procesa argv para manejar el alias --mode full_demo.
+    
+    Convierte: --mode full_demo -> --mode full --profile full_demo
+    (solo si el usuario no especificó --profile explícitamente)
+    """
+    if argv is None:
+        argv = sys.argv[1:]
+    
+    argv = list(argv)  # Copia para no mutar original
+    
+    # Detectar --mode full_demo
+    if "--mode" not in argv:
+        return argv
+    
+    mode_idx = argv.index("--mode")
+    if mode_idx + 1 >= len(argv) or argv[mode_idx + 1] != "full_demo":
+        return argv
+    
+    # Es --mode full_demo, verificar conflicto con --profile
+    has_explicit_profile = "--profile" in argv
+    
+    if has_explicit_profile:
+        profile_idx = argv.index("--profile")
+        if profile_idx + 1 < len(argv):
+            explicit_profile = argv[profile_idx + 1]
+            if explicit_profile != "full_demo":
+                raise ValueError(
+                    f"Conflicto: --mode full_demo implica --profile full_demo, "
+                    f"pero se especificó --profile {explicit_profile}"
+                )
+    
+    # Normalizar: full_demo -> full
+    argv[mode_idx + 1] = "full"
+    
+    # Añadir --profile full_demo si no está explícito
+    if not has_explicit_profile:
+        argv.extend(["--profile", "full_demo"])
+    
+    return argv
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Run 2B risk calibration grid")
+    epilog = """
+Examples:
+  # Modo rápido (default)
+  python tools/run_calibration_2B.py --mode quick
+
+  # Modo completo con profile full_demo (recomendado para entorno sintético)
+  python tools/run_calibration_2B.py --mode full --profile full_demo
+
+  # Alias: equivale al anterior
+  python tools/run_calibration_2B.py --mode full_demo
+
+  # Modo completo con gates estrictos (producción)
+  python tools/run_calibration_2B.py --mode full --profile full --strict-gate
+"""
+    parser = argparse.ArgumentParser(
+        description="Run 2B risk calibration grid",
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument(
         "--mode",
-        choices=["quick", "full"],
+        choices=["quick", "full", "full_demo"],
         default="quick",
-        help="quick: limited combos, full: all combos (default: quick)",
+        help="quick: limited combos, full: all combos, full_demo: alias for full+profile full_demo",
     )
     parser.add_argument(
         "--max-combinations",
@@ -844,7 +905,13 @@ def main():
         help="Path to config YAML (default: configs/risk_calibration_2B.yaml)",
     )
 
-    args = parser.parse_args()
+    # Normalizar argv para manejar alias full_demo
+    try:
+        normalized_argv = normalize_args()
+    except ValueError as e:
+        parser.error(str(e))
+    
+    args = parser.parse_args(normalized_argv)
 
     exit_code = run_calibration(
         mode=args.mode,

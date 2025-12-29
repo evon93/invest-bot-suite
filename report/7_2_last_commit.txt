@@ -1,0 +1,1 @@
+﻿4cc8bed (HEAD -> feature/7_2_cli_full_demo_alias) feat(cli): add --mode full_demo alias + normalize_args + examples epilog
