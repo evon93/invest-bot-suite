@@ -48,10 +48,8 @@ grid:
     size_multiplier_soft: [0.5, 0.7, 1.0]
   kelly:
     # Maps to: kelly.cap_factor (el cap efectivo usado por RiskManager)
-    # Floor 0.70 promovido tras validacion multi-seed (2B-3.5):
-    # - cap_factor < 0.70 produce 0% activity (bloqueado por kelly_cap:ETF)
-    # - cap_factor >= 0.70 produce 100% activity
-    cap_factor: [0.70, 0.90, 1.10, 1.30]
+    # Config de control para tests de gate failure (produce 0% activity)
+    cap_factor: [0.50]
 
 constraints:
   # Hard constraints: si se violan, descartar candidato (score = -inf)
