@@ -16,7 +16,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from tools.run_calibration_2B import classify_inactive_reason
+from tools.run_calibration_2B import classify_inactive_reason, normalize_args
 
 
 class TestCalibrationRunner2B:
@@ -493,4 +493,68 @@ class TestCalibrationRunner2B:
         # With synthetic data, we expect some rejections
         topk = meta_data["risk_reject_reasons_topk"]
         assert isinstance(topk, dict), f"Expected dict, got {type(topk)}"
+
+
+class TestNormalizeArgs:
+    """Tests for the --mode full_demo alias normalization."""
+
+    def test_full_demo_alias_normalizes_to_full_with_profile(self):
+        """
+        --mode full_demo debe convertirse a --mode full --profile full_demo.
+        """
+        argv = ["--mode", "full_demo", "--output-dir", "/tmp/test"]
+        result = normalize_args(argv)
+        
+        assert "--mode" in result
+        mode_idx = result.index("--mode")
+        assert result[mode_idx + 1] == "full", "mode should be normalized to 'full'"
+        
+        assert "--profile" in result
+        profile_idx = result.index("--profile")
+        assert result[profile_idx + 1] == "full_demo", "profile should be 'full_demo'"
+
+    def test_full_demo_alias_with_explicit_matching_profile(self):
+        """
+        --mode full_demo --profile full_demo no debe dar conflicto.
+        """
+        argv = ["--mode", "full_demo", "--profile", "full_demo"]
+        result = normalize_args(argv)
+        
+        mode_idx = result.index("--mode")
+        assert result[mode_idx + 1] == "full"
+
+    def test_full_demo_alias_with_conflicting_profile_raises(self):
+        """
+        --mode full_demo --profile full debe lanzar ValueError.
+        """
+        argv = ["--mode", "full_demo", "--profile", "full"]
+        
+        with pytest.raises(ValueError) as exc_info:
+            normalize_args(argv)
+        
+        assert "Conflicto" in str(exc_info.value)
+        assert "full_demo implica" in str(exc_info.value)
+
+    def test_normal_mode_unchanged(self):
+        """
+        --mode full (sin alias) no debe ser modificado.
+        """
+        argv = ["--mode", "full", "--output-dir", "/tmp/test"]
+        result = normalize_args(argv)
+        
+        mode_idx = result.index("--mode")
+        assert result[mode_idx + 1] == "full"
+        
+        # No debe añadir --profile automáticamente
+        assert "--profile" not in result
+
+    def test_quick_mode_unchanged(self):
+        """
+        --mode quick no debe ser modificado.
+        """
+        argv = ["--mode", "quick"]
+        result = normalize_args(argv)
+        
+        mode_idx = result.index("--mode")
+        assert result[mode_idx + 1] == "quick"
 
