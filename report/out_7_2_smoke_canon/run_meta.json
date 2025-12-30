@@ -1,6 +1,6 @@
 {
   "config_hash": "6e8214a42d39b659",
-  "git_head": "1ad7c3898683",
+  "git_head": "63d1d94d2626",
   "seed": 42,
   "mode": "full",
   "gate_profile": "full_demo",
@@ -9,8 +9,8 @@
   "running": 40,
   "ok": 40,
   "errors": 0,
-  "duration_s": 0.47,
-  "timestamp": "2025-12-29T20:35:55.162389",
+  "duration_s": 0.54,
+  "timestamp": "2025-12-30T17:14:40.755091",
   "output_dir": "report\\out_7_2_smoke_canon",
   "active_n": 40,
   "inactive_n": 0,
