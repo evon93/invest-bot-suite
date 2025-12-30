@@ -1,0 +1,12 @@
+=== Mini-Grid Evidence Run ===
+Command: python tools/run_calibration_2B.py --mode full --max-combinations 24 --output-dir report/out_2B_3_3_grid_sensitivity_20251230_202500
+Exit Code: 0
+Gate Status: PASS
+
+=== Key Result ===
+- 24 combos executed
+- 24 unique effective_config_hash values (100% diversity)
+- All metrics identical (CAGR=14.3%, Sharpe=1.07, MaxDD=-9.9%)
+
+=== Interpretation ===
+Wiring is correct. Metrics don't vary because synthetic scenario is too simple.

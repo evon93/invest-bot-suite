@@ -1,0 +1,18 @@
+Subject: [PATCH] 2B: make calibration grid useful (effective overrides + sensitivity counters)
+
+---
+ tests/test_calibration_2B_override_wiring.py | 150 +++++++++++++++++++++++++++
+ tools/run_calibration_2B.py                  |  29 ++++++
+ 2 files changed, 179 insertions(+)
+ create mode 100644 tests/test_calibration_2B_override_wiring.py
+
+Changes in tools/run_calibration_2B.py:
+- Added compute_rules_hash(rules) function to hash calibrated sections
+- Added 7 new CSV columns: effective_config_hash, effective_kelly_cap_factor, 
+  effective_dd_soft_limit_pct, effective_dd_hard_limit_pct, effective_dd_size_multiplier_soft,
+  effective_atr_multiplier, effective_min_stop_pct
+- Populated effective columns after overlay application in combo loop
+
+New file tests/test_calibration_2B_override_wiring.py:
+- TestOverlayWiring: 5 tests for apply_overlay and compute_rules_hash
+- TestHashDiversity: 2 tests for grid producing unique hashes
