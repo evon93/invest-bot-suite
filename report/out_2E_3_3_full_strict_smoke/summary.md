@@ -1,25 +1,24 @@
 # Calibration 2B Run Summary
 
-**Timestamp**: 2025-12-28T15:54:52.097986
+**Timestamp**: 2025-12-30T18:14:40.660930
 **Mode**: full
 **Seed**: 42
-**Git HEAD**: 26fb0e137f86
+**Git HEAD**: ae2a38dd5c5b
 
 ## Results
 
-- Total grid size: 216
+- Total grid size: 288
 - Combinations run: 40
 - OK: 40
 - Errors: 0
-- Duration: 0.65s
+- Duration: 0.45s
 
 ## Activity Analysis
 
-- Active scenarios: 13 (32.50%)
-- Inactive scenarios: 27 (67.50%)
+- Active scenarios: 40 (100.00%)
+- Inactive scenarios: 0 (0.00%)
 - Active pass rate: 100.00%
-- **Gate passed**: NO
-- Gate fail reasons: active_n_below_min, active_rate_below_min, inactive_rate_above_max
+- **Gate passed**: YES
 
 ## Score Formula
 
@@ -32,15 +31,15 @@
 | Rank | Combo ID | Score | Sharpe | CAGR | MaxDD | Active |
 |------|----------|-------|--------|------|-------|--------|
 | 1 | ffae19fec604 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 2 | fa94dabfc7d9 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 3 | abd891f17a53 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 4 | 9daf5a15114e | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 5 | 7a63e2010a20 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 6 | dc3c983f74bc | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 7 | c2d7b03329c4 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 8 | 59aac2ce9c2d | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 9 | a7ba7b95a053 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
-| 10 | 34ae485cdeaf | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 2 | 0576d1c2bfe6 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 3 | 2411a44ce582 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 4 | f93ac29cc62d | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 5 | fa94dabfc7d9 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 6 | c9b8c7cf9b5f | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 7 | 2368daacf8d9 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 8 | 6ecd3e5356e1 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 9 | abd891f17a53 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
+| 10 | 70d95e17dd21 | 0.9926 | 1.0702 | 0.1426 | -0.0993 | ✓ |
 
 ## Artifacts
 

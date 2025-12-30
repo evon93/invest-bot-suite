@@ -1,0 +1,13 @@
+=== Run 1: Normal Full Mode (Force FAIL with 1 combo) ===
+Command: python tools/run_calibration_2B.py --mode full --max-combinations 1 --output-dir report/out_2E_3_3_fail_smoke
+Exit Code: 0
+Gate Status: FAIL
+Gate Fail Reasons: ["active_n_below_min"]
+Output Dir: report/out_2E_3_3_fail_smoke
+
+=== Run 2: Strict Gate Mode (Force FAIL with 1 combo) ===
+Command: python tools/run_calibration_2B.py --mode full --max-combinations 1 --strict-gate --output-dir report/out_2E_3_3_fail_strict_smoke
+Exit Code: 1 (as expected when gate fails with --strict-gate)
+Gate Status: FAIL
+Gate Fail Reasons: ["active_n_below_min"]
+Output Dir: report/out_2E_3_3_fail_strict_smoke
