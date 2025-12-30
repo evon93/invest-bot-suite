@@ -415,6 +415,18 @@ def compute_config_hash(config: Dict[str, Any]) -> str:
     return hashlib.md5(s.encode()).hexdigest()[:16]
 
 
+def compute_rules_hash(rules: Dict[str, Any]) -> str:
+    """Hash MD5 de las rules efectivas (subset calibrado) para verificar wiring."""
+    # Extraer solo las secciones que se calibran
+    calibrated = {
+        "kelly": rules.get("kelly", {}),
+        "max_drawdown": rules.get("max_drawdown", {}),
+        "stop_loss": rules.get("stop_loss", {}),
+    }
+    s = json.dumps(calibrated, sort_keys=True)
+    return hashlib.md5(s.encode()).hexdigest()[:12]
+
+
 def compute_score(row: Dict[str, Any], formula: str) -> float:
     """Calcula score según fórmula. Fallback a sharpe_ratio si hay error."""
     try:
@@ -553,6 +565,14 @@ def run_calibration(
         "rejection_price_missing",
         "rejection_other",
         "risk_reject_reasons_top",  # Structured risk reasons (2E-4-2)
+        # === Nuevas columnas 2B-3.3-7: effective config verification ===
+        "effective_config_hash",
+        "effective_kelly_cap_factor",
+        "effective_dd_soft_limit_pct",
+        "effective_dd_hard_limit_pct",
+        "effective_dd_size_multiplier_soft",
+        "effective_atr_multiplier",
+        "effective_min_stop_pct",
     ]
     # Añadir parámetros al header
     if combos:
@@ -595,6 +615,15 @@ def run_calibration(
             # Aplicar overlay
             rules = apply_overlay(base_rules, params)
             rules.setdefault("risk_manager", {})["mode"] = config.get("execution", {}).get("mode", "active")
+
+            # === 2B-3.3-7: Capture effective config values for wiring verification ===
+            row["effective_config_hash"] = compute_rules_hash(rules)
+            row["effective_kelly_cap_factor"] = rules.get("kelly", {}).get("cap_factor", None)
+            row["effective_dd_soft_limit_pct"] = rules.get("max_drawdown", {}).get("soft_limit_pct", None)
+            row["effective_dd_hard_limit_pct"] = rules.get("max_drawdown", {}).get("hard_limit_pct", None)
+            row["effective_dd_size_multiplier_soft"] = rules.get("max_drawdown", {}).get("size_multiplier_soft", None)
+            row["effective_atr_multiplier"] = rules.get("stop_loss", {}).get("atr_multiplier", None)
+            row["effective_min_stop_pct"] = rules.get("stop_loss", {}).get("min_stop_pct", None)
 
             # Ejecutar backtest
             metrics = run_single_backtest(rules, effective_seed, config)
