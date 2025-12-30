@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 import numpy as np
+import pandas as pd
 import subprocess
 
 # Añadir repo root al path para imports
@@ -45,6 +46,82 @@ CONFIG_PATH = REPO_ROOT / "configs" / "risk_calibration_2B.yaml"
 RULES_PATH = REPO_ROOT / "risk_rules.yaml"
 REPORT_DIR = REPO_ROOT / "report"
 DEFAULT_OUTPUT_DIR = "report/calibration_2B"
+
+
+# -------------------------------------------------------------------
+# Sensitivity Scenario: deterministic prices with drawdowns
+# -------------------------------------------------------------------
+def generate_sensitivity_prices(
+    start_date: str = "2024-01-01",
+    periods: int = 252,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """
+    Generates deterministic price series with vol clustering and drawdowns.
+    
+    This scenario is designed to make risk parameters discriminate:
+    - Month 1-2: uptrend with low vol
+    - Month 3: sharp drawdown (15% crash)
+    - Month 4-6: recovery with high vol
+    - Month 7-9: sideways with medium vol
+    - Month 10-12: gradual uptrend
+    
+    The drawdown phase should trigger DD soft/hard guardrails differently
+    depending on thresholds. The vol clustering should make ATR stops
+    vary in effectiveness.
+    """
+    np.random.seed(seed)
+    dates = pd.date_range(start_date, periods=periods, freq="D")
+    
+    assets = {
+        "ETF": {"base": 100},
+        "CRYPTO_BTC": {"base": 40000},
+        "CRYPTO_ETH": {"base": 3000},
+        "BONDS": {"base": 95},
+    }
+    
+    prices = pd.DataFrame(index=dates)
+    
+    for asset, params in assets.items():
+        base = params["base"]
+        price_series = []
+        p = base
+        
+        for i, date in enumerate(dates):
+            day_of_year = i
+            
+            # Determine regime based on day of year
+            if day_of_year < 42:  # ~Month 1-2: calm uptrend
+                mu = 0.001
+                sigma = 0.005
+            elif day_of_year < 63:  # ~Month 3: crash
+                mu = -0.008
+                sigma = 0.025
+            elif day_of_year < 126:  # ~Month 4-6: volatile recovery
+                mu = 0.0015
+                sigma = 0.02
+            elif day_of_year < 189:  # ~Month 7-9: sideways
+                mu = 0.0001
+                sigma = 0.01
+            else:  # ~Month 10-12: calm uptrend
+                mu = 0.0008
+                sigma = 0.006
+            
+            # Asset-specific vol multiplier
+            if "CRYPTO" in asset:
+                sigma *= 2.5
+            elif asset == "BONDS":
+                sigma *= 0.3
+                mu *= 0.5
+            
+            ret = np.random.normal(mu, sigma)
+            p = p * (1 + ret)
+            p = max(p, base * 0.3)  # Floor to prevent extinction
+            price_series.append(p)
+        
+        prices[asset] = price_series
+    
+    return prices
 
 
 # -------------------------------------------------------------------
@@ -114,10 +191,15 @@ def run_single_backtest(
     rules: Dict[str, Any],
     seed: int,
     config: Dict[str, Any],
+    scenario: str = "default",
 ) -> Dict[str, Any]:
     """
     Ejecuta un backtest con las reglas dadas.
     Retorna dict con métricas.
+    
+    Args:
+        scenario: "default" for standard synthetic prices,
+                  "sensitivity" for vol-clustering prices with crash phase
     """
     np.random.seed(seed)
     
@@ -126,7 +208,12 @@ def run_single_backtest(
     periods = baseline.get("periods", 252)
     initial_capital = baseline.get("initial_capital", 10000)
     
-    prices = generate_synthetic_prices(start_date=start_date, periods=periods)
+    # Select price generator based on scenario
+    if scenario == "sensitivity":
+        prices = generate_sensitivity_prices(start_date=start_date, periods=periods, seed=seed)
+    else:
+        prices = generate_synthetic_prices(start_date=start_date, periods=periods)
+    
     rm = RiskManagerV05(rules)
     
     bt = SimpleBacktester(prices, initial_capital=initial_capital)
@@ -456,10 +543,14 @@ def run_calibration(
     strict_gate: bool = False,
     profile_override: Optional[str] = None,
     config_path_override: Optional[str] = None,
+    scenario: str = "default",
 ) -> int:
     """
     Ejecuta la calibración según el grid definido en el YAML.
     Escribe todos los artefactos en output_dir (CLI override > YAML).
+    
+    Args:
+        scenario: "default" or "sensitivity" for price generation mode
     
     Returns:
         Exit code (0 = success, 1 = gate failed with strict_gate)
@@ -626,7 +717,7 @@ def run_calibration(
             row["effective_min_stop_pct"] = rules.get("stop_loss", {}).get("min_stop_pct", None)
 
             # Ejecutar backtest
-            metrics = run_single_backtest(rules, effective_seed, config)
+            metrics = run_single_backtest(rules, effective_seed, config, scenario=scenario)
             row.update(metrics)
             row["score"] = compute_score(row, score_formula)
             
@@ -933,6 +1024,13 @@ Examples:
         default=None,
         help="Path to config YAML (default: configs/risk_calibration_2B.yaml)",
     )
+    parser.add_argument(
+        "--scenario",
+        type=str,
+        choices=["default", "sensitivity"],
+        default="default",
+        help="Price generation scenario: default (uniform GBM) or sensitivity (vol-clustering with crash)",
+    )
 
     # Normalizar argv para manejar alias full_demo
     try:
@@ -950,6 +1048,7 @@ Examples:
         strict_gate=args.strict_gate,
         profile_override=args.profile,
         config_path_override=args.config,
+        scenario=args.scenario,
     )
     
     sys.exit(exit_code)
