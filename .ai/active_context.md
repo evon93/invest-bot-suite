@@ -2,40 +2,41 @@
 
 - **Proyecto**: invest-bot-suite
 - **Rama actual**: `main`
-- **Última actualización**: 2025-12-28
+- **Última actualización**: 2025-12-30
 
-## Estado actual: 2E Phase 4 completado
+## Estado actual: 2E-3.3 + 7.2 mergeados
 
-- **HEAD**: `6a225ef` (Merge PR #8: structured risk rejection reasons)
-- **Fase**: 2E-4-1/2E-4-2 completados (Inactive Reasons Instrumentation)
-- **Tests**: 127 passed
+- **HEAD**: `8fb7db3` (report: add 2E-3.3 gate semantics evidence)
+- **Fase**: 2E Phase completado + 7.2 CLI polish
+- **Tests**: 132 passed
 - **Validador**: 0 errors, 0 warnings
 
 ## PRs Mergeados Recientemente
 
 | PR | Commit | Descripción |
 |----|--------|-------------|
-| #7 | db8f355 | 2E-4-1: inactive reason breakdown |
-| #8 | 6a225ef | 2E-4-2: structured risk rejection reasons |
+| #11 | 073b643 | 7.2: CLI full_demo alias + tests |
+| #12 | e3fb90d | 2E-3.3: gate semantics fix (OR logic + granular reasons) |
+| (direct) | 8fb7db3 | Evidence artifacts commit |
 
-## Instrumentación 2E-4 Añadida
+## Features 2E Implementadas
 
-### Contrato de Datos
+### Gate Evaluation (2E-3.3)
 
-**results.csv**:
-- `is_active`: boolean (combo produjo trades)
-- `rejection_no_signal`, `rejection_blocked_risk`, `rejection_size_zero`, `rejection_price_missing`, `rejection_other`: 1-hot flags
-- `risk_reject_reasons_top`: string compacta (ej. `kelly_cap:ETF:181|dd_soft:5`)
+- Thresholds independientes (OR logic): `active_n`, `active_rate`, `inactive_rate`, `active_pass_rate`
+- `gate_fail_reasons` granulares en `run_meta.json`
+- `--strict-gate` flag para exit code 1 en CI
 
-**run_meta.json**:
-- `rejection_reasons_agg`: conteo por categoría
-- `top_inactive_reasons`: lista ordenada
-- `risk_reject_reasons_topk`: Counter global de motivos de riesgo (ej. `{"kelly_cap:ETF": 4887}`)
+### YAML Profiles (2E-3.4)
 
-### Por qué (rationale)
+- `configs/risk_calibration_2B.yaml` contiene perfiles: `quick`, `full_demo`, `full`
+- `--profile` flag en CLI para selección explícita
+- `--mode full_demo` como alias de `--mode full --profile full_demo`
 
-- Evitar parseo de logs/stderr (PowerShell genera ruido UTF-16).
-- Diagnósticos estructurados permiten CI/orchestrator consumir datos directamente.
+### Inactive Instrumentation (2E-4)
+
+- `is_active`, `rejection_*` flags en CSV
+- `risk_reject_reasons_topk` en meta
 
 ## Cómo ejecutar tests
 
@@ -46,4 +47,4 @@ python tools/validate_risk_config.py --config risk_rules.yaml
 
 ## Próximo paso
 
-Ver `report/AG-2E-4-3_handoff.md` para roadmap.
+Ver backlog en `registro_de_estado_invest_bot.md`.

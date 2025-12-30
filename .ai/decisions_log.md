@@ -1,6 +1,7 @@
 # Decisions Log — Antigravity Workflow v0.1
 
 Formato recomendado:
+
 - [YYYY-MM-DD HH:MM] [actor] [rama] — Descripción de la decisión.
 
 ---
@@ -17,6 +18,7 @@ Formato recomendado:
   - Infraestructura Antigravity v0.1 activa (.ai/* revisado)
 
 Snapshots iniciales 2A:
+
 - `report/pytest_2A_before.txt` (baseline previo al workflow Antigravity, 47 tests OK).
 - `report/pytest_2A_before_antigravity_integration.txt` (48 tests OK).
 - `report/validate_risk_config_2A_before.txt`:
@@ -28,6 +30,7 @@ Snapshots iniciales 2A:
     - `position_sizing`
 
 Notas:
+
 - No se ha tocado aún `risk_rules.yaml` ni `config_schema.py` en 2A.
 - Próximos pasos: implementación de `RiskContextV06` completo, integración en RiskManager v0.5, modo `active|monitor` y observabilidad mínima.
 
@@ -67,3 +70,10 @@ Notas:
 
 - [2025-12-29 16:20] [ANTIGRAVITY/EXECUTOR] [feature/2B_kelly_floor_promotion] — **2B-3.6**: Promovido floor `kelly.cap_factor >= 0.70` a baseline config. Grid actualizado a `[0.70, 0.90, 1.10, 1.30]`. Valores sub-óptimos (0.30, 0.50) eliminados.
 
+## 2025-12-30 — 7.2 CLI Polish + 2E-3.3 Gate Semantics Merge
+
+- [2025-12-30 17:30] [ANTIGRAVITY/EXECUTOR] [main] — **7.2 CLI polish**: PR #11 merged (073b643). Añadido `--mode full_demo` como alias de `--mode full --profile full_demo`. Detección de conflictos explícitos si se combinan alias + profile diferente.
+
+- [2025-12-30 17:45] [ANTIGRAVITY/EXECUTOR] [main] — **2E-3.3 Gate semantics**: PR #12 merged (e3fb90d). Evaluación de thresholds con lógica OR independiente (cualquiera falla → gate FAIL). Razones granulares: `active_n_below_min`, `active_rate_below_min`, `inactive_rate_above_max`, `active_pass_rate_below_min`.
+
+- [2025-12-30 18:00] [ANTIGRAVITY/EXECUTOR] [main] — **Decisión: versionado de `report/out_*`**: Los directorios de evidencia (`report/out_2E_*`) se commitean cuando contienen resultados de validación crítica (smokes PASS/FAIL, strict gate tests). Esto permite trazabilidad reproducible sin depender de CI artifacts externos.
