@@ -1,0 +1,1 @@
+c299848 (HEAD -> main, origin/main, origin/HEAD) docs: refresh 2E tracking + add versioning policy decision
