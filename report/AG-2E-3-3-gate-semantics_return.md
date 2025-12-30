@@ -119,7 +119,11 @@ Con thresholds del YAML:
 ## Commit
 
 ```
+<<<<<<< HEAD
 21f102d 2E: enforce activity gate thresholds + granular fail reasons
+=======
+3992d50 2E: enforce activity gate thresholds + granular fail reasons
+>>>>>>> 21f102d (2E: enforce activity gate thresholds + granular fail reasons)
 ```
 
 ## PR
