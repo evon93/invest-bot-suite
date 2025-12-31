@@ -48,3 +48,31 @@ python tools/validate_risk_config.py --config risk_rules.yaml
 ## PrÃ³ximo paso
 
 Ver backlog en `registro_de_estado_invest_bot.md`.
+## [2025-12-30] Estado actual (post 2B-3.3)
+
+- Branch: main (origin/main)
+- Head: 831710e (report pack) + bc15e5a (código)
+- 2E gate: integrado (activity stats + rejection reasons presentes en out_2E_*).
+- 2B calibration: grid ya discrimina overrides por effective_config_hash y, además, discrimina métricas con scenario determinista.
+
+Evidencia:
+- report/AG-2B-3-3-8_return.md
+- report/out_2B_3_3_grid_discriminates_20251230/
+
+Notas:
+- El dataset sintético default no activaba triggers de riesgo; por eso las métricas eran idénticas.
+- Usar: python tools/run_calibration_2B.py --mode full --max-combinations 24 --scenario sensitivity --output-dir <dir>
+## [2025-12-30] Estado actual (post 2B-3.3)
+
+- Branch: main (origin/main)
+- Head: 831710e (report pack) + bc15e5a (código)
+- 2E gate: integrado (activity stats + rejection reasons presentes en out_2E_*).
+- 2B calibration: grid ya discrimina overrides por effective_config_hash y, además, discrimina métricas con scenario determinista.
+
+Evidencia:
+- report/AG-2B-3-3-8_return.md
+- report/out_2B_3_3_grid_discriminates_20251230/
+
+Notas:
+- El dataset sintético default no activaba triggers de riesgo; por eso las métricas eran idénticas.
+- Usar: python tools/run_calibration_2B.py --mode full --max-combinations 24 --scenario sensitivity --output-dir <dir>

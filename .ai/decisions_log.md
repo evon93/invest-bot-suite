@@ -77,3 +77,31 @@ Notas:
 - [2025-12-30 17:45] [ANTIGRAVITY/EXECUTOR] [main] â€” **2E-3.3 Gate semantics**: PR #12 merged (e3fb90d). EvaluaciÃ³n de thresholds con lÃ³gica OR independiente (cualquiera falla â†’ gate FAIL). Razones granulares: `active_n_below_min`, `active_rate_below_min`, `inactive_rate_above_max`, `active_pass_rate_below_min`.
 
 - [2025-12-30 18:00] [ANTIGRAVITY/EXECUTOR] [main] â€” **DecisiÃ³n: versionado de `report/out_*`**: Los directorios de evidencia (`report/out_2E_*`) se commitean cuando contienen resultados de validaciÃ³n crÃ­tica (smokes PASS/FAIL, strict gate tests). Esto permite trazabilidad reproducible sin depender de CI artifacts externos.
+## [2025-12-30] DECISIÓN — Añadir scenario 'sensitivity' para calibración 2B
+
+Problema:
+- El grid 2B aplicaba overrides (hash variaba), pero las métricas eran idénticas por falta de activación de guardrails en el escenario sintético default.
+
+Decisión:
+- Añadir un harness determinista (--scenario sensitivity) con régimen de drawdown/vol que active DD-hard/soft de forma reproducible (seed 42).
+
+Criterio de aceptación:
+- Mini-grid 24 combos produce >=2 valores distintos en al menos una métrica/counter (p.ej. score, pct_time_hard_stop) sin tests flaky.
+
+Evidencia:
+- report/AG-2B-3-3-8_return.md
+- report/out_2B_3_3_grid_discriminates_20251230/
+## [2025-12-30] DECISIÓN — Añadir scenario 'sensitivity' para calibración 2B
+
+Problema:
+- El grid 2B aplicaba overrides (hash variaba), pero las métricas eran idénticas por falta de activación de guardrails en el escenario sintético default.
+
+Decisión:
+- Añadir un harness determinista (--scenario sensitivity) con régimen de drawdown/vol que active DD-hard/soft de forma reproducible (seed 42).
+
+Criterio de aceptación:
+- Mini-grid 24 combos produce >=2 valores distintos en al menos una métrica/counter (p.ej. score, pct_time_hard_stop) sin tests flaky.
+
+Evidencia:
+- report/AG-2B-3-3-8_return.md
+- report/out_2B_3_3_grid_discriminates_20251230/
