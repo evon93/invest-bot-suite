@@ -1,0 +1,2 @@
+5a45aa0 (HEAD -> main) report: add Orchestrator handoff post2B close2E (2025-12-31)
+c72bc60 2E: add manual full robustness workflow (workflow_dispatch)
