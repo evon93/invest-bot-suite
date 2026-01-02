@@ -217,18 +217,21 @@ def _apply_nan_policy(df: pd.DataFrame, stats: LoadStats) -> pd.DataFrame:
 def load_ohlcv(
     path: str | Path,
     encoding: str = "utf-8",
-) -> Tuple[pd.DataFrame, LoadStats]:
+    *,
+    return_stats: bool = False,
+) -> pd.DataFrame | Tuple[pd.DataFrame, LoadStats]:
     """
     Load OHLCV data from CSV or Parquet file.
     
     Args:
         path: Path to data file (.csv, .parquet, .pq)
         encoding: Encoding for CSV files (default: utf-8)
+        return_stats: If True, return (df, stats) tuple. If False (default),
+                      return just the DataFrame for backward compatibility.
     
     Returns:
-        Tuple of:
-        - DataFrame with columns: date, open, high, low, close, volume
-        - LoadStats with cleaning statistics
+        If return_stats=False (default): DataFrame with columns [date, open, high, low, close, volume]
+        If return_stats=True: Tuple of (DataFrame, LoadStats)
     
     Raises:
         FileNotFoundError: If file doesn't exist
@@ -279,7 +282,9 @@ def load_ohlcv(
     df = df.reset_index(drop=True)
     stats.rows_output = len(df)
     
-    return df, stats
+    if return_stats:
+        return df, stats
+    return df
 
 
 def summarize(df: pd.DataFrame, stats: LoadStats) -> dict:
@@ -339,7 +344,7 @@ def main():
     args = parser.parse_args()
     
     try:
-        df, stats = load_ohlcv(args.path, encoding=args.encoding)
+        df, stats = load_ohlcv(args.path, encoding=args.encoding, return_stats=True)
         print_summary(args.path, df, stats)
         sys.exit(0)
     except Exception as e:

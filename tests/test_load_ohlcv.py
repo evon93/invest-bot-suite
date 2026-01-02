@@ -83,18 +83,22 @@ class TestLoadOHLCV:
 
     def test_load_csv_basic(self, sample_csv):
         """Load basic CSV file."""
-        df, stats = load_ohlcv(sample_csv)
+        # Default: returns DataFrame only
+        df = load_ohlcv(sample_csv)
         
         assert len(df) == 10
         assert list(df.columns) == CANONICAL_COLUMNS
         assert df["date"].dtype == "datetime64[ns]"
         assert df["close"].dtype == "float64"
+        
+        # With return_stats=True
+        df, stats = load_ohlcv(sample_csv, return_stats=True)
         assert stats.rows_input == 10
         assert stats.rows_output == 10
 
     def test_load_csv_aliased_columns(self, sample_csv_aliased):
         """Load CSV with aliased column names."""
-        df, stats = load_ohlcv(sample_csv_aliased)
+        df = load_ohlcv(sample_csv_aliased)
         
         assert len(df) == 5
         assert list(df.columns) == CANONICAL_COLUMNS
@@ -102,14 +106,14 @@ class TestLoadOHLCV:
 
     def test_load_csv_sorted(self, sample_csv_unsorted):
         """Verify output is sorted by date ascending."""
-        df, stats = load_ohlcv(sample_csv_unsorted)
+        df = load_ohlcv(sample_csv_unsorted)
         
         dates = df["date"].tolist()
         assert dates == sorted(dates)
 
     def test_load_csv_deduplicates(self, sample_csv_with_dupes):
         """Verify duplicates are removed (keep last)."""
-        df, stats = load_ohlcv(sample_csv_with_dupes)
+        df, stats = load_ohlcv(sample_csv_with_dupes, return_stats=True)
         
         assert len(df) == 3
         assert df["date"].nunique() == 3
@@ -134,7 +138,7 @@ class TestLoadOHLCV:
 
     def test_summarize(self, sample_csv):
         """Test summarize function."""
-        df, stats = load_ohlcv(sample_csv)
+        df, stats = load_ohlcv(sample_csv, return_stats=True)
         s = summarize(df, stats)
         
         assert s["n_rows"] == 10
@@ -159,7 +163,7 @@ class TestH1NaNPolicy:
         path = tmp_path / "nat_dates.csv"
         df.to_csv(path, index=False, encoding="utf-8")
         
-        result, stats = load_ohlcv(path)
+        result, stats = load_ohlcv(path, return_stats=True)
         
         assert len(result) == 2
         assert stats.dropped_nat_date == 1
@@ -177,7 +181,7 @@ class TestH1NaNPolicy:
         path = tmp_path / "ohlc_nan.csv"
         df.to_csv(path, index=False, encoding="utf-8")
         
-        result, stats = load_ohlcv(path)
+        result, stats = load_ohlcv(path, return_stats=True)
         
         assert len(result) == 2
         assert stats.dropped_ohlc_nan == 1
@@ -195,7 +199,7 @@ class TestH1NaNPolicy:
         path = tmp_path / "volume_nan.csv"
         df.to_csv(path, index=False, encoding="utf-8")
         
-        result, stats = load_ohlcv(path)
+        result, stats = load_ohlcv(path, return_stats=True)
         
         assert len(result) == 3
         assert result["volume"].iloc[1] == 0.0
@@ -218,7 +222,7 @@ class TestH2EpochParsing:
         path = tmp_path / "epoch_seconds.csv"
         df.to_csv(path, index=False, encoding="utf-8")
         
-        result, stats = load_ohlcv(path)
+        result, stats = load_ohlcv(path, return_stats=True)
         
         assert len(result) == 3
         assert stats.epoch_unit_used == "s"
@@ -239,7 +243,7 @@ class TestH2EpochParsing:
         path = tmp_path / "epoch_ms.csv"
         df.to_csv(path, index=False, encoding="utf-8")
         
-        result, stats = load_ohlcv(path)
+        result, stats = load_ohlcv(path, return_stats=True)
         
         assert len(result) == 3
         assert stats.epoch_unit_used == "ms"
@@ -319,7 +323,7 @@ class TestParquet:
 
     def test_load_parquet(self, sample_parquet):
         """Load Parquet file."""
-        df, stats = load_ohlcv(sample_parquet)
+        df = load_ohlcv(sample_parquet)
         
         assert len(df) == 5
         assert list(df.columns) == CANONICAL_COLUMNS
