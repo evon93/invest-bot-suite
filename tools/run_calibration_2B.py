@@ -132,6 +132,162 @@ def load_yaml(path: Path) -> Dict[str, Any]:
         return yaml.safe_load(f) or {}
 
 
+def parse_seeds(seeds_str: str) -> List[int]:
+    """
+    Parse comma-separated seed string into list of unique ints.
+    
+    Examples:
+        "42" -> [42]
+        "42,123,456" -> [42, 123, 456]
+    """
+    if not seeds_str or not seeds_str.strip():
+        raise ValueError("--seeds cannot be empty")
+    
+    parts = [s.strip() for s in seeds_str.split(",")]
+    seeds = []
+    for p in parts:
+        try:
+            seed = int(p)
+            if seed < 0:
+                raise ValueError(f"Seed must be non-negative: {seed}")
+            seeds.append(seed)
+        except ValueError:
+            raise ValueError(f"Invalid seed value: '{p}'")
+    
+    # Check for duplicates
+    if len(seeds) != len(set(seeds)):
+        raise ValueError(f"Duplicate seeds detected: {seeds}")
+    
+    return seeds
+
+
+def compute_ranking_stability(
+    results_by_seed: List[Dict[str, Any]],
+    seeds: List[int],
+    score_col: str = "score",
+) -> Dict[str, Any]:
+    """
+    Compute ranking stability metrics across seeds using Spearman correlation.
+    
+    Returns:
+        Dict with spearman_mean, spearman_min, topk_overlap (K=10)
+    """
+    if len(seeds) < 2:
+        return {"spearman_mean": 1.0, "spearman_min": 1.0, "topk_overlap": 1.0}
+    
+    # Build DataFrame
+    df = pd.DataFrame(results_by_seed)
+    if df.empty or score_col not in df.columns:
+        return {"spearman_mean": 0.0, "spearman_min": 0.0, "topk_overlap": 0.0}
+    
+    # Pivot: rows=combo_id, cols=seed, values=score
+    pivot = df.pivot_table(index="combo_id", columns="seed", values=score_col, aggfunc="first")
+    
+    # Compute pairwise Spearman
+    correlations = []
+    seed_cols = [s for s in seeds if s in pivot.columns]
+    for i, s1 in enumerate(seed_cols):
+        for s2 in seed_cols[i+1:]:
+            r1 = pivot[s1].rank(ascending=False)
+            r2 = pivot[s2].rank(ascending=False)
+            valid = r1.notna() & r2.notna()
+            if valid.sum() < 2:
+                continue
+            # Use pandas corr for Spearman (no scipy needed)
+            corr = r1[valid].corr(r2[valid], method='spearman')
+            if not np.isnan(corr):
+                correlations.append(corr)
+    
+    spearman_mean = float(np.mean(correlations)) if correlations else 0.0
+    spearman_min = float(np.min(correlations)) if correlations else 0.0
+    
+    # TopK overlap (K=10)
+    topk = 10
+    topk_sets = []
+    for s in seed_cols:
+        top = pivot[s].dropna().nlargest(topk).index.tolist()
+        topk_sets.append(set(top))
+    
+    if len(topk_sets) < 2:
+        topk_overlap = 1.0
+    else:
+        # Pairwise Jaccard
+        overlaps = []
+        for i, s1 in enumerate(topk_sets):
+            for s2 in topk_sets[i+1:]:
+                if len(s1 | s2) > 0:
+                    overlaps.append(len(s1 & s2) / len(s1 | s2))
+        topk_overlap = float(np.mean(overlaps)) if overlaps else 0.0
+    
+    return {
+        "spearman_mean": round(spearman_mean, 4),
+        "spearman_min": round(spearman_min, 4),
+        "topk_overlap": round(topk_overlap, 4),
+    }
+
+
+def aggregate_seed_results(
+    results_by_seed: List[Dict[str, Any]],
+    metric_cols: List[str],
+) -> List[Dict[str, Any]]:
+    """
+    Aggregate results across seeds: mean, median, p05, p95, worst for each metric.
+    
+    Returns:
+        List of dicts, one per combo_id, with aggregated columns.
+    """
+    df = pd.DataFrame(results_by_seed)
+    if df.empty:
+        return []
+    
+    # Group by combo_id
+    grouped = df.groupby("combo_id")
+    
+    agg_rows = []
+    for combo_id, grp in grouped:
+        row = {"combo_id": combo_id, "n_seeds": len(grp)}
+        
+        # Copy first instance params
+        param_cols = [c for c in grp.columns if c.startswith("stop_loss.") or c.startswith("kelly.") or c.startswith("max_drawdown.")]
+        for pc in param_cols:
+            row[pc] = grp[pc].iloc[0]
+        
+        # Aggregate metrics
+        for col in metric_cols:
+            if col not in grp.columns:
+                continue
+            vals = grp[col].dropna()
+            if len(vals) == 0:
+                row[f"{col}_mean"] = np.nan
+                row[f"{col}_median"] = np.nan
+                row[f"{col}_p05"] = np.nan
+                row[f"{col}_p95"] = np.nan
+                row[f"{col}_worst"] = np.nan
+            else:
+                row[f"{col}_mean"] = float(vals.mean())
+                row[f"{col}_median"] = float(vals.median())
+                row[f"{col}_p05"] = float(np.percentile(vals, 5))
+                row[f"{col}_p95"] = float(np.percentile(vals, 95))
+                # Worst: min for return-like, max for drawdown
+                if "drawdown" in col.lower():
+                    row[f"{col}_worst"] = float(vals.min())  # More negative = worse
+                else:
+                    row[f"{col}_worst"] = float(vals.min())  # Lowest score/return = worst
+        
+        # Compute robust score
+        score_vals = grp["score"].dropna()
+        if len(score_vals) > 0:
+            row["score_robust"] = float(np.percentile(score_vals, 5))  # p05 as robust
+        else:
+            row["score_robust"] = 0.0
+        
+        agg_rows.append(row)
+    
+    # Sort by score_robust descending
+    agg_rows.sort(key=lambda x: x.get("score_robust", 0), reverse=True)
+    return agg_rows
+
+
 def generate_combo_id(params: Dict[str, Any]) -> str:
     """Genera un ID estable para la combinación de parámetros."""
     s = json.dumps(params, sort_keys=True)
@@ -538,7 +694,7 @@ def compute_score(row: Dict[str, Any], formula: str) -> float:
 def run_calibration(
     mode: str = "quick",
     max_combinations: Optional[int] = None,
-    seed: int = 42,
+    seeds: Optional[List[int]] = None,
     output_dir_override: Optional[str] = None,
     strict_gate: bool = False,
     profile_override: Optional[str] = None,
@@ -550,11 +706,15 @@ def run_calibration(
     Escribe todos los artefactos en output_dir (CLI override > YAML).
     
     Args:
+        seeds: List of random seeds for multi-seed robustness (default: [42])
         scenario: "default" or "sensitivity" for price generation mode
     
     Returns:
         Exit code (0 = success, 1 = gate failed with strict_gate)
     """
+    # Default to single seed for backward compat
+    if seeds is None:
+        seeds = [42]
     run_start = time.time()
     
     # Cargar configs
@@ -572,7 +732,9 @@ def run_calibration(
     
     # Paths de artefactos dentro de output_dir
     log_file = output_dir / "run_log.txt"
-    csv_file = output_dir / "results.csv"
+    csv_file = output_dir / "results.csv"  # Legacy compat (same as results_by_seed for single seed)
+    results_by_seed_file = output_dir / "results_by_seed.csv"
+    results_agg_file = output_dir / "results_agg.csv"
     summary_file = output_dir / "summary.md"
     topk_file = output_dir / "topk.json"
     meta_file = output_dir / "run_meta.json"
@@ -601,8 +763,9 @@ def run_calibration(
     activity_gate = profile.get("activity_gate")
     quality_gate = profile.get("quality_gate")
 
-    # Usar seed del YAML si no se pasó explícitamente diferente
-    effective_seed = seed if seed != 42 else yaml_seed
+    # Use first seed as primary (for backward compat logs), all seeds for multi-seed
+    primary_seed = seeds[0]
+    yaml_seed = config.get("repro", {}).get("seed", 42)
 
     # Generar combinaciones
     all_combos = flatten_grid(grid)
@@ -623,6 +786,7 @@ def run_calibration(
 
     # Inicializar CSV con nuevas columnas
     csv_headers = [
+        "seed",  # Multi-seed support
         "combo_id",
         "status",
         "error_type",
@@ -674,84 +838,95 @@ def run_calibration(
         writer = csv.DictWriter(f, fieldnames=csv_headers, extrasaction="ignore")
         writer.writeheader()
 
-    log(f"Mode: {mode}, Profile: {effective_profile_name}, Total grid: {total_combos}, Running: {len(combos)}, Seed: {effective_seed}", log_file)
+    log(f"Mode: {mode}, Profile: {effective_profile_name}, Total grid: {total_combos}, Running: {len(combos)}, Seeds: {seeds}", log_file)
     log(f"Output dir: {output_dir}", log_file)
 
-    results = []
+    all_results = []  # All rows across all seeds
+    total_runs = len(seeds) * len(combos)
+    run_idx = 0
 
-    for i, params in enumerate(combos, 1):
-        combo_id = generate_combo_id(params)
-        log(f"START combo_id={combo_id} ({i}/{len(combos)}) params={params}", log_file)
+    for current_seed in seeds:
+        log(f"=== Starting seed {current_seed} ===", log_file)
+        np.random.seed(current_seed)  # Global RNG reset per seed
+        
+        for i, params in enumerate(combos, 1):
+            run_idx += 1
+            combo_id = generate_combo_id(params)
+            log(f"START seed={current_seed} combo_id={combo_id} ({run_idx}/{total_runs}) params={params}", log_file)
 
-        start_time = time.time()
-        row: Dict[str, Any] = {
-            "combo_id": combo_id,
-            "status": "ok",
-            "error_type": "",
-            "error_msg": "",
-            "traceback_short": "",
-            "duration_s": 0.0,
-            "score": 0.0,
-            # Nuevas columnas con defaults
-            "is_active": False,
-            "rejection_no_signal": 0,
-            "rejection_blocked_risk": 0,
-            "rejection_size_zero": 0,
-            "rejection_price_missing": 0,
-            "rejection_other": 0,
-        }
-        row.update(params)
-
-        try:
-            # Aplicar overlay
-            rules = apply_overlay(base_rules, params)
-            rules.setdefault("risk_manager", {})["mode"] = config.get("execution", {}).get("mode", "active")
-
-            # === 2B-3.3-7: Capture effective config values for wiring verification ===
-            row["effective_config_hash"] = compute_rules_hash(rules)
-            row["effective_kelly_cap_factor"] = rules.get("kelly", {}).get("cap_factor", None)
-            row["effective_dd_soft_limit_pct"] = rules.get("max_drawdown", {}).get("soft_limit_pct", None)
-            row["effective_dd_hard_limit_pct"] = rules.get("max_drawdown", {}).get("hard_limit_pct", None)
-            row["effective_dd_size_multiplier_soft"] = rules.get("max_drawdown", {}).get("size_multiplier_soft", None)
-            row["effective_atr_multiplier"] = rules.get("stop_loss", {}).get("atr_multiplier", None)
-            row["effective_min_stop_pct"] = rules.get("stop_loss", {}).get("min_stop_pct", None)
-
-            # Ejecutar backtest
-            metrics = run_single_backtest(rules, effective_seed, config, scenario=scenario)
-            row.update(metrics)
-            row["score"] = compute_score(row, score_formula)
-            
-            # Determinar is_active y diagnóstico de inactividad
-            num_trades = row.get("num_trades", 0)
-            row["is_active"] = num_trades > 0
-            
-            # Clasificar razón de inactividad usando diagnósticos reales
-            diag_data = {
-                "signal_count": row.get("signal_count", 0),
-                "signal_rejected_count": row.get("signal_rejected_count", 0),
-                "price_missing_count": row.get("price_missing_count", 0),
-                "size_zero_count": row.get("size_zero_count", 0),
+            start_time = time.time()
+            row: Dict[str, Any] = {
+                "seed": current_seed,
+                "combo_id": combo_id,
+                "status": "ok",
+                "error_type": "",
+                "error_msg": "",
+                "traceback_short": "",
+                "duration_s": 0.0,
+                "score": 0.0,
+                # Nuevas columnas con defaults
+                "is_active": False,
+                "rejection_no_signal": 0,
+                "rejection_blocked_risk": 0,
+                "rejection_size_zero": 0,
+                "rejection_price_missing": 0,
+                "rejection_other": 0,
             }
-            rejection_flags = classify_inactive_reason(num_trades, diag_data)
-            row.update(rejection_flags)
+            row.update(params)
 
-        except Exception as e:
-            row["status"] = "error"
-            row["error_type"] = type(e).__name__
-            row["error_msg"] = str(e)
-            tb = traceback.format_exc()
-            row["traceback_short"] = tb[-1500:] if len(tb) > 1500 else tb
+            try:
+                # Aplicar overlay
+                rules = apply_overlay(base_rules, params)
+                rules.setdefault("risk_manager", {})["mode"] = config.get("execution", {}).get("mode", "active")
 
-        row["duration_s"] = round(time.time() - start_time, 2)
+                # === 2B-3.3-7: Capture effective config values for wiring verification ===
+                row["effective_config_hash"] = compute_rules_hash(rules)
+                row["effective_kelly_cap_factor"] = rules.get("kelly", {}).get("cap_factor", None)
+                row["effective_dd_soft_limit_pct"] = rules.get("max_drawdown", {}).get("soft_limit_pct", None)
+                row["effective_dd_hard_limit_pct"] = rules.get("max_drawdown", {}).get("hard_limit_pct", None)
+                row["effective_dd_size_multiplier_soft"] = rules.get("max_drawdown", {}).get("size_multiplier_soft", None)
+                row["effective_atr_multiplier"] = rules.get("stop_loss", {}).get("atr_multiplier", None)
+                row["effective_min_stop_pct"] = rules.get("stop_loss", {}).get("min_stop_pct", None)
 
-        log(f"END combo_id={combo_id} status={row['status']} duration_s={row['duration_s']}", log_file)
+                # Ejecutar backtest
+                metrics = run_single_backtest(rules, current_seed, config, scenario=scenario)
+                row.update(metrics)
+                row["score"] = compute_score(row, score_formula)
+                
+                # Determinar is_active y diagnóstico de inactividad
+                num_trades = row.get("num_trades", 0)
+                row["is_active"] = num_trades > 0
+                
+                # Clasificar razón de inactividad usando diagnósticos reales
+                diag_data = {
+                    "signal_count": row.get("signal_count", 0),
+                    "signal_rejected_count": row.get("signal_rejected_count", 0),
+                    "price_missing_count": row.get("price_missing_count", 0),
+                    "size_zero_count": row.get("size_zero_count", 0),
+                }
+                rejection_flags = classify_inactive_reason(num_trades, diag_data)
+                row.update(rejection_flags)
 
-        # Append to CSV
-        with open(csv_file, "a", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=csv_headers, extrasaction="ignore")
-            writer.writerow(row)
+            except Exception as e:
+                row["status"] = "error"
+                row["error_type"] = type(e).__name__
+                row["error_msg"] = str(e)
+                tb = traceback.format_exc()
+                row["traceback_short"] = tb[-1500:] if len(tb) > 1500 else tb
 
-        results.append(row)
+            row["duration_s"] = round(time.time() - start_time, 2)
+
+            log(f"END combo_id={combo_id} status={row['status']} duration_s={row['duration_s']}", log_file)
+
+            # Append to CSV
+            with open(csv_file, "a", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=csv_headers, extrasaction="ignore")
+                writer.writerow(row)
+
+            all_results.append(row)
+
+    # Use all_results for backward compat with existing logic
+    results = all_results
 
     # Stats básicos
     ok_count = sum(1 for r in results if r["status"] == "ok")
@@ -810,15 +985,19 @@ def run_calibration(
         json.dump(topk_data, f, indent=2)
 
     # ----- Generate run_meta.json -----
+    # Compute ranking stability if multi-seed
+    stability_metrics = compute_ranking_stability(results, seeds, score_col="score")
+    
     meta_data = {
         "config_hash": compute_config_hash(config),
         "git_head": get_git_head(),
-        "seed": effective_seed,
+        "seeds": seeds,
+        "n_seeds": len(seeds),
         "mode": mode,
         "gate_profile": effective_profile_name,
         "total_grid": total_combos,
         "num_combos": len(combos),
-        "running": len(combos),
+        "running": len(combos) * len(seeds),
         "ok": ok_count,
         "errors": error_count,
         "duration_s": run_duration,
@@ -837,9 +1016,24 @@ def run_calibration(
         "rejection_reasons_agg": rejection_agg,
         "top_inactive_reasons": top_inactive_reasons,
         "risk_reject_reasons_topk": aggregate_risk_reject_reasons(results),
+        # === Multi-seed stability metrics (2G) ===
+        "spearman_mean": stability_metrics["spearman_mean"],
+        "spearman_min": stability_metrics["spearman_min"],
+        "topk_overlap": stability_metrics["topk_overlap"],
     }
     with open(meta_file, "w", encoding="utf-8") as f:
         json.dump(meta_data, f, indent=2)
+    
+    # ----- Generate results_by_seed.csv (copy of results.csv for multi-seed) -----
+    import shutil
+    shutil.copy(csv_file, results_by_seed_file)
+    
+    # ----- Generate results_agg.csv (aggregated across seeds) -----
+    metric_cols = ["score", "sharpe_ratio", "cagr", "max_drawdown", "calmar_ratio", "win_rate", "num_trades"]
+    agg_results = aggregate_seed_results(results, metric_cols)
+    if agg_results:
+        agg_df = pd.DataFrame(agg_results)
+        agg_df.to_csv(results_agg_file, index=False, encoding="utf-8")
 
     # ----- Generate summary.md -----
     summary_lines = [
@@ -847,7 +1041,7 @@ def run_calibration(
         "",
         f"**Timestamp**: {datetime.now().isoformat()}",
         f"**Mode**: {mode}",
-        f"**Seed**: {effective_seed}",
+        f"**Seeds**: {seeds}",
         f"**Git HEAD**: {get_git_head()}",
         "",
         "## Results",
@@ -902,7 +1096,7 @@ def run_calibration(
         "## Reproducibility",
         "",
         f"```bash",
-        f"python tools/run_calibration_2B.py --mode {mode} --max-combinations {len(combos)} --seed {effective_seed}",
+        f"python tools/run_calibration_2B.py --mode {mode} --max-combinations {len(combos)} --seeds {','.join(map(str, seeds))}",
         f"```",
     ])
     
@@ -997,8 +1191,14 @@ Examples:
     parser.add_argument(
         "--seed",
         type=int,
-        default=42,
-        help="Random seed for reproducibility (default: 42)",
+        default=None,
+        help="Single random seed (legacy, use --seeds for multi-seed)",
+    )
+    parser.add_argument(
+        "--seeds",
+        type=str,
+        default="42",
+        help="Comma-separated seeds for multi-seed robustness (default: '42')",
     )
     parser.add_argument(
         "--output-dir",
@@ -1039,11 +1239,20 @@ Examples:
         parser.error(str(e))
     
     args = parser.parse_args(normalized_argv)
+    
+    # Resolve seeds: --seed takes precedence for backward compat
+    if args.seed is not None:
+        seeds = [args.seed]
+    else:
+        try:
+            seeds = parse_seeds(args.seeds)
+        except ValueError as e:
+            parser.error(str(e))
 
     exit_code = run_calibration(
         mode=args.mode,
         max_combinations=args.max_combinations,
-        seed=args.seed,
+        seeds=seeds,
         output_dir_override=args.output_dir,
         strict_gate=args.strict_gate,
         profile_override=args.profile,
