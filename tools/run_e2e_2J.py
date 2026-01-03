@@ -68,6 +68,8 @@ def main():
     parser = argparse.ArgumentParser(description="Run 2J E2E Synthetic Pipeline")
     parser.add_argument("--outdir", type=Path, default=DEFAULT_OUT_DIR, help="Output directory for calibration run")
     parser.add_argument("--dry-run", action="store_true", help="Print commands only")
+    parser.add_argument("--mode", choices=["quick", "full"], default="quick", 
+                        help="Execution mode: quick (smoke) or full (full_demo)")
     parser.add_argument("--seed", default="42", help="Global seed for reproducibility")
     args = parser.parse_args()
 
@@ -80,16 +82,20 @@ def main():
     risk_rules_prod = CONFIGS_DIR / "risk_rules_prod.yaml"
     dashboard_dir = REPORT_DIR / "dashboard_2J"
 
+    # Map runner mode to calibration mode/profile
+    # quick -> run_calibration_2B --mode quick
+    # full  -> run_calibration_2B --mode full_demo (as per previous logic)
+    calib_mode = "quick" if args.mode == "quick" else "full_demo"
+
     # Define Steps
     steps = []
 
     # 1. Calibration
-    # Using full_demo (288 combos) for synth smoke.
     steps.append({
-        "desc": "Step 1: Calibration (2B)",
+        "desc": f"Step 1: Calibration (2B) [Mode: {calib_mode}]",
         "cmd": [
             "python", "tools/run_calibration_2B.py",
-            "--mode", "full_demo",
+            "--mode", calib_mode,
             "--output-dir", str(out_dir),
             "--seed", args.seed
         ]
