@@ -442,3 +442,10 @@ Estado de validación:
 - Snapshots:
   - `report/validate_risk_config_step5.txt`
   - `report/pytest_antigravity_step5.txt`
+
+## 2026-01-03  Fase 2J.4: Python Version Standardization
+
+- **Decisión**: Python 3.12.x es el runtime canónico para CI y desarrollo local.
+- **Rationale**: Alineación de .venv local (3.12.3) con GitHub Actions (3.12). Windows 3.13 queda fuera del baseline.
+- **Alcance**: Todos los workflows (.github/workflows/*.yml) fijados a python-version: 3.12.
+- **Estado**: IMPLEMENTED.
