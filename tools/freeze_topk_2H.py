@@ -25,11 +25,11 @@ sys.path.insert(0, str(REPO_ROOT))
 # Metric columns to exclude when detecting parameters
 EXCLUDE_COLS = [
     "score", "score_robust", "seed", "n_seeds", "run_id", "timestamp", 
-    "data_source", "realdata_path", "row_hash"
+    "data_source", "realdata_path", "row_hash", "combo_id"
 ]
 METRIC_PREFIXES = ["total_return", "cagr", "max_drawdown", "sharpe", "calmar", 
                   "num_trades", "p05_", "p95_", "median_", "mean_", "worst_", 
-                  "spearman_", "topk_", "win_rate"]
+                  "spearman_", "topk_", "win_rate", "score_"]
 
 def get_git_head() -> str:
     """Gets current git HEAD hash, or 'unknown'."""
