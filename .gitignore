@@ -11,6 +11,12 @@ report/audit_1C_v0_5_bundle_20251204.tar.gz
 # Ignorar runs temporales de robustness (CI genera en cada run)
 report/runs/
 
+# 3B.0: Ignore local artifacts/configs
+configs/best_params_2H.json
+configs/risk_rules_prod.yaml
+report/dashboard_2J/
+report/topk_freeze_2H.json
+
 # H0: Ignore generated report artifacts (AG-2J-0-2)
 report/AG-*
 report/out_*
