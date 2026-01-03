@@ -475,3 +475,12 @@ Estado de validación:
 - **Runner Canónico**: `tools/run_e2e_2J.py`
 - **Configuración Producción**: configs/risk_rules_prod.yaml
 - **Estado**: READY para 3A (Paper Trading).
+
+## 2026-01-03  Fase 3A: Paper Trading Loop & Observability
+
+- **Hito**: Infraestructura de simulación event-driven completada.
+- **Bridge Report**: [bridge_3A_to_3B_report.md](bridge_3A_to_3B_report.md)
+- **Contracts**: v1 (contracts/event_messages.py).
+- **Runner**: 	ools/run_paper_loop_3A.py (con métricas). 
+- **Estado**: READY para 3B (Live Integration).
+
