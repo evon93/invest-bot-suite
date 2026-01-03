@@ -449,3 +449,12 @@ Estado de validación:
 - **Rationale**: Alineación de .venv local (3.12.3) con GitHub Actions (3.12). Windows 3.13 queda fuera del baseline.
 - **Alcance**: Todos los workflows (.github/workflows/*.yml) fijados a python-version: 3.12.
 - **Estado**: IMPLEMENTED.
+
+## 2026-01-03  Fase 2J.5: Cierre y Puente a 3A
+
+- **Hito**: Completada la fase de Pipeline Sintético E2E.
+- **Bridge Report**: [bridge_2J_to_3A_report.md](bridge_2J_to_3A_report.md)
+- **Runner Canónico**: 	ools/run_e2e_2J.py
+- **Configuración Producción**: configs/risk_rules_prod.yaml
+- **Estado**: READY para 3A (Paper Trading).
+
