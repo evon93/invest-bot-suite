@@ -193,8 +193,8 @@ def compute_ranking_stability(
             valid = r1.notna() & r2.notna()
             if valid.sum() < 2:
                 continue
-            # Use pandas corr for Spearman (no scipy needed)
-            corr = r1[valid].corr(r2[valid], method='spearman')
+            # Use pearson corr on RANKS (equivalent to Spearman) to avoid scipy dependency
+            corr = r1[valid].corr(r2[valid], method='pearson')
             if not np.isnan(corr):
                 correlations.append(corr)
     
