@@ -2,7 +2,7 @@
 """
 tools/run_paper_loop_3A.py
 
-Paper Trading Simulator Loop (AG-3A-2-1 + AG-3A-3-1 Metrics).
+Paper Trading Simulator Loop (AG-3A-2-1 + AG-3A-3-1 + AG-3A-3-2).
 Consumes signals (OrderIntent) from NDJSON, validates against Risk Rules,
 and generates Mock Fills or Rejections with observability metrics.
 
@@ -18,8 +18,9 @@ import logging
 import sys
 import time
 import random
+import math
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 
 # Add repo root to path
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -54,7 +55,8 @@ class PaperLoop:
             "n_allowed": 0,
             "n_rejected": 0,
             "n_fills": 0,
-            "rejection_reasons": {},
+            "rejection_reasons": {}, 
+            "rejected_by_reason": {}, # Alias
             "max_gross_exposure_pct": 0.0,
             "max_drawdown_pct": 0.0,
             "active_rate": 0.0,
@@ -69,7 +71,6 @@ class PaperLoop:
         self._active_samples_count = 0
         
         # Risk Context Mock
-        # In this mock loop, we start with 100k cash
         self.mock_context = {
             "portfolio": {
                 "nav": 100000.0, 
@@ -80,6 +81,29 @@ class PaperLoop:
         }
         
         self.initial_nav = 100000.0
+
+    def _normalize_reasons(self, reasons: Union[List, Dict, str, Any]) -> List[str]:
+        """
+        Normalize rejection reasons to a stable list of strings.
+        Truncates long strings to avoid exploding metrics cardinality.
+        """
+        normalized = []
+        try:
+            if isinstance(reasons, list):
+                for r in reasons:
+                    normalized.append(str(r)[:100])
+            elif isinstance(reasons, dict):
+                # If dict, keys are usually the identifiers
+                for k in reasons.keys():
+                    normalized.append(str(k)[:100])
+            elif isinstance(reasons, str):
+                normalized.append(reasons[:100])
+            else:
+                normalized.append(str(reasons)[:100])
+        except Exception:
+            normalized.append("unknown_parse_error")
+            
+        return [n for n in normalized if n]
 
     def _update_portfolio_valuation(self):
         """Re-calculate NAV and exposure based on current prices and positions."""
@@ -109,7 +133,6 @@ class PaperLoop:
         )
         
         # Drawdown Metric
-        # We track peak NAV seen so far
         peak_nav = max(self.initial_nav, *self._nav_series) if self._nav_series else self.initial_nav
         peak_nav = max(peak_nav, nav)
         
@@ -134,16 +157,13 @@ class PaperLoop:
         """
         events = []
         
-        # 1. Update Market Data (Mark-to-Market)
-        # Use limit_price if available, or meta.price, or default 100
+        # 1. Update Market Data
         current_price = order_intent.limit_price
         if current_price is None or current_price <= 0:
             current_price = order_intent.meta.get("price", 100.0)
         
         self.mock_context["prices"][order_intent.symbol] = current_price
         
-        # Re-value portfolio BEFORE risk check (strictly speaking risk might run on pre-signal state,
-        # but updated prices are better)
         self._update_portfolio_valuation()
         
         # 2. Risk Check
@@ -157,13 +177,9 @@ class PaperLoop:
         }
         
         try:
-            # We pass signal_dict using standard keys, plus current_weights
-            # RiskManager expects positions {symbol: qty} or similar weights. 
-            # Ideally weights = {sym: (qty*price)/nav}. But v0.4 logic uses simple pos dict usually.
             positions = self.mock_context["portfolio"]["positions"]
             decision = self.risk_manager.filter_signal(signal_dict, positions)
             
-            # Normalize decision
             allowed = False
             reasons = []
             
@@ -172,11 +188,9 @@ class PaperLoop:
                 if not allowed:
                     reasons = ["RiskManager rejected (bool)"]
             elif isinstance(decision, tuple):
-                 # Support (bool, list)
                  allowed = decision[0]
                  reasons = decision[1] if len(decision) > 1 else []
             else:
-                # Unknown return
                 allowed = bool(decision)
         
         except Exception as e:
@@ -184,40 +198,37 @@ class PaperLoop:
             allowed = False
             reasons = [f"Risk Check Error: {str(e)}"]
 
+        # Normalize reasons
+        if not allowed:
+            reasons = self._normalize_reasons(reasons)
+
         # 3. Create RiskDecision Event
         risk_event = RiskDecision(
             ref_order_event_id=order_intent.event_id,
             allowed=allowed,
-            rejection_reasons=reasons,
-            trace_id=order_intent.trace_id # Propagate Trace ID
+            rejection_reasons=reasons, 
+            trace_id=order_intent.trace_id
         )
         events.append(risk_event)
         
         if allowed:
             self.metrics["n_allowed"] += 1
             
-            # 4. Mock Execution (Fill)
-            # Simulate latency
             if self.latency_ms > 0:
                 time.sleep(self.latency_ms / 1000.0)
             
-            # Record explicit latency sample
             self._latencies_ms.append(self.latency_ms)
             
             fill_price = current_price
-            # Apply mock slippage (random -1bps to +1bps for smoke)
             slippage = fill_price * random.uniform(-0.0001, 0.0001)
             exec_price = fill_price + slippage
             
-            # Determine fill qty (if intent has notional, calc qty)
             fill_qty = order_intent.qty
             if fill_qty is None and order_intent.notional:
                 fill_qty = order_intent.notional / exec_price
             
-            if fill_qty is None: fill_qty = 0.0 # Should not happen if strictly validated
+            if fill_qty is None: fill_qty = 0.0
             
-            # Update Portfolio (Mock Execution)
-            # Side: BUY -> +qty, -cash. SELL -> -qty, +cash
             cost = fill_qty * exec_price
             if order_intent.side == "BUY":
                 self.mock_context["portfolio"]["cash"] -= cost
@@ -236,17 +247,16 @@ class PaperLoop:
                 avg_price=exec_price,
                 slippage=slippage,
                 latency_ms=self.latency_ms,
-                trace_id=order_intent.trace_id # Propagate Trace ID
+                trace_id=order_intent.trace_id
             )
             self.metrics["n_fills"] += 1
             events.append(exec_report)
             
         else:
             self.metrics["n_rejected"] += 1
-            # Track reasons (normalize)
+            # Track reasons (using normalized)
             for r in reasons:
-                r_str = str(r)
-                self.metrics["rejection_reasons"][r_str] = self.metrics["rejection_reasons"].get(r_str, 0) + 1
+                self.metrics["rejection_reasons"][r] = self.metrics["rejection_reasons"].get(r, 0) + 1
                 
             # Create Rejected Execution Report
             exec_report = ExecutionReport(
@@ -254,12 +264,11 @@ class PaperLoop:
                 ref_risk_event_id=risk_event.event_id,
                 status="REJECTED",
                 extra={"reasons": reasons},
-                trace_id=order_intent.trace_id # Propagate Trace ID
+                trace_id=order_intent.trace_id
             )
             events.append(exec_report)
-            self._latencies_ms.append(0.0) # Zero latency on immediate reject? Or minimal?
+            self._latencies_ms.append(0.0)
 
-        # Make sure to update valuation after fill too
         self._update_portfolio_valuation()
 
         return events
@@ -272,13 +281,19 @@ class PaperLoop:
             
         # Latency Stats
         if self._latencies_ms:
-            import statistics
-            self.metrics["latency_ms_mean"] = statistics.mean(self._latencies_ms)
-            self.metrics["latency_ms_p95"] = statistics.quantiles(self._latencies_ms, n=20)[-1] # ~95th percentile approximation if n=20 (19cuts) -> top 5%
-            # Or simpler if tiny sample
+            total_lat = sum(self._latencies_ms)
+            count_lat = len(self._latencies_ms)
+            self.metrics["latency_ms_mean"] = total_lat / count_lat
+            
+            # Robust P95 without statistics module
             sorted_lat = sorted(self._latencies_ms)
-            idx = int(len(sorted_lat) * 0.95)
-            self.metrics["latency_ms_p95"] = sorted_lat[min(idx, len(sorted_lat)-1)]
+            idx = int(count_lat * 0.95)
+            # Ensure index is within bounds (0-indexed)
+            if idx >= count_lat: idx = count_lat - 1
+            self.metrics["latency_ms_p95"] = sorted_lat[idx]
+            
+        # Alias rejected_by_reason
+        self.metrics["rejected_by_reason"] = self.metrics["rejection_reasons"].copy()
 
     def run(self, signals_path: str, out_dir: str, max_events: int = 50):
         # Prepare output
@@ -298,24 +313,17 @@ class PaperLoop:
                     continue
                 
                 try:
-                    # Parse OrderIntent
                     data = json.loads(line)
-                    # Support legacy or schema format
                     if "schema_id" in data and data["schema_id"] == "OrderIntent":
                         intent = OrderIntent.from_dict(data)
                     else:
-                        # Skip unknown or try to adapt
                         continue
                     
                     self.metrics["n_signals"] += 1
-                    
-                    # Log Intent first
                     fout.write(intent.to_json() + "\n")
                     
-                    # Process
                     generated_events = self.process_signal(intent)
                     
-                    # Log generated events
                     for ev in generated_events:
                         fout.write(ev.to_json() + "\n")
                         
@@ -324,10 +332,8 @@ class PaperLoop:
                 except Exception as e:
                     logger.error(f"Failed to process line: {e}")
         
-        # Finalize Metrics
         self._finalize_metrics()
         
-        # Save Metrics
         metrics_file = out_path / "metrics.json"
         with open(metrics_file, "w") as f:
             json.dump(self.metrics, f, indent=2)

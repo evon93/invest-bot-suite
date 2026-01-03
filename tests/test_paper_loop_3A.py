@@ -65,6 +65,10 @@ def test_paper_loop_run(run_dir, signals_file, risk_config):
     assert "latency_ms_mean" in metrics
     assert "latency_ms_p95" in metrics
     
+    # Check hardening: aliases
+    assert "rejected_by_reason" in metrics
+    assert metrics["rejected_by_reason"] == metrics["rejection_reasons"]
+    
     # Verify ranges
     assert metrics["max_drawdown_pct"] <= 0.0
     assert metrics["max_gross_exposure_pct"] >= 0.0
