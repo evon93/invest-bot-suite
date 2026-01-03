@@ -10,3 +10,18 @@ report/audit_1C_v0_5_bundle_20251204.tar.gz
 
 # Ignorar runs temporales de robustness (CI genera en cada run)
 report/runs/
+
+# H0: Ignore generated report artifacts (AG-2J-0-2)
+report/AG-*
+report/out_*
+report/dashboard_handoff/
+report/robustness_2D/
+report/test_2g_out/
+report/external_ai/inbox_external/
+
+# H0: Ignore validate_risk_config noise
+report/validate_risk_config_step5.txt
+
+# H0: Ignore accumulated handoff docs and copy-paste packs (AG-H0-EOL-1-5)
+report/DS-*_paste_pack.md
+report/ORCH_HANDOFF_*.md
