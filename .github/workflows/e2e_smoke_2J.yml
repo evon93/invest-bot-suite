@@ -1,0 +1,83 @@
+name: E2E Smoke 2J
+
+on:
+  pull_request:
+    branches: ['*']
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  e2e-smoke-2j:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Verify PyYAML installed
+        run: python -c "import yaml; print('PyYAML OK', yaml.__version__)"
+      
+      - name: Run E2E 2J Canonical Runner
+        run: |
+          python tools/run_e2e_2J.py \
+            --outdir report/runs/2J_e2e_synth_ci \
+            --seed 42
+      
+      - name: Verify Artifacts Existence
+        run: |
+          # 1. Calibration Results
+          test -f report/runs/2J_e2e_synth_ci/results_agg.csv || { echo "❌ Missing results_agg.csv"; exit 1; }
+          
+          # 2. Frozen Params
+          test -f configs/best_params_2H.json || { echo "❌ Missing configs/best_params_2H.json"; exit 1; }
+          
+          # 3. Rendered Prod Config
+          test -f configs/risk_rules_prod.yaml || { echo "❌ Missing configs/risk_rules_prod.yaml"; exit 1; }
+          
+          # 4. TopK Report
+          test -f report/topk_freeze_2H.json || { echo "❌ Missing report/topk_freeze_2H.json"; exit 1; }
+          
+          # 5. Dashboard
+          test -f report/dashboard_2J/index.html || { echo "❌ Missing report/dashboard_2J/index.html"; exit 1; }
+          
+          echo "✅ All expected artifacts exist."
+
+      - name: Upload Calibration Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-2j-calibration
+          path: report/runs/2J_e2e_synth_ci/
+          retention-days: 7
+
+      - name: Upload Config Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-2j-configs
+          path: |
+            configs/risk_rules_prod.yaml
+            configs/best_params_2H.json
+            report/topk_freeze_2H.json
+          retention-days: 7
+
+      - name: Upload Dashboard
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-2j-dashboard
+          path: report/dashboard_2J/
+          retention-days: 7

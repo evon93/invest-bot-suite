@@ -73,7 +73,7 @@ class TestCalibrationRunner2B:
         
         # --- 4. Verificar run_meta.json campos ---
         meta_data = json.loads((output_dir / "run_meta.json").read_text())
-        assert "seed" in meta_data, "seed missing from run_meta.json"
+        assert "seeds" in meta_data, "seeds missing from run_meta.json"
         assert "mode" in meta_data, "mode missing from run_meta.json"
         assert "num_combos" in meta_data, "num_combos missing from run_meta.json"
         assert "duration_s" in meta_data, "duration_s missing from run_meta.json"

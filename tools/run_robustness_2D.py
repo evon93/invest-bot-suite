@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 import numpy as np
+import os
 
 # Añadir repo root al path para imports
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -37,6 +38,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from backtest_initial import SimpleBacktester, calculate_metrics, generate_synthetic_prices
 from risk_manager_v0_5 import RiskManagerV05
 from tools.validate_robustness_2D_config import validate_config
+from tools.load_ohlcv import load_ohlcv
 
 # -------------------------------------------------------------------
 # Paths
@@ -283,8 +285,17 @@ def run_single_backtest(
     seed: int,
     baseline_cfg: Dict[str, Any],
     data_perturbation: Dict[str, Any],
+    realdata_prices: Optional[Any] = None,
 ) -> Dict[str, Any]:
-    """Run single backtest with given rules and return metrics."""
+    """Run single backtest with given rules and return metrics.
+    
+    Args:
+        rules: Risk rules configuration
+        seed: Random seed for synthetic data
+        baseline_cfg: Baseline configuration
+        data_perturbation: Data perturbation config
+        realdata_prices: Pre-loaded real OHLCV DataFrame (optional)
+    """
     np.random.seed(seed)
     
     start_date = baseline_cfg.get("dataset", {}).get("start_date", "2024-01-01")
@@ -296,7 +307,11 @@ def run_single_backtest(
     periods = 252  # 1 year default
     initial_capital = 10000
     
-    prices = generate_synthetic_prices(start_date=start_date, periods=periods)
+    # Use realdata if provided, otherwise generate synthetic
+    if realdata_prices is not None:
+        prices = realdata_prices.copy()
+    else:
+        prices = generate_synthetic_prices(start_date=start_date, periods=periods)
     
     # Apply subsample
     subsample = data_perturbation.get("subsample_ratio", 1.0)
@@ -370,6 +385,52 @@ def run_robustness(
     config = load_yaml(config_path)
     base_rules = load_yaml(RULES_PATH)
     best_params = load_json(BEST_PARAMS_PATH)
+    
+    # Resolve data_source (backward compat: default synthetic)
+    data_source = config.get("data_source", "synthetic")
+    realdata_prices = None
+    realdata_info = {}
+    
+    if data_source == "realdata":
+        # Resolve realdata path
+        realdata_cfg = config.get("realdata", {})
+        realdata_path = realdata_cfg.get("path") or os.environ.get("INVESTBOT_REALDATA_PATH")
+        
+        if not realdata_path:
+            raise ValueError(
+                "data_source='realdata' requires realdata.path in config "
+                "or INVESTBOT_REALDATA_PATH environment variable"
+            )
+        
+        realdata_path = Path(realdata_path)
+        if not realdata_path.is_absolute():
+            realdata_path = REPO_ROOT / realdata_path
+        
+        if not realdata_path.exists():
+            raise FileNotFoundError(f"Realdata file not found: {realdata_path}")
+        
+        print(f"Loading realdata from: {realdata_path}")
+        realdata_prices = load_ohlcv(realdata_path)
+        
+        # Apply date filtering if specified in baseline.dataset
+        baseline_dataset = config.get("baseline", {}).get("dataset", {})
+        start_date = baseline_dataset.get("start_date")
+        end_date = baseline_dataset.get("end_date")
+        
+        if start_date:
+            realdata_prices = realdata_prices[realdata_prices["date"] >= start_date]
+        if end_date:
+            realdata_prices = realdata_prices[realdata_prices["date"] <= end_date]
+        
+        realdata_prices = realdata_prices.reset_index(drop=True)
+        
+        realdata_info = {
+            "realdata_path": str(realdata_path),
+            "n_rows": len(realdata_prices),
+            "start_date": str(realdata_prices["date"].iloc[0]) if len(realdata_prices) > 0 else None,
+            "end_date": str(realdata_prices["date"].iloc[-1]) if len(realdata_prices) > 0 else None,
+        }
+        print(f"Loaded {realdata_info['n_rows']} rows ({realdata_info['start_date']} to {realdata_info['end_date']})")
     
     # Apply best_params to get candidate rules (in memory only)
     candidate_rules = deepcopy(base_rules)
@@ -506,6 +567,7 @@ def run_robustness(
                 scenario["seed"],
                 config.get("baseline", {}),
                 scenario["data_perturbation"],
+                realdata_prices=realdata_prices,
             )
             
             # Add metrics to row
@@ -565,6 +627,7 @@ def run_robustness(
         "start_time": datetime.now().isoformat(),
         "end_time": datetime.now().isoformat(),
         "mode": mode,
+        "data_source": data_source,
         "gates_profile": gates_profile,
         "git_head": get_git_head(),
         "python_version": sys.version.split()[0],
@@ -578,6 +641,9 @@ def run_robustness(
         "default_seed": default_seed,
         "candidate_params_applied_count": candidate_params_count,
     }
+    # Add realdata info if applicable
+    if realdata_info:
+        meta.update(realdata_info)
     with open(meta_file, "w", encoding="utf-8") as f:
         json.dump(meta, f, indent=2)
     

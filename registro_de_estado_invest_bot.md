@@ -11,6 +11,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 - **Commit HEAD:** `f663e18 docs(report): add AG-2D-03-3.7A return artifacts`
 
 **Entregables principales:**
+
 - Contrato: `configs/robustness_2D.yaml`
 - Spec: `report/robustness_2D_spec.md`
 - Runner: `tools/run_robustness_2D.py`
@@ -18,12 +19,14 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 - CI workflow: `.github/workflows/robustness_quick.yml`
 
 **Gates por modo:**
+
 - `quick`: sanity check (no exige sharpe/cagr, permite 0 trades)
 - `full`: quality gate (min_sharpe=0.3, min_cagr=0.05, min_trades=1)
 
 **Tests:** 114 passed
 
 **Documentación:**
+
 - `report/bridge_2D_to_2E_orchestrator.md`
 
 **Limitación conocida:** ~50% escenarios con 0 trades en full (señal sintética débil)
@@ -33,6 +36,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 ## Estado Actual (2025-12-26) — Fase 2C: Apply Best Params + EOL Hygiene
 
 **Entregables principales:**
+
 - Schema/Selector: `tools/best_params_schema_2C.py`
 - Builder CLI: `tools/build_best_params_2C.py`
 - Apply CLI: `tools/apply_calibration_topk.py`
@@ -40,34 +44,38 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 - Tests: `tests/test_best_params_2C.py`, `tests/test_apply_calibration_topk_2C.py`
 
 **Parámetros calibrados aplicados a risk_rules.yaml:**
+
 - `stop_loss.atr_multiplier`: 2.5 → 2.0
 - `max_drawdown.hard_limit_pct`: 0.08 → 0.1
 - `kelly.cap_factor`: 0.50 → 0.7
 
 **EOL Hygiene:**
+
 - Renormalización de 48 archivos a LF
 - Commit: `3c3d74b`
 
 **Tests:** 77 passed
 
 **Documentación:**
+
 - `bridge_2C_to_2D_report.md`
 
 ---
 
 ## Estado Actual (2025-12-23) — Fase 2B: Risk Calibration Runner
 
-
 - **Rama:** `feature/2B_risk_calibration`
 - **Estado:** ✅ COMPLETADO
 - **Commit HEAD:** `0611785 2E: make full calibration gate useful (active/inactive + activity gate + diagnostics)`
 
 **Entregables principales:**
+
 - Runner de calibración actualizado: `tools/run_calibration_2B.py`
 - Configuración con profiles: `configs/risk_calibration_2B.yaml`
 - Tests ampliados: `tests/test_calibration_runner_2B.py` (5 tests)
 
 **Nuevas capacidades 2E:**
+
 - Semántica `is_active`: `num_trades > 0`
 - Columnas diagnóstico: `rejection_no_signal`, `rejection_blocked_risk`, `rejection_size_zero`, `rejection_price_missing`, `rejection_other`
 - Activity gate: valida `min_active_n`, `min_active_rate`, `min_active_pass_rate`
@@ -76,12 +84,14 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 - Línea GATE en stdout: `GATE full: PASS/FAIL | active_n=.. active_rate=.. reasons=[..]`
 
 **Campos añadidos en run_meta.json:**
+
 - `active_n`, `inactive_n`, `active_rate`, `inactive_rate`
 - `active_pass_rate`
 - `gate_passed`, `insufficient_activity`, `gate_fail_reasons`, `suggested_exit_code`
 - `rejection_reasons_agg`, `top_inactive_reasons`
 
 **Hallazgo clave (AG-2E-1-2-extract):**
+
 - 66.7% de combinaciones producen 0 trades
 - Causa: `kelly.cap_factor < 0.7` → inactividad total
 - El gate detecta correctamente `insufficient_activity` cuando `active_rate < 60%`
@@ -89,6 +99,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 **Tests:** 61 passed
 
 **Documentación:**
+
 - `report/AG-2E-2-1_return.md`
 - `report/bridge_2E_full_gate_useful.md`
 
@@ -96,7 +107,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ## Estado Anterior (2025-12-23) — Fase 2B: Risk Calibration Runner
 
-##  Estado Actual (2025-11-27)
+## Estado Actual (2025-11-27)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
 - **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
@@ -121,7 +132,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
     - eventos auxiliares (`PortfolioSnapshot`, `MarketFeatures`, etc.).
   - No se ha modificado código productivo; 1B es 100% diseño y documentación previa a la implementación (1C).
 
-##  Estado Actual (2025-11-26)
+## Estado Actual (2025-11-26)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
 - **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
@@ -149,7 +160,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
     - Tests de riesgo → matriz de escenarios y brechas de cobertura.
   - Sin modificación de código productivo; solo documentación y clarificación de contrato de riesgo.
 
-##  Estado Actual (2025-11-24)
+## Estado Actual (2025-11-24)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
 - **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
@@ -179,7 +190,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
     - `report/pytest_20251124_backtest_0C_after_fix.txt`
   - Snapshot tests: `report/test_backtest_deepseek_snapshot_0B.py`.
 
-##  Estado Actual (2025-11-24)
+## Estado Actual (2025-11-24)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
 - **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
@@ -207,7 +218,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
   - Drawdown calculado con `cummax` + `fillna(0.0)` para evitar NaN.
   - Sharpe ratio forzado a 0 si la volatilidad es 0 o NaN.
 
-##  Estado Actual (2025-11-21)
+## Estado Actual (2025-11-21)
 
 - **Entorno**: Windows 11 host · WSL 2 Ubuntu 24.04 (Python 3.12.3 en `.venv`).
 - **Ruta de trabajo**: `/mnt/c/Users/ivn_b/Desktop/invest-bot-suite`.
@@ -218,7 +229,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-##  Estado Actual (2025-07-12)
+## Estado Actual (2025-07-12)
 
 - **Entorno**: Windows 11 23H2 host  **WSL 2** (Ubuntu 24.04, kernel 5.15, GPU habilitada).
 - **Ruta de trabajo**: `~/invest-bot-suite` (ext4, fuera de OneDrive).
@@ -240,7 +251,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-##  Estado Actual (2025-07-08)
+## Estado Actual (2025-07-08)
 
 - **Freeze candidate v1.3:** código sincronizado en repo privado `evon93/invest-bot-suite`.
 - RiskManager v0.5 (parches ISS-1923) en rama `main`.
@@ -250,9 +261,10 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-##  Historial de Fases Clave
+## Historial de Fases Clave
 
 ### 2025-11-27  Paso 1B — Diseño avanzado de guardrails de riesgo
+
 - Generada spec de guardrails avanzados:
   - `report/risk_advanced_guardrails_spec_1B_20251127.md`
   - Basada en auditoría 1A, risk_rules.yaml y código v0.4.
@@ -266,6 +278,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 - Sin cambios de lógica aún; 1B sirve como base para la futura implementación en la Fase 1C.
 
 ### 2025-11-26  Paso 1A — Auditoría sistema de riesgo
+
 - Congelado estado de tests de riesgo (`test_risk_suite.py`, `test_risk_deepseek.py`) con artefactos en `report/pytest_1A_*.txt`.
 - Generados resúmenes estructurados:
   - Reglas declarativas (`risk_rules.yaml`).
@@ -276,22 +289,25 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
   - Documentadas brechas de cobertura de tests para ser abordadas en fases 1B/1C.
 
 ### 2025-07-12  Migración a WSL 2 & detección de 6 tests FAIL
+
 - Copiado repo a `~/invest-bot-suite` en volumen ext4.
 - Creado venv `.venv` y actualización mínima de dependencias.
 - Corregido indent en `backtest_initial.py`; aparecen 6 FAIL en rebalanceo.
 
 ### 2025-07-08  v1.3 (Design-Freeze loop)
--  Repo GitHub privado creado y código base push.
--  Añadido workflow **edge_tests** + artefactos logs.
--  Fixes críticos ISS-1923 integrados (cascade alert, liquidity multiplier Asia, stablecoin de-peg, gas multipliers, edge-tests CI).
+
+- Repo GitHub privado creado y código base push.
+- Añadido workflow **edge_tests** + artefactos logs.
+- Fixes críticos ISS-1923 integrados (cascade alert, liquidity multiplier Asia, stablecoin de-peg, gas multipliers, edge-tests CI).
 
 ### 2025-07-04
+
 - Base limpia RiskManager v0.4 + SHIM universal + tests `3 passed`.
 - Backup generado: `backup_20250704_1753.zip`.
 
 ---
 
-##  Lecciones Aprendidas
+## Lecciones Aprendidas
 
 1. Sin CI no hay auditoría IA  workflow mínimo indispensable.
 2. Parar trading en rangos y cascadas evita DD > 15 %.
@@ -300,7 +316,7 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-##  Próximos Hitos Inmediatos
+## Próximos Hitos Inmediatos
 
 | Semana | Hito | Responsable |
 |--------|------|-------------|
@@ -312,13 +328,15 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-##  Trazabilidad IA  IA
+## Trazabilidad IA  IA
+
 - **TRACE_ID última build:** migrate_wsl2_v1.3_candidate
 - IAs colaboradoras: Kai (o3), Claude Opus 4, Gemini 2.5 Pro, DeepSeek R1.
 
 ---
 
-##  Notas
+## Notas
+
 - Actualizar este registro tras cada push relevante.
 - Adjuntar artefactos (edge_logs, metrics) en cada auditoría.
 - Mantener backups tras milestones.
@@ -363,7 +381,6 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
     - Reglas de liquidez (ADV, % de volumen) para limitar tamaño de posiciones.
     - Overrides por activo/estrategia para ajustes finos.
   - Integrar estos guardrails adicionales con `stress_tester` y métricas de portfolio (Calmar, Max DD, etc.).
-
 
 ## PLAN 1D.validation — RiskManager v0.5 (DD/ATR/Kelly) · cierre y puente a 2A
 
@@ -415,7 +432,6 @@ Decisión y puente a 2A:
   - Definir el contrato RiskContext v0.5 como base para futuras versiones.
 - El ajuste fino de parámetros (por ejemplo relajación de Kelly para ETF, escenarios alternativos, multi-portfolio, etc.) se delega explícitamente a los planes de la serie 2A/2B, donde se trabajará ya con RiskContext formalizado como dataclass y objetivos cuantitativos de riesgo/retorno.
 
-
 ## 2025-12-11 — Workflow Antigravity v0.1 (infraestructura)
 
 - Rama de trabajo: feature/workflow_antigravity_v0_1
@@ -423,6 +439,7 @@ Decisión y puente a 2A:
   sin modificar la lógica de trading ni de riesgo.
 
 Cambios principales:
+
 - Carpeta `.ai/`:
   - `.ai/active_context.md`: estado técnico resumido (rama actual, snapshots de pytest).
   - `.ai/decisions_log.md`: log de decisiones técnicas (incluye creación de protocolo y tooling).
@@ -437,8 +454,33 @@ Cambios principales:
   - `tests/test_risk_config_schema.py`: garantiza que `risk_rules.yaml` es estructuralmente válido.
 
 Estado de validación:
+
 - `python tools/validate_risk_config.py` → Errors: 0, Warnings: 4 (secciones recomendadas ausentes).
 - `python -m pytest -q` → 48 tests OK.
 - Snapshots:
   - `report/validate_risk_config_step5.txt`
   - `report/pytest_antigravity_step5.txt`
+
+## 2026-01-03  Fase 2J.4: Python Version Standardization
+
+- **Decisión**: Python 3.12.x es el runtime canónico para CI y desarrollo local.
+- **Rationale**: Alineación de .venv local (3.12.3) con GitHub Actions (3.12). Windows 3.13 queda fuera del baseline.
+- **Alcance**: Todos los workflows (.github/workflows/*.yml) fijados a python-version: 3.12.
+- **Estado**: IMPLEMENTED.
+
+## 2026-01-03  Fase 2J.5: Cierre y Puente a 3A
+
+- **Hito**: Completada la fase de Pipeline Sintético E2E.
+- **Bridge Report**: [bridge_2J_to_3A_report.md](bridge_2J_to_3A_report.md)
+- **Runner Canónico**: `tools/run_e2e_2J.py`
+- **Configuración Producción**: configs/risk_rules_prod.yaml
+- **Estado**: READY para 3A (Paper Trading).
+
+## 2026-01-03  Fase 3A: Paper Trading Loop & Observability
+
+- **Hito**: Infraestructura de simulación event-driven completada.
+- **Bridge Report**: [bridge_3A_to_3B_report.md](bridge_3A_to_3B_report.md)
+- **Contracts**: v1 (contracts/event_messages.py).
+- **Runner**: 	ools/run_paper_loop_3A.py (con métricas). 
+- **Estado**: READY para 3B (Live Integration).
+

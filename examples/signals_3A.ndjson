@@ -1,0 +1,4 @@
+{"schema_id": "OrderIntent", "event_id": "sig-001", "ts": "2026-01-03T20:00:00Z", "symbol": "BTC-USD", "side": "BUY", "qty": 0.5, "meta": {"strategy": "demo"}}
+{"schema_id": "OrderIntent", "event_id": "sig-002", "ts": "2026-01-03T20:00:01Z", "symbol": "ETH-USD", "side": "SELL", "notional": 1000.0, "meta": {"strategy": "demo"}}
+{"schema_id": "OrderIntent", "event_id": "sig-003", "ts": "2026-01-03T20:00:02Z", "symbol": "SOL-USD", "side": "BUY", "qty": 10.0, "limit_price": 150.0, "order_type": "LIMIT"}
+{"schema_id": "OrderIntent", "event_id": "sig-004", "ts": "2026-01-03T20:00:03Z", "symbol": "XRP-USD", "side": "BUY", "qty": 1000.0}

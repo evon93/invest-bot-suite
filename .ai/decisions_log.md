@@ -105,3 +105,9 @@ Criterio de aceptación:
 Evidencia:
 - report/AG-2B-3-3-8_return.md
 - report/out_2B_3_3_grid_discriminates_20251230/
+
+## [2026-01-03] DECISION - Python Version Truth
+- **Context**: Unify CI/Local runtime version.
+- **Decision**: Python 3.12.x is the canonical runtime for CI and local development.
+- **Rationale**: Windows 3.13 is not yet the baseline. All workflows (ci.yml, e2e_smoke_2J.yml, etc) use 3.12. Local .venv is 3.12.3.
+- **Status**: IMPLEMENTED.
