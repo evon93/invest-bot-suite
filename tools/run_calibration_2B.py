@@ -146,13 +146,16 @@ def parse_seeds(seeds_str: str) -> List[int]:
     parts = [s.strip() for s in seeds_str.split(",")]
     seeds = []
     for p in parts:
+        if not p:  # Skip empty parts (e.g. trailing comma)
+            continue
         try:
             seed = int(p)
-            if seed < 0:
-                raise ValueError(f"Seed must be non-negative: {seed}")
-            seeds.append(seed)
         except ValueError:
             raise ValueError(f"Invalid seed value: '{p}'")
+
+        if seed < 0:
+            raise ValueError(f"Seed must be non-negative: {seed}")
+        seeds.append(seed)
     
     # Check for duplicates
     if len(seeds) != len(set(seeds)):
