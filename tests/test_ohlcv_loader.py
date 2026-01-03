@@ -1,6 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
+import datetime
 from data_adapters.ohlcv_loader import load_ohlcv
 
 def test_load_csv_standard_aliases(tmp_path):
@@ -19,7 +20,8 @@ def test_load_csv_standard_aliases(tmp_path):
     df = load_ohlcv(csv_path)
     
     assert list(df.columns) == ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-    assert df['timestamp'].dtype.name.startswith("datetime64[ns, UTC]")
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert str(df["timestamp"].dt.tz) == "datetime.timezone.utc" or str(df["timestamp"].dt.tz) == "UTC"
     assert len(df) == 2
     assert df.iloc[0]['open'] == 100.0
 
@@ -91,3 +93,85 @@ def test_unsorted_timestamps(tmp_path):
     
     with pytest.raises(ValueError, match="Timestamps are not strictly monotonic"):
         load_ohlcv(csv_path)
+
+def test_epoch_seconds_timestamp_parses_to_utc(tmp_path):
+    csv_path = tmp_path / "epoch_sec.csv"
+    # ~2023 in seconds
+    ts = [1672531200, 1672534800] 
+    data = {
+        "ts": ts,
+        "o": [1, 2], "h": [3, 4], "l": [1, 2], "c": [2, 3], "v": [10, 20]
+    }
+    pd.DataFrame(data).to_csv(csv_path, index=False)
+    
+    df = load_ohlcv(csv_path)
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert df["timestamp"].iloc[0].year == 2023
+
+def test_epoch_milliseconds_timestamp_parses_to_utc(tmp_path):
+    csv_path = tmp_path / "epoch_ms.csv"
+    # ~2023 in milliseconds
+    ts = [1672531200000, 1672534800000]
+    data = {
+        "ts": ts,
+        "o": [1, 2], "h": [3, 4], "l": [1, 2], "c": [2, 3], "v": [10, 20]
+    }
+    pd.DataFrame(data).to_csv(csv_path, index=False)
+    
+    df = load_ohlcv(csv_path)
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert df["timestamp"].iloc[0].year == 2023
+
+def test_epoch_microseconds_timestamp_parses_to_utc(tmp_path):
+    csv_path = tmp_path / "epoch_us.csv"
+    # ~2023 in microseconds
+    ts = [1672531200000000, 1672534800000000]
+    data = {
+        "ts": ts,
+        "o": [1, 2], "h": [3, 4], "l": [1, 2], "c": [2, 3], "v": [10, 20]
+    }
+    pd.DataFrame(data).to_csv(csv_path, index=False)
+    
+    df = load_ohlcv(csv_path)
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert df["timestamp"].iloc[0].year == 2023
+
+def test_timezone_offset_string_converts_to_utc(tmp_path):
+    csv_path = tmp_path / "tz_offset.csv"
+    # 2023-01-01 00:00:00-05:00 maps to 05:00 UTC
+    data = {
+        "ts": ["2023-01-01 00:00:00-05:00", "2023-01-01 01:00:00-05:00"],
+        "o": [1, 2], "h": [3, 4], "l": [1, 2], "c": [2, 3], "v": [10, 20]
+    }
+    pd.DataFrame(data).to_csv(csv_path, index=False)
+    
+    df = load_ohlcv(csv_path)
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    # 00:00 -0500 is 05:00 UTC
+    assert df["timestamp"].iloc[0].hour == 5
+
+def test_micro_consumption_pattern_itertuples_and_rolling(tmp_path):
+    csv_path = tmp_path / "micro.csv"
+    data = {
+        "ts": ["2023-01-01 00:00", "2023-01-01 01:00", "2023-01-01 02:00"],
+        "o": [10.0, 11.0, 12.0],
+        "h": [12.0, 13.0, 14.0],
+        "l": [9.0, 10.0, 11.0],
+        "c": [11.0, 12.0, 13.0],
+        "v": [100, 200, 300]
+    }
+    pd.DataFrame(data).to_csv(csv_path, index=False)
+    
+    df = load_ohlcv(csv_path)
+    
+    # Test strict attribute access (used in paper loop)
+    for row in df.itertuples():
+        assert hasattr(row, 'timestamp')
+        assert hasattr(row, 'close')
+        assert hasattr(row, 'volume')
+        assert isinstance(row.close, float)
+    
+    # Test rolling capability
+    ma = df['close'].rolling(2).mean()
+    assert pd.isna(ma.iloc[0])
+    assert ma.iloc[1] == 11.5

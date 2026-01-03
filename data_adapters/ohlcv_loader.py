@@ -8,12 +8,12 @@ logger = logging.getLogger(__name__)
 
 # Column Aliases Mapping
 COLUMN_ALIASES = {
-    'timestamp': ['ts', 'datetime', 'date', 'time', 'timestamp'],
-    'open': ['o', 'open'],
-    'high': ['h', 'high'],
-    'low': ['l', 'low'],
-    'close': ['c', 'close'],
-    'volume': ['v', 'vol', 'volume']
+    'timestamp': ['ts', 'datetime', 'date', 'time', 'timestamp', 'Timestamp', 'Date', 'Datetime'],
+    'open': ['o', 'open', 'Open', 'open_price'],
+    'high': ['h', 'high', 'High', 'high_price'],
+    'low': ['l', 'low', 'Low', 'low_price'],
+    'close': ['c', 'close', 'Close', 'close_price'],
+    'volume': ['v', 'vol', 'volume', 'Volume', 'volumen']
 }
 
 REQUIRED_COLUMNS = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
@@ -27,9 +27,7 @@ def load_ohlcv(path: Union[str, Path]) -> pd.DataFrame:
         path: Path to the CSV or Parquet file.
 
     Returns:
-        pd.DataFrame: Normalized OHLCV DataFrame with UTC timestamp index (or column).
-        Actually, per req, return DataFrame with columns. 
-        We will keep 'timestamp' as a column to match "pd.DataFrame (OHLCV normalizado)".
+        pd.DataFrame: Normalized OHLCV DataFrame with UTC timestamp column.
     """
     path = Path(path)
     if not path.exists():
@@ -68,9 +66,30 @@ def load_ohlcv(path: Union[str, Path]) -> pd.DataFrame:
         raise ValueError(f"Missing required columns: {missing}. Found: {list(df.columns)}")
 
     # 3. Parse Timestamp
-    # utc=True -> converts to UTC datetime64[ns, UTC]
+    # Heuristic for epoch detection
     try:
-        df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+        # Check if column is numeric
+        if pd.api.types.is_numeric_dtype(df['timestamp']):
+            # Get max value to infer unit (using first non-null as proxy or max)
+            max_val = df['timestamp'].max()
+            if pd.isna(max_val):
+                 raise ValueError("Timestamp column is empty or all NaN")
+            
+            # Heuristics
+            if max_val < 3e11:   # ~250 years in seconds (e.g. 1.7e9 is 2024)
+                unit = 's'
+            elif max_val < 3e14: # milliseconds
+                unit = 'ms'
+            elif max_val < 3e17: # microseconds
+                unit = 'us'
+            else:                # nanoseconds
+                unit = 'ns'
+            
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit=unit, utc=True)
+        else:
+            # String parsing
+            df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+            
     except Exception as e:
         raise ValueError(f"Failed to parse timestamp column: {e}")
 
