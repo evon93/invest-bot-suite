@@ -2,7 +2,7 @@
 
 **Date**: 2026-01-03
 **Status**: 2J COMPLETE
-**Current Head**: `fc02e41` (2J.4: standardize python 3.12 version policy)
+**Current Head**: `0bf352c` (2J.5: bridge 2J to 3A (docs))
 **Branch**: `main`
 
 ## 1. Estado Actual (Phase 2J Complete)
