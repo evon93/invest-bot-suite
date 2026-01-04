@@ -21,8 +21,10 @@ from strategy_engine.strategy_v0_7 import generate_order_intents
 from contracts.event_messages import OrderIntent, RiskDecision, ExecutionReport
 from execution.execution_adapter_v0_2 import simulate_execution
 
-# Risk Manager (Existing v0.4 as requested)
+# Risk Manager (v0.4 default, v0.6 event-native optional)
 from risk_manager_v_0_4 import RiskManager
+from risk_manager_v0_6 import RiskManagerV06
+from contracts.events_v1 import OrderIntentV1, RiskDecisionV1
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
 logger = logging.getLogger("Runner3B")
@@ -75,13 +77,26 @@ def run_integration_pipeline(
     logger.info(f"Loaded {len(df)} rows.")
     
     # 2. Init Components
-    risk_cfg_path = config.get("risk_rules", "configs/risk_rules_prod.yaml") # Default or passed
-    # If file doesn't exist, create a dummy dict for v0.4 init
+    risk_cfg_path = config.get("risk_rules", "configs/risk_rules_prod.yaml")
+    risk_version = config.get("risk_version", "v0.4")
+    
+    # Initialize appropriate RiskManager version
     if Path(risk_cfg_path).exists():
-        risk_manager = RiskManager(risk_cfg_path)
+        risk_rules = risk_cfg_path
     else:
         logger.warning(f"Risk config {risk_cfg_path} not found. Using defaults.")
-        risk_manager = RiskManager({})
+        risk_rules = {}
+    
+    if risk_version == "v0.6":
+        logger.info("Using RiskManager v0.6 (event-native)")
+        risk_manager_v06 = RiskManagerV06(risk_rules)
+        risk_manager = risk_manager_v06.v04  # Keep v04 ref for compat
+        use_v06 = True
+    else:
+        logger.info("Using RiskManager v0.4 (default)")
+        risk_manager = RiskManager(risk_rules)
+        risk_manager_v06 = None
+        use_v06 = False
         
     strat_params = config.get("strategy_params", {"fast_period": 3, "slow_period": 5})
     exec_cfg = config.get("execution_config", {"slippage_bps": 5.0})
@@ -121,8 +136,24 @@ def run_integration_pipeline(
             intent.meta['current_price'] = float(current_price) 
             intent.meta['close'] = float(current_price)
             
-            # B. Risk
-            decision = risk_shim_adapter(risk_manager, intent)
+            # B. Risk (version-aware)
+            if use_v06:
+                # Convert to OrderIntentV1 for v0.6
+                intent_v1 = OrderIntentV1(
+                    symbol=intent.symbol,
+                    side=intent.side,
+                    qty=intent.qty,
+                    notional=intent.notional,
+                    order_type=intent.order_type,
+                    limit_price=intent.limit_price,
+                    event_id=intent.event_id,
+                    trace_id=intent.trace_id,
+                    meta=intent.meta,
+                )
+                decision = risk_manager_v06.assess(intent_v1)
+            else:
+                decision = risk_shim_adapter(risk_manager, intent)
+            
             logger.info(f"Risk DECISION: {decision}")
             events.append(decision)
             
@@ -153,12 +184,19 @@ def main():
     parser.add_argument("--data", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--ticker", default="BTC-USD")
+    parser.add_argument(
+        "--risk-version", 
+        choices=["v0.4", "v0.6"], 
+        default="v0.4",
+        help="Risk manager version: v0.4 (default) or v0.6 (event-native)"
+    )
     args = parser.parse_args()
     
     cfg = {
         "ticker": args.ticker,
         "strategy_params": {"fast_period": 3, "slow_period": 5},
-        "execution_config": {"slippage_bps": 5.0, "partial_fill": False}
+        "execution_config": {"slippage_bps": 5.0, "partial_fill": False},
+        "risk_version": args.risk_version,
     }
     
     run_integration_pipeline(args.data, args.out, cfg)
