@@ -4,7 +4,24 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-04) — Fase 3B: Integrated Live-Like Runner
+## Estado Actual (2026-01-04) — Fase 3C: Event Loop & Hardening
+
+- **Rama:** `main` (feature/3C_5_2_ds_hardening merged indirectly via handover)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **LoopStepper:** `engine/loop_stepper.py` E2E determinista.
+  - **Contracts V1:** `contracts/events_v1.py` (OrderIntentV1, RiskDecisionV1, ExecutionReportV1).
+  - **SQLite Position Store:** `state/position_store_sqlite.py` con `apply_fill` atómico y manejo de shorts/crosses.
+  - **CI Smoke:** `.github/workflows/smoke_3C.yml` + `data/ci_smoke.csv`.
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3C_close_20260104.md`
+  - `bridge_3C_to_3D_report.md`
+- **Auditorías Externas Resueltas:**
+  - DS-3C-4-2 (SQLite), DS-3C-5-1 (LoopStepper Determinism), G3/GR-3C-3-1 (Risk V1).
+
+---
+
+## Estado Anterior (2026-01-04) — Fase 3B: Integrated Live-Like Runner
 
 - **Rama:** `main` (feature/3B_integrated_runner merged indirectly)
 - **Estado:** ✅ COMPLETADO
