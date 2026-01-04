@@ -4,7 +4,10 @@
 **Phase Completed:** 3B (Integrated Live-Like Runner)
 **Status:** ✅ CLOSED
 **Date:** 2026-01-04
-**Repo State:** `main` branch, HEAD `2d14d5f`
+**Repo State:** `main` branch, HEAD `3f35a7d`
+
+> [!NOTE]
+> **Corrección (AG-3C-0-1, 2026-01-04):** El HEAD original reportado (`2d14d5f`) correspondía al momento de redacción del bridge doc. Posteriormente se añadió el commit `3f35a7d` (este handoff report). Se corrige para reflejar el estado tras el cierre completo de 3B.
 
 ---
 
