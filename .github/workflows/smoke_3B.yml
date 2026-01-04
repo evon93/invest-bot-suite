@@ -1,0 +1,68 @@
+name: Smoke 3B Integration
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  smoke-3b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Pytest (Gate)
+      run: |
+        # Run specific integration tests first
+        python -m pytest tests/test_run_live_integration_3B.py -q
+        # Run full suite (quick)
+        python -m pytest -q
+
+    - name: Generate Synthetic Data for Runner
+      run: |
+        mkdir -p report/runs/3B_CI
+        python -c 'import pandas as pd; import numpy as np; dates=pd.date_range("2024-01-01", periods=50, freq="1h", tz="UTC"); closes=np.concatenate([np.full(25, 100.0), np.full(25, 110.0)]); df=pd.DataFrame({"timestamp":dates, "open":closes, "high":closes, "low":closes, "close":closes, "volume":1000}); df.to_csv("report/runs/3B_CI/ohlcv.csv", index=False)'
+
+    - name: Execute Integrated Runner 3B
+      run: |
+        python tools/run_live_integration_3B.py \
+          --data report/runs/3B_CI/ohlcv.csv \
+          --out report/runs/3B_CI/events.ndjson \
+          --ticker CI-ASSET
+
+    - name: Verify Output Exists
+      run: |
+        if [ ! -f report/runs/3B_CI/events.ndjson ]; then
+          echo "Output file missing!"
+          exit 1
+        fi
+        # Check integrity
+        COUNT=$(wc -l < report/runs/3B_CI/events.ndjson)
+        echo "Events generated: $COUNT"
+        if [ "$COUNT" -eq "0" ]; then
+          echo "No events generated!"
+          exit 1
+        fi
+
+    - name: Upload Artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: 3b-smoke-events
+        path: report/runs/3B_CI/events.ndjson
+        retention-days: 5
