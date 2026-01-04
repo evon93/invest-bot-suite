@@ -4,6 +4,23 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
+## Estado Actual (2026-01-04) — Fase 3B: Integrated Live-Like Runner
+
+- **Rama:** `main` (feature/3B_integrated_runner merged indirectly)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Integrated Runner:** `tools/run_live_integration_3B.py` (Loader->Strat->Shim->Exec->Log)
+  - **Live-Like Exec Adapter:** `execution/execution_adapter_v0_2.py` (Deterministic Slippage/Latency)
+  - **Strategy Engine v0.7:** `strategy_engine/strategy_v0_7.py` (Functional, SMA Crossover)
+  - **CI Smoke:** `.github/workflows/smoke_3B.yml`
+- **Documentación:**
+  - `report/bridge_3B_to_3C_20260104.md`
+- **Notas Técnicas:**
+  - Se utiliza un **Risk Shim** para adaptar `OrderIntent` al `RiskManager v0.4` existente.
+  - Hardening de `ohlcv_loader` para soporte estricto de UTC y Epochs.
+
+---
+
 ## Estado Actual (2025-12-27) — Fase 2D: Parameter Robustness Testing
 
 - **Rama:** `feature/2D_param_robustness`
@@ -481,6 +498,5 @@ Estado de validación:
 - **Hito**: Infraestructura de simulación event-driven completada.
 - **Bridge Report**: [bridge_3A_to_3B_report.md](bridge_3A_to_3B_report.md)
 - **Contracts**: v1 (contracts/event_messages.py).
-- **Runner**: 	ools/run_paper_loop_3A.py (con métricas). 
+- **Runner**:  ools/run_paper_loop_3A.py (con métricas).
 - **Estado**: READY para 3B (Live Integration).
-
