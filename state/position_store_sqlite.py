@@ -119,7 +119,7 @@ class PositionStoreSQLite:
         """
         conn = self._get_connection()
         now = datetime.now(timezone.utc).isoformat()
-        meta_json = json.dumps(meta) if meta else None
+        meta_json = json.dumps(meta, sort_keys=True, separators=(',', ':')) if meta else None
         
         conn.execute(
             """
@@ -172,59 +172,148 @@ class PositionStoreSQLite:
         price: float,
     ) -> Dict[str, Any]:
         """
-        Apply a fill to update position.
+        Apply a fill to update position (transactional).
         
-        BUY: Increases position, recalculates avg_price
-        SELL: Decreases position (closes if qty matches)
+        Semantics:
+        - BUY adds positive qty, SELL adds negative qty to position
+        - Increasing position: recalculate weighted avg_price
+        - Decreasing/reducing position: keep existing avg_price
+        - Cross (sign flip): avg_price = fill price
+        - Full close (qty near zero): delete position
         
         Args:
-            symbol: Asset symbol
-            side: "BUY" or "SELL"
-            qty: Fill quantity (always positive)
-            price: Fill price
+            symbol: Asset symbol (non-empty string)
+            side: "BUY" or "SELL" (case-insensitive)
+            qty: Fill quantity (must be > 0)
+            price: Fill price (must be > 0)
             
         Returns:
-            Updated position dict
-        """
-        if qty <= 0:
-            raise ValueError(f"qty must be positive, got {qty}")
-        if side.upper() not in ("BUY", "SELL"):
-            raise ValueError(f"side must be BUY or SELL, got {side}")
-        
-        side = side.upper()
-        current = self.get_position(symbol)
-        
-        if current is None:
-            # No existing position
-            if side == "BUY":
-                new_qty = qty
-                new_avg = price
-            else:
-                # SELL with no position: short position
-                new_qty = -qty
-                new_avg = price
-        else:
-            current_qty = current["qty"]
-            current_avg = current["avg_price"] or 0.0
+            Updated position dict (or closed=True if closed)
             
-            if side == "BUY":
-                # Add to position
-                total_value = (current_qty * current_avg) + (qty * price)
-                new_qty = current_qty + qty
-                new_avg = total_value / new_qty if new_qty != 0 else 0.0
+        Raises:
+            ValueError: If inputs are invalid
+        """
+        # Validate inputs
+        if not symbol or not isinstance(symbol, str) or not symbol.strip():
+            raise ValueError(f"symbol must be a non-empty string, got {symbol!r}")
+        symbol = symbol.strip()
+        
+        if not isinstance(side, str):
+            raise ValueError(f"side must be a string, got {type(side)}")
+        side = side.upper().strip()
+        if side not in ("BUY", "SELL"):
+            raise ValueError(f"side must be BUY or SELL, got {side!r}")
+        
+        if qty is None or qty <= 0:
+            raise ValueError(f"qty must be positive, got {qty}")
+        
+        if price is None or price <= 0:
+            raise ValueError(f"price must be positive, got {price}")
+        
+        # Transactional: use single connection with explicit transaction
+        conn = self._get_connection()
+        
+        with conn:  # Implicit transaction
+            # Read current position within transaction
+            cursor = conn.execute(
+                "SELECT symbol, qty, avg_price FROM positions WHERE symbol = ?",
+                (symbol,)
+            )
+            row = cursor.fetchone()
+            
+            if row is None:
+                current_qty = 0.0
+                current_avg = 0.0
             else:
-                # Reduce position
-                new_qty = current_qty - qty
-                # Keep avg_price on sell (realized P&L would be external)
-                new_avg = current_avg if new_qty != 0 else None
+                current_qty = float(row["qty"])
+                current_avg = float(row["avg_price"]) if row["avg_price"] is not None else 0.0
+            
+            # Calculate new qty and avg_price
+            new_qty, new_avg = self._compute_new_position(
+                current_qty, current_avg, side, qty, price
+            )
+            
+            # Handle position closure
+            if abs(new_qty) < 1e-10:
+                conn.execute("DELETE FROM positions WHERE symbol = ?", (symbol,))
+                return {"symbol": symbol, "qty": 0.0, "avg_price": None, "closed": True}
+            
+            # Upsert within transaction
+            now = datetime.now(timezone.utc).isoformat()
+            conn.execute(
+                """
+                INSERT INTO positions (symbol, qty, avg_price, updated_at, meta_json)
+                VALUES (?, ?, ?, ?, NULL)
+                ON CONFLICT(symbol) DO UPDATE SET
+                    qty = excluded.qty,
+                    avg_price = excluded.avg_price,
+                    updated_at = excluded.updated_at
+                """,
+                (symbol, new_qty, new_avg, now)
+            )
         
-        # Handle position closure
-        if abs(new_qty) < 1e-10:
-            self.delete_position(symbol)
-            return {"symbol": symbol, "qty": 0.0, "avg_price": None, "closed": True}
-        
-        self.upsert_position(symbol, new_qty, new_avg)
+        # Read back the updated position
         return self.get_position(symbol)
+
+    def _compute_new_position(
+        self,
+        current_qty: float,
+        current_avg: float,
+        side: str,
+        fill_qty: float,
+        fill_price: float,
+    ) -> tuple:
+        """
+        Compute new position qty and avg_price after a fill.
+        
+        Rules (DS-3C-4-1):
+        1. Increasing position (same sign): weighted average
+        2. Reducing position (opposite sign, no cross): keep avg_price
+        3. Crossing zero: avg_price = fill_price
+        4. Opening from flat: avg_price = fill_price
+        
+        Args:
+            current_qty: Current position quantity (can be negative for short)
+            current_avg: Current average price
+            side: "BUY" or "SELL"
+            fill_qty: Fill quantity (always positive)
+            fill_price: Fill price
+            
+        Returns:
+            Tuple of (new_qty, new_avg_price)
+        """
+        # Determine the signed fill delta
+        if side == "BUY":
+            delta = fill_qty  # Positive
+        else:
+            delta = -fill_qty  # Negative
+        
+        # Case 1: No existing position (flat)
+        if abs(current_qty) < 1e-10:
+            return (delta, fill_price)
+        
+        new_qty = current_qty + delta
+        
+        # Case 2: Full close (new position is flat)
+        if abs(new_qty) < 1e-10:
+            return (0.0, None)
+        
+        # Determine if this is increasing, reducing, or crossing
+        same_sign_as_current = (delta > 0 and current_qty > 0) or (delta < 0 and current_qty < 0)
+        crossed_zero = (current_qty > 0 and new_qty < 0) or (current_qty < 0 and new_qty > 0)
+        
+        if crossed_zero:
+            # Case 3: Crossed zero - avg_price = fill price
+            return (new_qty, fill_price)
+        
+        if same_sign_as_current:
+            # Case 4: Increasing position - weighted average
+            total_value = (abs(current_qty) * current_avg) + (fill_qty * fill_price)
+            new_avg = total_value / abs(new_qty)
+            return (new_qty, new_avg)
+        else:
+            # Case 5: Reducing position (partial cover) - keep avg_price
+            return (new_qty, current_avg)
 
     # -------------------------------------------------------------------------
     # Key-Value Store

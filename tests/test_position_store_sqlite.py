@@ -233,3 +233,102 @@ class TestKeyValueStore:
             
             assert deleted is True
             assert store.get_kv("key1") is None
+
+
+class TestApplyFillHardening:
+    """Tests for apply_fill() hardening (shorts, crosses, validation)."""
+
+    def test_short_increase_recalculates_avg(self, tmp_path):
+        """SELL on existing short should increase short and recalc avg."""
+        db_path = tmp_path / "state.db"
+        with PositionStoreSQLite(db_path) as store:
+            # Open short
+            store.apply_fill("BTC/USDT", "SELL", 1.0, 50000.0)
+            # Increase short
+            result = store.apply_fill("BTC/USDT", "SELL", 1.0, 60000.0)
+            
+            # Short increases: qty = -2.0
+            assert result["qty"] == -2.0
+            # avg = (1*50000 + 1*60000) / 2 = 55000
+            assert result["avg_price"] == pytest.approx(55000.0)
+
+    def test_long_to_short_cross_uses_fill_price(self, tmp_path):
+        """Crossing from long to short should set avg_price = fill price."""
+        db_path = tmp_path / "state.db"
+        with PositionStoreSQLite(db_path) as store:
+            # Open long
+            store.apply_fill("BTC/USDT", "BUY", 1.0, 50000.0)
+            # Cross to short
+            result = store.apply_fill("BTC/USDT", "SELL", 2.0, 55000.0)
+            
+            # Crossed: qty = 1 - 2 = -1
+            assert result["qty"] == -1.0
+            # avg_price = fill price on cross
+            assert result["avg_price"] == 55000.0
+
+    def test_short_to_long_cross_uses_fill_price(self, tmp_path):
+        """Crossing from short to long should set avg_price = fill price."""
+        db_path = tmp_path / "state.db"
+        with PositionStoreSQLite(db_path) as store:
+            # Open short
+            store.apply_fill("BTC/USDT", "SELL", 1.0, 50000.0)
+            # Cross to long
+            result = store.apply_fill("BTC/USDT", "BUY", 2.0, 55000.0)
+            
+            # Crossed: qty = -1 + 2 = 1
+            assert result["qty"] == 1.0
+            # avg_price = fill price on cross
+            assert result["avg_price"] == 55000.0
+
+    def test_partial_cover_short_keeps_avg(self, tmp_path):
+        """Partial cover of short should keep existing avg_price."""
+        db_path = tmp_path / "state.db"
+        with PositionStoreSQLite(db_path) as store:
+            # Open short
+            store.apply_fill("BTC/USDT", "SELL", 2.0, 50000.0)
+            # Partial cover
+            result = store.apply_fill("BTC/USDT", "BUY", 1.0, 55000.0)
+            
+            # Still short: qty = -2 + 1 = -1
+            assert result["qty"] == -1.0
+            # avg_price preserved on reduction
+            assert result["avg_price"] == 50000.0
+
+    def test_price_zero_raises(self, tmp_path):
+        """Price <= 0 should raise ValueError."""
+        db_path = tmp_path / "state.db"
+        with PositionStoreSQLite(db_path) as store:
+            with pytest.raises(ValueError):
+                store.apply_fill("BTC/USDT", "BUY", 1.0, 0)
+            with pytest.raises(ValueError):
+                store.apply_fill("BTC/USDT", "BUY", 1.0, -100.0)
+
+    def test_empty_symbol_raises(self, tmp_path):
+        """Empty or whitespace symbol should raise ValueError."""
+        db_path = tmp_path / "state.db"
+        with PositionStoreSQLite(db_path) as store:
+            with pytest.raises(ValueError):
+                store.apply_fill("", "BUY", 1.0, 50000.0)
+            with pytest.raises(ValueError):
+                store.apply_fill("   ", "BUY", 1.0, 50000.0)
+
+    def test_meta_json_deterministic(self, tmp_path):
+        """meta_json should use sorted keys for determinism."""
+        db_path = tmp_path / "state.db"
+        with PositionStoreSQLite(db_path) as store:
+            # Keys in unsorted order
+            meta = {"zebra": 1, "apple": 2, "mango": 3}
+            store.upsert_position("BTC/USDT", 1.0, meta=meta)
+            
+            pos = store.get_position("BTC/USDT")
+            assert pos["meta"] == meta
+            
+            # Verify the underlying JSON is sorted by checking raw data
+            conn = store._get_connection()
+            cursor = conn.execute(
+                "SELECT meta_json FROM positions WHERE symbol = ?", ("BTC/USDT",)
+            )
+            row = cursor.fetchone()
+            # Should be compact with sorted keys
+            assert row["meta_json"] == '{"apple":2,"mango":3,"zebra":1}'
+
