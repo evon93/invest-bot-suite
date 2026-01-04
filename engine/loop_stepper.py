@@ -51,17 +51,11 @@ class LoopStepper:
     ):
         """
         Initialize the loop stepper.
-        
-        Args:
-            risk_rules: Risk rules config path or dict
-            risk_version: "v0.4" or "v0.6"
-            ticker: Symbol for orders
-            strategy_params: Strategy parameters (fast_period, slow_period)
-            execution_config: Execution config (slippage_bps, etc.)
-            state_db: Path to SQLite state database (optional)
-            seed: Random seed for determinism
         """
         self.seed = seed
+        import random
+        self._rng = random.Random(seed)
+        
         self.ticker = ticker
         self.risk_version = risk_version
         self.strategy_params = strategy_params or {"fast_period": 3, "slow_period": 5}
@@ -87,17 +81,16 @@ class LoopStepper:
         self._event_count = 0
         self._fill_count = 0
         self._rejected_count = 0
+        self._rejected_count = 0
+
+    def _gen_uuid(self) -> str:
+        """Generate deterministic UUID based on seed."""
+        import uuid
+        return str(uuid.UUID(int=self._rng.getrandbits(128), version=4))
 
     def step(self, ohlcv_slice: pd.DataFrame, bar_idx: int) -> List[Dict[str, Any]]:
         """
         Process a single bar and return list of event dicts.
-        
-        Args:
-            ohlcv_slice: DataFrame containing OHLCV data up to current bar
-            bar_idx: Current bar index (for seeding)
-            
-        Returns:
-            List of event dicts (OrderIntent, RiskDecision, ExecutionReport)
         """
         events = []
         self._step_count += 1
@@ -110,15 +103,35 @@ class LoopStepper:
         asof_ts = last_row['timestamp'] if 'timestamp' in last_row else pd.Timestamp.now()
         current_price = float(last_row['close'])
         
+        # Use ISO format for events, ensuring UTC aware if possible
+        if hasattr(asof_ts, "tz") and asof_ts.tz is None:
+             # Assume UTC if naive, or just use isoformat
+             pass
+        
+        ts_str = asof_ts.isoformat() if hasattr(asof_ts, "isoformat") else str(asof_ts)
+
         # 1. Strategy: Generate order intents
         intents = generate_order_intents(
             ohlcv_slice, self.strategy_params, self.ticker, asof_ts
         )
         
         for intent in intents:
-            # Enrich with price context
-            intent.meta['current_price'] = current_price
-            intent.meta['close'] = current_price
+            # Overwrite with deterministic IDs and TS to ensure reproducibility
+            # (Strategy might have used random UUIDs)
+            intent.event_id = self._gen_uuid()
+            intent.trace_id = self._gen_uuid()
+            intent.ts = ts_str
+
+            # Enrich with observability metadata
+            intent.meta.update({
+                "current_price": current_price,
+                "close": current_price,
+                "step_idx": self._step_count,
+                "bar_idx": bar_idx,
+                "bar_ts": ts_str,
+                "engine_version": "3C.5.2",
+                "risk_version": self.risk_version,
+            })
             
             # Convert to event dict
             intent_dict = {
@@ -128,7 +141,9 @@ class LoopStepper:
             events.append(intent_dict)
             self._event_count += 1
             
-            # 2. Risk evaluation
+            # 2. Risk evaluation (Always output RiskDecisionV1 canonical)
+            decision_event_id = self._gen_uuid()
+            
             if self.risk_version == "v0.6" and self._risk_v06:
                 # Convert to V1 contract
                 intent_v1 = OrderIntentV1(
@@ -143,27 +158,42 @@ class LoopStepper:
                     meta=intent.meta,
                 )
                 decision = self._risk_v06.assess(intent_v1)
-                decision_dict = {
-                    "type": "RiskDecisionV1",
-                    "payload": decision.to_dict(),
-                }
+                
+                # Override with deterministic ID and TS
+                decision.event_id = decision_event_id
+                decision.ts = ts_str
+                
+                # Ensure trace_id propagation
+                if decision.trace_id != intent.trace_id:
+                    decision.trace_id = intent.trace_id
+                    
             else:
-                # Use v0.4 shim
+                # Use v0.4 shim but emit V1 contract
                 signal = {
                     "assets": [intent.symbol],
                     "deltas": {intent.symbol: 0.10},
                 }
                 allowed, annotated = self._risk_v04.filter_signal(signal, {}, nav_eur=10000.0)
-                decision_dict = {
-                    "type": "RiskDecision",
-                    "payload": {
-                        "ref_order_event_id": intent.event_id,
-                        "allowed": allowed,
-                        "rejection_reasons": annotated.get("risk_reasons", []),
-                    },
-                }
-                decision = type('Decision', (), {'allowed': allowed, 'rejection_reasons': annotated.get("risk_reasons", [])})()
-            
+                rejection_reasons = annotated.get("risk_reasons", [])
+                
+                decision = RiskDecisionV1(
+                    ref_order_event_id=intent.event_id,
+                    allowed=allowed,
+                    rejection_reasons=rejection_reasons,
+                    trace_id=intent.trace_id,
+                    event_id=decision_event_id, # Deterministic ID
+                    ts=ts_str, # Deterministic TS
+                    extra={
+                        "risk_engine": "v0.4",
+                        "annotated": annotated,
+                        "step_idx": self._step_count,
+                    }
+                )
+
+            decision_dict = {
+                "type": "RiskDecisionV1",
+                "payload": decision.to_dict(),
+            }
             events.append(decision_dict)
             self._event_count += 1
             
@@ -173,21 +203,45 @@ class LoopStepper:
                 reports = simulate_execution([intent], self.execution_config, seed=exec_seed)
                 
                 for rep in reports:
+                    # Enforce V1 conversion/wrapping
+                    
+                    # Create canonical ExecutionReportV1
+                    rep_v1 = ExecutionReportV1(
+                        ref_order_event_id=rep.ref_order_event_id,
+                        status=rep.status,
+                        filled_qty=rep.filled_qty,
+                        avg_price=rep.avg_price,
+                        fee=rep.fee,
+                        slippage=rep.slippage,
+                        latency_ms=rep.latency_ms,
+                        ref_risk_event_id=decision.event_id,
+                        trace_id=intent.trace_id,
+                        event_id=self._gen_uuid(), # Deterministic ID
+                        ts=ts_str, # Deterministic TS
+                        extra=rep.extra or {}
+                    )
+                    
+                    # Add observability
+                    rep_v1.extra.update({
+                        "step_idx": self._step_count,
+                        "engine_version": "3C.5.2",
+                    })
+                    
                     report_dict = {
-                        "type": "ExecutionReport",
-                        "payload": rep.to_dict(),
+                        "type": "ExecutionReportV1",
+                        "payload": rep_v1.to_dict(),
                     }
                     events.append(report_dict)
                     self._event_count += 1
                     self._fill_count += 1
                     
                     # Apply to state store if available
-                    if self._state_store and rep.status in ("FILLED", "PARTIALLY_FILLED"):
+                    if self._state_store and rep_v1.status in ("FILLED", "PARTIALLY_FILLED"):
                         self._state_store.apply_fill(
                             symbol=intent.symbol,
                             side=intent.side,
-                            qty=rep.filled_qty,
-                            price=rep.avg_price,
+                            qty=rep_v1.filled_qty,
+                            price=rep_v1.avg_price,
                         )
             else:
                 self._rejected_count += 1

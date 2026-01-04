@@ -95,7 +95,9 @@ def run_simulation(
     logger.info("Writing %d events to %s", len(events), events_path)
     with open(events_path, "w", encoding="utf-8") as f:
         for evt in events:
-            f.write(json.dumps(evt) + "\n")
+            # Deterministic JSON dump
+            line = json.dumps(evt, sort_keys=True, separators=(',', ':'))
+            f.write(line + "\n")
     
     # 7. Write run metadata
     positions = stepper.get_positions()
@@ -112,10 +114,15 @@ def run_simulation(
         "metrics": metrics,
         "final_positions": len(positions),
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        # TODO: Add engine_version and git_head if available
     }
     
     with open(meta_path, "w", encoding="utf-8") as f:
-        json.dump(run_meta, f, indent=2)
+        # Deterministic JSON dump for meta (pretty print but sorted)
+        # Note: indent=2 might vary line endings on some platforms, but usually fine.
+        # Strict determinism would prefer compact, but meta is for humans. 
+        # Let's use sort_keys=True at least.
+        json.dump(run_meta, f, indent=2, sort_keys=True)
     
     logger.info("Run complete. Metrics: %s", metrics)
     
