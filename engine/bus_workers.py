@@ -19,6 +19,7 @@ import logging
 from bus import InMemoryBus, BusEnvelope
 from contracts.events_v1 import OrderIntentV1, RiskDecisionV1, ExecutionReportV1
 from state.position_store_sqlite import PositionStoreSQLite
+from engine.exchange_adapter import ExchangeAdapter, PaperExchangeAdapter, ExecutionContext
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +145,7 @@ class ExecWorker:
         self,
         execution_config: Optional[Dict[str, Any]] = None,
         *,
+        exchange_adapter: Optional[ExchangeAdapter] = None,
         gen_event_id=None,
         intent_cache: Optional[Dict[str, Dict]] = None,
         jsonl_logger=None,
@@ -158,6 +160,16 @@ class ExecWorker:
             jsonl_logger: Optional structured JSONL logger
         """
         self._config = execution_config or {"slippage_bps": 5.0}
+        
+        # Initialize adapter
+        if exchange_adapter:
+            self._adapter = exchange_adapter
+        else:
+            # Default to Paper with config
+            slippage = self._config.get("slippage_bps", 5.0)
+            fee = self._config.get("fee_bps", 10.0)
+            self._adapter = PaperExchangeAdapter(slippage_bps=slippage, fee_bps=fee)
+            
         self._gen_event_id = gen_event_id or (lambda: "exec-event-id")
         self._intent_cache = intent_cache if intent_cache is not None else {}
         self._jsonl_logger = jsonl_logger
@@ -237,37 +249,51 @@ class ExecWorker:
                 f"ExecWorker: No valid price available for ref_order_event_id={decision.ref_order_event_id}"
             )
         
-        # Simulate execution (deterministic)
-        slippage_bps = self._config.get("slippage_bps", 5.0)
-        fee_bps = self._config.get("fee_bps", 10.0)
+        # Prepare Context
+        # Note: intent_payload contains meta, which we might need.
+        # Reconstruct OrderIntentV1 is ideal but expensive/redundant if we just pass dict?
+        # Adapter expects OrderIntentV1. Let's reconstruct it quickly or pass a shell.
+        # Actually ExecWorker had 'symbol' etc from intent_payload.
+        # To satisfy Protocol, we must pass intent object.
+        intent = OrderIntentV1.from_dict(intent_payload)
         
-        # Apply slippage
-        if side == "BUY":
-            avg_price = base_price * (1 + slippage_bps / 10000)
-        else:
-            avg_price = base_price * (1 - slippage_bps / 10000)
+        exec_ctx: ExecutionContext = {
+            "step_id": self._processed_count,
+            "time_provider": None # We don't have access to time_provider here easily unless injected
+        }
         
-        fee = filled_qty * avg_price * (fee_bps / 10000)
+        # Pass ts from intent if available for the report
+        if "ts" in intent_payload:
+            intent_payload["ts"] = intent_payload["ts"]
+            
+        # Delegate to Adapter
+        report_event_id = self._gen_event_id()
         
-        # Create ExecutionReportV1
-        report = ExecutionReportV1(
-            ref_order_event_id=decision.ref_order_event_id,
-            status="FILLED",
-            filled_qty=filled_qty,
-            avg_price=avg_price,
-            fee=fee,
-            slippage=slippage_bps,
-            latency_ms=1.0,
-            ref_risk_event_id=decision.event_id,
-            trace_id=trace_id,
-            event_id=self._gen_event_id(),
-            extra={
-                "worker": "ExecWorker",
-                "bus_seq": env.seq,
-                "symbol": symbol,
-                "side": side,
-            }
-        )
+        # Extract meta from intent to help adapter find price
+        extra_meta = intent_payload.get("meta", {}).copy()
+        extra_meta["ts"] = intent_payload.get("ts") # Ensure TS is available
+        
+        try:
+            report = self._adapter.submit(
+                intent=intent,
+                decision=decision,
+                context=exec_ctx,
+                report_event_id=report_event_id,
+                extra_meta=extra_meta
+            )
+            
+            # Enrich extra from worker context if needed (e.g. bus_seq)
+            if not report.extra:
+                report.extra = {}
+            report.extra["worker"] = "ExecWorker"
+            report.extra["bus_seq"] = env.seq
+            
+        except ValueError as e:
+            # Re-raise or log? The requirement says "maintain fail-fast in cache miss".
+            # Cache miss checks happen ABOVE this block (lines 197-203).
+            # Price missing might raise ValueError in adapter. 
+            # We allow it to propagate to crash/fail-fast as per current behavior logic.
+            raise e
         
         # Publish to execution_report topic
         bus.publish(

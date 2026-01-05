@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 
 from engine.time_provider import TimeProvider, SimulatedTimeProvider
+from engine.exchange_adapter import ExchangeAdapter
 
 import pandas as pd
 
@@ -340,6 +341,7 @@ class LoopStepper:
         warmup: int = 10,
         max_drain_iterations: int = 100,
         log_jsonl_path: Optional[Union[str, Path]] = None,
+        exchange_adapter: Optional[ExchangeAdapter] = None,
     ) -> Dict[str, Any]:
         """
         Run simulation using bus-based event flow.
@@ -387,6 +389,7 @@ class LoopStepper:
             gen_event_id=self._gen_uuid,
             intent_cache=intent_cache,
             jsonl_logger=jsonl_logger,
+            exchange_adapter=exchange_adapter,
         )
         pos_worker = PositionStoreWorker(self._state_store, jsonl_logger=jsonl_logger) if self._state_store else None
         # Drain execution_report if no pos_worker (prevents deadlock)
