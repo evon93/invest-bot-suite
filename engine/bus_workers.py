@@ -39,6 +39,7 @@ class RiskWorker:
         risk_manager,
         *,
         gen_event_id=None,
+        jsonl_logger=None,
     ):
         """
         Initialize RiskWorker.
@@ -46,9 +47,11 @@ class RiskWorker:
         Args:
             risk_manager: RiskManager instance (v0.4 or v0.6)
             gen_event_id: Optional callable to generate deterministic event IDs
+            jsonl_logger: Optional structured JSONL logger
         """
         self._rm = risk_manager
         self._gen_event_id = gen_event_id or (lambda: "risk-event-id")
+        self._jsonl_logger = jsonl_logger
         self._processed_count = 0
     
     def step(self, bus: InMemoryBus, max_items: int = 10) -> int:
@@ -110,6 +113,23 @@ class RiskWorker:
             payload=decision.to_dict(),
         )
         
+        # Log event if logger configured
+        if self._jsonl_logger:
+            from engine.structured_jsonl_logger import log_event
+            log_event(
+                self._jsonl_logger,
+                trace_id=trace_id,
+                event_type="RiskDecisionV1",
+                step_id=self._processed_count,
+                action="publish",
+                topic=TOPIC_RISK_DECISION,
+                extra={
+                    "allowed": allowed,
+                    "rejection_reasons": rejection_reasons,
+                    "ref_order_event_id": decision.ref_order_event_id,
+                },
+            )
+        
         self._processed_count += 1
         logger.debug("RiskWorker processed intent %s -> allowed=%s", intent.event_id, allowed)
 
@@ -126,6 +146,7 @@ class ExecWorker:
         *,
         gen_event_id=None,
         intent_cache: Optional[Dict[str, Dict]] = None,
+        jsonl_logger=None,
     ):
         """
         Initialize ExecWorker.
@@ -134,10 +155,12 @@ class ExecWorker:
             execution_config: Config for slippage, fees, etc.
             gen_event_id: Optional callable to generate deterministic event IDs
             intent_cache: Dict mapping ref_order_event_id to intent payload (for fill details)
+            jsonl_logger: Optional structured JSONL logger
         """
         self._config = execution_config or {"slippage_bps": 5.0}
         self._gen_event_id = gen_event_id or (lambda: "exec-event-id")
         self._intent_cache = intent_cache if intent_cache is not None else {}
+        self._jsonl_logger = jsonl_logger
         self._processed_count = 0
         self._fill_count = 0
     
@@ -254,6 +277,24 @@ class ExecWorker:
             payload=report.to_dict(),
         )
         
+        # Log event if logger configured
+        if self._jsonl_logger:
+            from engine.structured_jsonl_logger import log_event
+            log_event(
+                self._jsonl_logger,
+                trace_id=trace_id,
+                event_type="ExecutionReportV1",
+                step_id=self._processed_count,
+                action="publish",
+                topic=TOPIC_EXECUTION_REPORT,
+                extra={
+                    "status": report.status,
+                    "filled_qty": report.filled_qty,
+                    "avg_price": report.avg_price,
+                    "ref_order_event_id": report.ref_order_event_id,
+                },
+            )
+        
         self._fill_count += 1
         logger.debug("ExecWorker produced fill for %s", decision.ref_order_event_id)
 
@@ -264,14 +305,16 @@ class PositionStoreWorker:
     Updates SQLite position store.
     """
     
-    def __init__(self, store: PositionStoreSQLite):
+    def __init__(self, store: PositionStoreSQLite, jsonl_logger=None):
         """
         Initialize PositionStoreWorker.
         
         Args:
             store: PositionStoreSQLite instance
+            jsonl_logger: Optional structured JSONL logger
         """
         self._store = store
+        self._jsonl_logger = jsonl_logger
         self._processed_count = 0
     
     def step(self, bus: InMemoryBus, max_items: int = 10) -> int:
@@ -291,6 +334,7 @@ class PositionStoreWorker:
     def _process_one(self, env: BusEnvelope) -> None:
         """Process single ExecutionReportV1 envelope."""
         payload = env.payload
+        trace_id = env.trace_id
         
         report = ExecutionReportV1.from_dict(payload)
         
@@ -310,6 +354,25 @@ class PositionStoreWorker:
             qty=report.filled_qty,
             price=report.avg_price,
         )
+        
+        # Log event if logger configured
+        if self._jsonl_logger:
+            from engine.structured_jsonl_logger import log_event
+            log_event(
+                self._jsonl_logger,
+                trace_id=trace_id,
+                event_type="PositionUpdated",
+                step_id=self._processed_count,
+                action="persist",
+                topic=None,  # No topic produced
+                extra={
+                    "symbol": symbol,
+                    "side": side,
+                    "qty": report.filled_qty,
+                    "price": report.avg_price,
+                    "ref_exec_report_id": report.event_id,
+                },
+            )
         
         self._processed_count += 1
         logger.debug("PositionStoreWorker applied fill: symbol=%s qty=%s", symbol, report.filled_qty)

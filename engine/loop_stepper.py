@@ -362,13 +362,15 @@ class LoopStepper:
         risk_worker = RiskWorker(
             self._risk_v04,
             gen_event_id=self._gen_uuid,
+            jsonl_logger=jsonl_logger,
         )
         exec_worker = ExecWorker(
             self.execution_config,
             gen_event_id=self._gen_uuid,
             intent_cache=intent_cache,
+            jsonl_logger=jsonl_logger,
         )
-        pos_worker = PositionStoreWorker(self._state_store) if self._state_store else None
+        pos_worker = PositionStoreWorker(self._state_store, jsonl_logger=jsonl_logger) if self._state_store else None
         # Drain execution_report if no pos_worker (prevents deadlock)
         exec_report_drainer = DrainWorker(TOPIC_EXECUTION_REPORT) if not pos_worker else None
         
