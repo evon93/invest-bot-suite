@@ -4,6 +4,23 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
+## Estado Actual (2026-01-05) — Fase 3D: Traceable Bus & Workers
+
+- **Rama:** `main` (feature/3C_7_close merged indirectly)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Canonical Runner:** `tools/run_3D_canonical.py` (determinista, logs JSONL).
+  - **Traceable Workers:** `RiskWorker`, `ExecWorker`, `PositionStoreWorker` conectados vía `InMemoryBus`.
+  - **JSONL Logging:** Logs estructurados sin timestamps con trace_id.
+  - **Smoke Test:** `tests/test_3D_canonical_smoke.py`.
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3D_close_20260105.md`
+- **Notas Técnicas:**
+  - Validaciones estrictas de riesgo (`risk_rules_loader.py`).
+  - Métricas deterministas (`run_metrics.json`).
+
+---
+
 ## Estado Actual (2026-01-04) — Fase 3C: Event Loop & Hardening
 
 - **Rama:** `main` (feature/3C_5_2_ds_hardening merged indirectly via handover)
