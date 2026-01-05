@@ -373,8 +373,8 @@ class PositionStoreWorker:
         symbol = extra.get("symbol", "UNKNOWN")
         side = extra.get("side", "BUY")
         
-        # Apply fill to store
-        self._store.apply_fill(
+        # Apply fill to store (returns updated position dict)
+        new_pos = self._store.apply_fill(
             symbol=symbol,
             side=side,
             qty=report.filled_qty,
@@ -384,6 +384,8 @@ class PositionStoreWorker:
         # Log event if logger configured
         if self._jsonl_logger:
             from engine.structured_jsonl_logger import log_event
+            
+            # 1. Existing Log (PositionUpdated) - maintaining backward compatibility/existing trace
             log_event(
                 self._jsonl_logger,
                 trace_id=trace_id,
@@ -397,6 +399,24 @@ class PositionStoreWorker:
                     "qty": report.filled_qty,
                     "price": report.avg_price,
                     "ref_exec_report_id": report.event_id,
+                },
+            )
+
+            # 2. PROPOSED: position_changed (Observability Gap Gap)
+            # Payload: symbol, qty (holding), avg_px, step_id
+            # We use the new_pos dict returned by apply_fill
+            log_event(
+                self._jsonl_logger,
+                trace_id=trace_id,
+                event_type="position_changed",
+                step_id=self._processed_count, 
+                action="state_change",
+                topic=None,
+                extra={
+                    "symbol": symbol,
+                    "qty": new_pos.get("qty", 0.0),
+                    "avg_px": new_pos.get("avg_price"),
+                    "step_id": self._processed_count, # Deterministic worker step
                 },
             )
         
