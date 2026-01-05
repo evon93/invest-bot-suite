@@ -154,6 +154,13 @@ def main():
     )
     parser.add_argument("--state-db", type=Path, default=None, help="SQLite state DB path")
     parser.add_argument("--risk-rules", type=Path, default=None, help="Risk rules YAML path")
+    parser.add_argument(
+        "--strict-risk-config",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help="Fail-fast validation of critical keys (default: 0 for 3C compat)"
+    )
     
     args = parser.parse_args()
     
