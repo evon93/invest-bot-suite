@@ -167,28 +167,58 @@ class ExecWorker:
             logger.debug("ExecWorker: decision not allowed, skipping %s", decision.ref_order_event_id)
             return
         
-        # Get original intent details from cache (if available)
-        intent_payload = self._intent_cache.get(decision.ref_order_event_id, {})
+        # Get original intent details from cache (REQUIRED)
+        intent_payload = self._intent_cache.get(decision.ref_order_event_id)
         
+        # FAIL-FAST: No defaults allowed for missing cache entries
         if not intent_payload:
-            logger.warning(
-                "ExecWorker: No intent in cache for ref_order_event_id=%s. "
-                "Cache has %d entries. Keys sample: %s",
-                decision.ref_order_event_id,
-                len(self._intent_cache),
-                list(self._intent_cache.keys())[:3]
+            raise ValueError(
+                f"ExecWorker cache miss: ref_order_event_id={decision.ref_order_event_id} "
+                f"trace_id={trace_id} not found in intent_cache. "
+                f"Cache has {len(self._intent_cache)} entries. "
+                "Cannot process execution without original intent data."
+            )
+        
+        # Validate required fields FIRST (order matters for error messages)
+        symbol = intent_payload.get("symbol")
+        if not symbol:
+            raise ValueError(
+                f"ExecWorker: Missing symbol for ref_order_event_id={decision.ref_order_event_id}"
+            )
+        
+        side = intent_payload.get("side", "").upper()
+        if side not in ("BUY", "SELL"):
+            raise ValueError(
+                f"ExecWorker: Invalid side={side} for ref_order_event_id={decision.ref_order_event_id}"
+            )
+        
+        filled_qty = intent_payload.get("qty")
+        if filled_qty is None or filled_qty <= 0:
+            raise ValueError(
+                f"ExecWorker: Invalid qty={filled_qty} for ref_order_event_id={decision.ref_order_event_id}"
+            )
+        
+        # Try to get price from various sources
+        base_price = intent_payload.get("limit_price")
+        if not base_price or base_price <= 0:
+            # Try notional / qty
+            notional = intent_payload.get("notional")
+            if notional and notional > 0:
+                base_price = notional / filled_qty
+        if not base_price or base_price <= 0:
+            # Fallback to meta (current_price, close, bar_close)
+            meta = intent_payload.get("meta", {})
+            base_price = meta.get("current_price") or meta.get("close") or meta.get("bar_close")
+        if not base_price or base_price <= 0:
+            raise ValueError(
+                f"ExecWorker: No valid price available for ref_order_event_id={decision.ref_order_event_id}"
             )
         
         # Simulate execution (deterministic)
         slippage_bps = self._config.get("slippage_bps", 5.0)
         fee_bps = self._config.get("fee_bps", 10.0)
         
-        # Default fill values
-        filled_qty = intent_payload.get("qty", 1.0)
-        base_price = intent_payload.get("limit_price") or 100.0
-        
         # Apply slippage
-        side = intent_payload.get("side", "BUY").upper()
         if side == "BUY":
             avg_price = base_price * (1 + slippage_bps / 10000)
         else:
@@ -211,7 +241,7 @@ class ExecWorker:
             extra={
                 "worker": "ExecWorker",
                 "bus_seq": env.seq,
-                "symbol": intent_payload.get("symbol", "UNKNOWN"),
+                "symbol": symbol,
                 "side": side,
             }
         )

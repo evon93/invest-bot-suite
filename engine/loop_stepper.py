@@ -321,6 +321,7 @@ class LoopStepper:
         max_steps: Optional[int] = None,
         warmup: int = 10,
         max_drain_iterations: int = 100,
+        log_jsonl_path: Optional[Union[str, Path]] = None,
     ) -> Dict[str, Any]:
         """
         Run simulation using bus-based event flow.
@@ -348,6 +349,12 @@ class LoopStepper:
             RiskWorker, ExecWorker, PositionStoreWorker, DrainWorker,
             TOPIC_ORDER_INTENT, TOPIC_RISK_DECISION, TOPIC_EXECUTION_REPORT
         )
+        
+        # Initialize JSONL logger if path provided
+        jsonl_logger = None
+        if log_jsonl_path:
+            from engine.structured_jsonl_logger import get_jsonl_logger, log_event, close_jsonl_logger
+            jsonl_logger = get_jsonl_logger(log_jsonl_path)
         
         # Initialize workers
         intent_cache: Dict[str, Dict] = {}  # Cache intents for ExecWorker
@@ -397,8 +404,11 @@ class LoopStepper:
                 intent.trace_id = self._gen_uuid()
                 intent.ts = ts_str
                 
-                # Cache for ExecWorker
+                # Cache for ExecWorker (add bar_close for price fallback)
                 intent_dict = intent.to_dict()
+                if "meta" not in intent_dict or intent_dict["meta"] is None:
+                    intent_dict["meta"] = {}
+                intent_dict["meta"]["bar_close"] = last_row.get("close", 0.0) if hasattr(last_row, "get") else last_row["close"]
                 intent_cache[intent.event_id] = intent_dict
                 
                 # Publish to bus
@@ -410,6 +420,19 @@ class LoopStepper:
                 )
                 published_count += 1
                 self._event_count += 1
+                
+                # Log publish event
+                if jsonl_logger:
+                    from engine.structured_jsonl_logger import log_event
+                    log_event(
+                        jsonl_logger,
+                        trace_id=intent.trace_id,
+                        event_type="OrderIntentV1",
+                        step_id=self._step_count,
+                        action="publish",
+                        topic=TOPIC_ORDER_INTENT,
+                        extra={"event_id": intent.event_id, "symbol": intent.symbol},
+                    )
         
         # Phase 2: Drain queues with workers
         drain_iter = 0
@@ -453,6 +476,19 @@ class LoopStepper:
         # Update metrics from workers
         self._fill_count = exec_worker._fill_count
         self._rejected_count = risk_worker._processed_count - exec_worker._fill_count
+        
+        # Close JSONL logger
+        if jsonl_logger:
+            from engine.structured_jsonl_logger import log_event, close_jsonl_logger
+            log_event(
+                jsonl_logger,
+                trace_id="SYSTEM",
+                event_type="BusModeDone",
+                step_id=self._step_count,
+                action="complete",
+                extra={"published": published_count, "drain_iterations": drain_iter},
+            )
+            close_jsonl_logger(jsonl_logger)
         
         return {
             "metrics": self._get_metrics(),
