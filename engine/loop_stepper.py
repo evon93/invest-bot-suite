@@ -15,6 +15,8 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 
+from engine.time_provider import TimeProvider, SimulatedTimeProvider
+
 import pandas as pd
 
 from contracts.events_v1 import OrderIntentV1, RiskDecisionV1, ExecutionReportV1
@@ -47,6 +49,7 @@ class LoopStepper:
         strategy_params: Optional[Dict[str, Any]] = None,
         execution_config: Optional[Dict[str, Any]] = None,
         state_db: Optional[Union[str, Path]] = None,
+        time_provider: Optional[TimeProvider] = None,
         seed: int = 42,
     ):
         """
@@ -55,6 +58,12 @@ class LoopStepper:
         self.seed = seed
         import random
         self._rng = random.Random(seed)
+        
+        # Initialize time provider (default to Simulated for determinism)
+        if time_provider:
+            self.time_provider = time_provider
+        else:
+            self.time_provider = SimulatedTimeProvider(seed=seed)
         
         self.ticker = ticker
         self.risk_version = risk_version
@@ -99,8 +108,17 @@ class LoopStepper:
             return events
         
         # Get current bar timestamp
+        # Advance logical time
+        self.time_provider.advance_steps(1)
+
         last_row = ohlcv_slice.iloc[-1]
-        asof_ts = last_row['timestamp'] if 'timestamp' in last_row else pd.Timestamp.now()
+        
+        if 'timestamp' in last_row:
+            asof_ts = last_row['timestamp']
+        else:
+            # Deterministic fallback using time_provider
+            now_ns = self.time_provider.now_ns()
+            asof_ts = pd.Timestamp(now_ns, unit='ns', tz='UTC')
         current_price = float(last_row['close'])
         
         # Use ISO format for events, ensuring UTC aware if possible
@@ -393,7 +411,13 @@ class LoopStepper:
                 continue
             
             last_row = current_slice.iloc[-1]
-            asof_ts = last_row['timestamp'] if 'timestamp' in last_row else pd.Timestamp.now()
+            last_row = current_slice.iloc[-1]
+            if 'timestamp' in last_row:
+                asof_ts = last_row['timestamp']
+            else:
+                # Deterministic fallback
+                now_ns = self.time_provider.now_ns()
+                asof_ts = pd.Timestamp(now_ns, unit='ns', tz='UTC')
             ts_str = asof_ts.isoformat() if hasattr(asof_ts, "isoformat") else str(asof_ts)
             
             intents = generate_order_intents(
