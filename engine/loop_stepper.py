@@ -312,3 +312,150 @@ class LoopStepper:
         """Close resources."""
         if self._state_store:
             self._state_store.close()
+
+    def run_bus_mode(
+        self,
+        ohlcv_df: pd.DataFrame,
+        bus,  # InMemoryBus
+        *,
+        max_steps: Optional[int] = None,
+        warmup: int = 10,
+        max_drain_iterations: int = 100,
+    ) -> Dict[str, Any]:
+        """
+        Run simulation using bus-based event flow.
+        
+        Flow:
+        1. Generate OrderIntentV1 and publish to order_intent topic
+        2. RiskWorker processes → risk_decision topic
+        3. ExecWorker processes → execution_report topic
+        4. PositionStoreWorker processes → SQLite updates
+        
+        Args:
+            ohlcv_df: Full OHLCV DataFrame
+            bus: InMemoryBus instance
+            max_steps: Maximum bars to process (None = all after warmup)
+            warmup: Warmup period (bars to skip)
+            max_drain_iterations: Max iterations to drain queues (prevents deadlock)
+            
+        Returns:
+            Dict with metrics and published envelopes count
+            
+        Raises:
+            RuntimeError: If queues not drained within max_drain_iterations
+        """
+        from engine.bus_workers import (
+            RiskWorker, ExecWorker, PositionStoreWorker, DrainWorker,
+            TOPIC_ORDER_INTENT, TOPIC_RISK_DECISION, TOPIC_EXECUTION_REPORT
+        )
+        
+        # Initialize workers
+        intent_cache: Dict[str, Dict] = {}  # Cache intents for ExecWorker
+        
+        risk_worker = RiskWorker(
+            self._risk_v04,
+            gen_event_id=self._gen_uuid,
+        )
+        exec_worker = ExecWorker(
+            self.execution_config,
+            gen_event_id=self._gen_uuid,
+            intent_cache=intent_cache,
+        )
+        pos_worker = PositionStoreWorker(self._state_store) if self._state_store else None
+        # Drain execution_report if no pos_worker (prevents deadlock)
+        exec_report_drainer = DrainWorker(TOPIC_EXECUTION_REPORT) if not pos_worker else None
+        
+        published_count = 0
+        
+        if len(ohlcv_df) <= warmup:
+            logger.warning("Not enough data for simulation (need > %d rows)", warmup)
+            return {"metrics": self._get_metrics(), "published": 0}
+        
+        end_idx = len(ohlcv_df)
+        if max_steps:
+            end_idx = min(warmup + max_steps, len(ohlcv_df))
+        
+        # Phase 1: Publish all OrderIntentV1 to bus
+        for i in range(warmup, end_idx):
+            current_slice = ohlcv_df.iloc[:i+1]
+            self._step_count += 1
+            
+            if current_slice.empty:
+                continue
+            
+            last_row = current_slice.iloc[-1]
+            asof_ts = last_row['timestamp'] if 'timestamp' in last_row else pd.Timestamp.now()
+            ts_str = asof_ts.isoformat() if hasattr(asof_ts, "isoformat") else str(asof_ts)
+            
+            intents = generate_order_intents(
+                current_slice, self.strategy_params, self.ticker, asof_ts
+            )
+            
+            for intent in intents:
+                # Deterministic IDs
+                intent.event_id = self._gen_uuid()
+                intent.trace_id = self._gen_uuid()
+                intent.ts = ts_str
+                
+                # Cache for ExecWorker
+                intent_dict = intent.to_dict()
+                intent_cache[intent.event_id] = intent_dict
+                
+                # Publish to bus
+                bus.publish(
+                    topic=TOPIC_ORDER_INTENT,
+                    event_type="OrderIntentV1",
+                    trace_id=intent.trace_id,
+                    payload=intent_dict,
+                )
+                published_count += 1
+                self._event_count += 1
+        
+        # Phase 2: Drain queues with workers
+        drain_iter = 0
+        while drain_iter < max_drain_iterations:
+            drain_iter += 1
+            
+            # Process all workers in order
+            risk_processed = risk_worker.step(bus, max_items=100)
+            exec_processed = exec_worker.step(bus, max_items=100)
+            if pos_worker:
+                pos_processed = pos_worker.step(bus, max_items=100)
+            elif exec_report_drainer:
+                pos_processed = exec_report_drainer.step(bus, max_items=100)
+            else:
+                pos_processed = 0
+            
+            total_processed = risk_processed + exec_processed + pos_processed
+            
+            # Check if all queues are empty
+            intent_pending = bus.size(TOPIC_ORDER_INTENT)
+            decision_pending = bus.size(TOPIC_RISK_DECISION)
+            report_pending = bus.size(TOPIC_EXECUTION_REPORT)
+            
+            if intent_pending == 0 and decision_pending == 0 and report_pending == 0:
+                logger.info("Bus mode: all queues drained after %d iterations", drain_iter)
+                break
+            
+            if total_processed == 0 and (intent_pending + decision_pending + report_pending) > 0:
+                # Stuck: events in queue but no progress
+                raise RuntimeError(
+                    f"Bus mode deadlock: pending events but no progress. "
+                    f"intent={intent_pending}, decision={decision_pending}, report={report_pending}"
+                )
+        else:
+            raise RuntimeError(
+                f"Bus mode: max_drain_iterations ({max_drain_iterations}) exceeded. "
+                f"Queues not empty: intent={bus.size(TOPIC_ORDER_INTENT)}, "
+                f"decision={bus.size(TOPIC_RISK_DECISION)}, report={bus.size(TOPIC_EXECUTION_REPORT)}"
+            )
+        
+        # Update metrics from workers
+        self._fill_count = exec_worker._fill_count
+        self._rejected_count = risk_worker._processed_count - exec_worker._fill_count
+        
+        return {
+            "metrics": self._get_metrics(),
+            "published": published_count,
+            "drain_iterations": drain_iter,
+        }
