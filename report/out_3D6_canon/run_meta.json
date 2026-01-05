@@ -1,0 +1,11 @@
+{
+  "branch": "feature/3C_7_close",
+  "commit": "a6c10e51b96b0c3071618feac0e37b8ce46dc677",
+  "max_steps": 50,
+  "num_signals": 5,
+  "python_version": "3.12.3 (main, Nov  6 2025, 13:44:16) [GCC 13.3.0]",
+  "risk_rules_path": null,
+  "seed": 42,
+  "strict_risk_config": false,
+  "sys_executable": "/mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/bin/python"
+}
