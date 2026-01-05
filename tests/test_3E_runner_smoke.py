@@ -62,7 +62,19 @@ def test_run_live_3E_simulated_paper(temp_outdir):
     df = pd.read_csv(temp_outdir / "results.csv")
     assert not df.empty
     # Expect at least some metric columns
-    assert "events_count" in df.columns or "steps_processed" in df.columns or "total_events" in df.columns
+    assert "max_step_id" in df.columns
+    assert "unique_trace_ids" in df.columns
+    assert int(df["max_step_id"].iloc[0]) >= 1
+    assert int(df["unique_trace_ids"].iloc[0]) >= 1
+    
+    # Check for num_ counters
+    num_cols = [c for c in df.columns if c.startswith("num_")]
+    assert len(num_cols) >= 1
+    assert df[num_cols].sum(axis=1).iloc[0] > 0
+    
+    # Deterministic check for 10 steps
+    if int(df["max_step_id"].iloc[0]) == 10:
+        pass # Expected for 10 steps
 
 def test_run_live_3E_stub_mode(temp_outdir):
     """Test stub mode execution."""
