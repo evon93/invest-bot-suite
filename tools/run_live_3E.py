@@ -34,6 +34,7 @@ from engine.loop_stepper import LoopStepper
 from engine.run_metrics_3D5 import collect_metrics_from_jsonl
 from engine.time_provider import SimulatedTimeProvider, RealTimeProvider
 from engine.exchange_adapter import PaperExchangeAdapter, StubNetworkExchangeAdapter
+from engine.runtime_config import RuntimeConfig
 from risk_rules_loader import load_risk_rules
 
 # Configure basic logging
@@ -93,6 +94,10 @@ def main():
     parser.add_argument("--latency-steps", type=int, default=1, help="Latency steps for stub exchange")
     
     args = parser.parse_args()
+    
+    # Validate runtime config for non-paper modes (fail-fast)
+    cfg = RuntimeConfig.from_env()
+    cfg.validate_for(args.clock, args.exchange)
     
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
