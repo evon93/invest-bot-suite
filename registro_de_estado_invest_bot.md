@@ -4,7 +4,20 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-05) — Fase 3D: Traceable Bus & Workers
+## Estado Actual (2026-01-06) — Fase 3E: Unified Live Runner & Determinism Gate
+
+- **Rama:** `feature/3E_6_closeout` (base `main`)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Unified Runner:** `tools/run_live_3E.py` (simulado v/s real, paper v/s stub).
+  - **Determinism Gate:** `tools/check_determinism_3E.py` (y en CI via `smoke_3E.yml`).
+  - **Observabilidad:** Evento `position_changed` en `PositionStoreWorker`.
+  - **Exchange Adapter:** Protocolo abstracto con implementaciones Paper (instant) y StubNetwork (latency).
+- **Handoff:**
+  - `ORCH_HANDOFF_post3E_close_20260106.md`
+  - `bridge_3E_to_3F_report.md`
+
+---
 
 - **Rama:** `main` (feature/3C_7_close merged indirectly)
 - **Estado:** ✅ COMPLETADO
