@@ -20,6 +20,8 @@ from bus import InMemoryBus, BusEnvelope
 from contracts.events_v1 import OrderIntentV1, RiskDecisionV1, ExecutionReportV1
 from state.position_store_sqlite import PositionStoreSQLite
 from engine.exchange_adapter import ExchangeAdapter, PaperExchangeAdapter, ExecutionContext
+from engine.retry_policy import RetryPolicy, retry_call, RetryExhaustedError
+from engine.idempotency import IdempotencyStore, InMemoryIdempotencyStore
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +151,9 @@ class ExecWorker:
         gen_event_id=None,
         intent_cache: Optional[Dict[str, Dict]] = None,
         jsonl_logger=None,
+        retry_policy: Optional[RetryPolicy] = None,
+        idempotency_store: Optional[IdempotencyStore] = None,
+        sleep_fn=None,
     ):
         """
         Initialize ExecWorker.
@@ -158,6 +163,9 @@ class ExecWorker:
             gen_event_id: Optional callable to generate deterministic event IDs
             intent_cache: Dict mapping ref_order_event_id to intent payload (for fill details)
             jsonl_logger: Optional structured JSONL logger
+            retry_policy: Optional RetryPolicy for retrying failed submissions
+            idempotency_store: Optional IdempotencyStore for preventing duplicates
+            sleep_fn: Optional sleep function (ms) for retry delays (no-op by default)
         """
         self._config = execution_config or {"slippage_bps": 5.0}
         
@@ -175,6 +183,12 @@ class ExecWorker:
         self._jsonl_logger = jsonl_logger
         self._processed_count = 0
         self._fill_count = 0
+        
+        # Retry and idempotency
+        self._retry_policy = retry_policy
+        self._idempotency_store = idempotency_store
+        self._sleep_fn = sleep_fn or (lambda ms: None)  # No-op default for paper/simulated
+        self._retry_attempts_total = 0  # For observability
     
     def step(self, bus: InMemoryBus, max_items: int = 10) -> int:
         """
@@ -273,14 +287,42 @@ class ExecWorker:
         extra_meta = intent_payload.get("meta", {}).copy()
         extra_meta["ts"] = intent_payload.get("ts") # Ensure TS is available
         
-        try:
-            report = self._adapter.submit(
+        # Generate stable op_key for idempotency and retry
+        op_key = f"exec:{decision.ref_order_event_id}"
+        
+        # Idempotency check: skip if already processed
+        if self._idempotency_store:
+            if not self._idempotency_store.mark_once(op_key):
+                logger.debug("ExecWorker: duplicate op_key=%s, skipping", op_key)
+                return  # Skip duplicate - no report generated
+        
+        # Define submit function for retry wrapper
+        def do_submit():
+            return self._adapter.submit(
                 intent=intent,
                 decision=decision,
                 context=exec_ctx,
                 report_event_id=report_event_id,
                 extra_meta=extra_meta
             )
+        
+        # Execute with retry if policy configured
+        try:
+            if self._retry_policy:
+                # Retry only on transient network errors
+                def is_retryable(e):
+                    return isinstance(e, (ConnectionError, TimeoutError, OSError))
+                
+                report, attempts = retry_call(
+                    do_submit,
+                    is_retryable_exc=is_retryable,
+                    policy=self._retry_policy,
+                    op_key=op_key,
+                    sleep_fn=self._sleep_fn,
+                )
+                self._retry_attempts_total += attempts
+            else:
+                report = do_submit()
             
             # Enrich extra from worker context if needed (e.g. bus_seq)
             if not report.extra:
@@ -288,6 +330,10 @@ class ExecWorker:
             report.extra["worker"] = "ExecWorker"
             report.extra["bus_seq"] = env.seq
             
+        except RetryExhaustedError as e:
+            # All retries failed - log and skip (don't crash the worker)
+            logger.error("ExecWorker: retries exhausted for op_key=%s: %s", op_key, e.last_exception)
+            return  # Skip - no report generated
         except ValueError as e:
             # Re-raise or log? The requirement says "maintain fail-fast in cache miss".
             # Cache miss checks happen ABOVE this block (lines 197-203).

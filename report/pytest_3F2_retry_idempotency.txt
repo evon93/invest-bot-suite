@@ -1,0 +1,29 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+plugins: anyio-4.9.0
+collecting ... collected 19 items
+
+tests/test_retry_policy_3F2.py::TestRetryPolicyComputeDelay::test_deterministic_same_inputs_same_output PASSED [  5%]
+tests/test_retry_policy_3F2.py::TestRetryPolicyComputeDelay::test_exponential_backoff PASSED [ 10%]
+tests/test_retry_policy_3F2.py::TestRetryPolicyComputeDelay::test_max_delay_cap PASSED [ 15%]
+tests/test_retry_policy_3F2.py::TestRetryPolicyComputeDelay::test_jitter_hash_deterministic_same_key PASSED [ 21%]
+tests/test_retry_policy_3F2.py::TestRetryPolicyComputeDelay::test_jitter_hash_varies_by_op_key PASSED [ 26%]
+tests/test_retry_policy_3F2.py::TestRetryPolicyComputeDelay::test_jitter_hash_varies_by_attempt PASSED [ 31%]
+tests/test_retry_policy_3F2.py::TestRetryCall::test_success_first_try PASSED [ 36%]
+tests/test_retry_policy_3F2.py::TestRetryCall::test_retries_on_retryable_exception PASSED [ 42%]
+tests/test_retry_policy_3F2.py::TestRetryCall::test_raises_non_retryable_immediately PASSED [ 47%]
+tests/test_retry_policy_3F2.py::TestRetryCall::test_retry_exhausted_error PASSED [ 52%]
+tests/test_retry_policy_3F2.py::TestRetryCall::test_no_real_sleep_by_default PASSED [ 57%]
+tests/test_idempotency_3F2.py::TestInMemoryIdempotencyStore::test_first_call_returns_true PASSED [ 63%]
+tests/test_idempotency_3F2.py::TestInMemoryIdempotencyStore::test_duplicate_returns_false PASSED [ 68%]
+tests/test_idempotency_3F2.py::TestInMemoryIdempotencyStore::test_different_keys_independent PASSED [ 73%]
+tests/test_idempotency_3F2.py::TestInMemoryIdempotencyStore::test_ttl_expires PASSED [ 78%]
+tests/test_idempotency_3F2.py::TestInMemoryIdempotencyStore::test_ttl_exactly_at_boundary PASSED [ 84%]
+tests/test_idempotency_3F2.py::TestInMemoryIdempotencyStore::test_size_tracking PASSED [ 89%]
+tests/test_idempotency_3F2.py::TestInMemoryIdempotencyStore::test_clear PASSED [ 94%]
+tests/test_idempotency_3F2.py::TestInMemoryIdempotencyStore::test_many_unique_keys PASSED [100%]
+
+============================= 19 passed in 0.57s ==============================
