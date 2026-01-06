@@ -1,0 +1,526 @@
+"""
+engine/loop_stepper.py
+
+Deterministic live-like loop stepper for Phase 3C.
+
+Provides:
+- step(bar) -> list[dict]: Process single bar, return event dicts
+- run(bars, max_steps, sleep_ms) -> dict: Run full simulation
+"""
+
+import json
+import time
+import logging
+from pathlib import Path
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Union
+
+from engine.time_provider import TimeProvider, SimulatedTimeProvider
+from engine.exchange_adapter import ExchangeAdapter
+
+import pandas as pd
+
+from contracts.events_v1 import OrderIntentV1, RiskDecisionV1, ExecutionReportV1
+from contracts.event_messages import OrderIntent
+from risk_manager_v0_6 import RiskManagerV06
+from risk_manager_v_0_4 import RiskManager as RiskManagerV04
+from adapters.risk_input_adapter import adapt_order_intent_to_risk_input
+from strategy_engine.strategy_v0_7 import generate_order_intents
+from execution.execution_adapter_v0_2 import simulate_execution
+from state.position_store_sqlite import PositionStoreSQLite
+
+
+logger = logging.getLogger(__name__)
+
+
+class LoopStepper:
+    """
+    Deterministic live-like loop stepper.
+    
+    Orchestrates: Strategy -> Risk -> Execution -> State
+    All operations are deterministic given the same seed.
+    """
+
+    def __init__(
+        self,
+        *,
+        risk_rules: Optional[Union[Dict, str, Path]] = None,
+        risk_version: str = "v0.4",
+        ticker: str = "BTC-USD",
+        strategy_params: Optional[Dict[str, Any]] = None,
+        execution_config: Optional[Dict[str, Any]] = None,
+        state_db: Optional[Union[str, Path]] = None,
+        time_provider: Optional[TimeProvider] = None,
+        seed: int = 42,
+    ):
+        """
+        Initialize the loop stepper.
+        """
+        self.seed = seed
+        import random
+        self._rng = random.Random(seed)
+        
+        # Initialize time provider (default to Simulated for determinism)
+        if time_provider:
+            self.time_provider = time_provider
+        else:
+            self.time_provider = SimulatedTimeProvider(seed=seed)
+        
+        self.ticker = ticker
+        self.risk_version = risk_version
+        self.strategy_params = strategy_params or {"fast_period": 3, "slow_period": 5}
+        self.execution_config = execution_config or {"slippage_bps": 5.0, "partial_fill": False}
+        
+        # Initialize risk manager
+        rules = risk_rules if risk_rules else {}
+        if risk_version == "v0.6":
+            self._risk_v06 = RiskManagerV06(rules)
+            self._risk_v04 = self._risk_v06.v04
+        else:
+            self._risk_v04 = RiskManagerV04(rules)
+            self._risk_v06 = None
+        
+        # Initialize state store if provided
+        self._state_store: Optional[PositionStoreSQLite] = None
+        if state_db:
+            self._state_store = PositionStoreSQLite(state_db)
+            self._state_store.ensure_schema()
+        
+        # Metrics
+        self._step_count = 0
+        self._event_count = 0
+        self._fill_count = 0
+        self._rejected_count = 0
+        self._rejected_count = 0
+
+    def _gen_uuid(self) -> str:
+        """Generate deterministic UUID based on seed."""
+        import uuid
+        return str(uuid.UUID(int=self._rng.getrandbits(128), version=4))
+
+    def step(self, ohlcv_slice: pd.DataFrame, bar_idx: int) -> List[Dict[str, Any]]:
+        """
+        Process a single bar and return list of event dicts.
+        """
+        events = []
+        self._step_count += 1
+        
+        if ohlcv_slice.empty:
+            return events
+        
+        # Get current bar timestamp
+        # Advance logical time
+        self.time_provider.advance_steps(1)
+
+        last_row = ohlcv_slice.iloc[-1]
+        
+        if 'timestamp' in last_row:
+            asof_ts = last_row['timestamp']
+        else:
+            # Deterministic fallback using time_provider
+            now_ns = self.time_provider.now_ns()
+            asof_ts = pd.Timestamp(now_ns, unit='ns', tz='UTC')
+        current_price = float(last_row['close'])
+        
+        # Use ISO format for events, ensuring UTC aware if possible
+        if hasattr(asof_ts, "tz") and asof_ts.tz is None:
+             # Assume UTC if naive, or just use isoformat
+             pass
+        
+        ts_str = asof_ts.isoformat() if hasattr(asof_ts, "isoformat") else str(asof_ts)
+
+        # 1. Strategy: Generate order intents
+        intents = generate_order_intents(
+            ohlcv_slice, self.strategy_params, self.ticker, asof_ts
+        )
+        
+        for intent in intents:
+            # Overwrite with deterministic IDs and TS to ensure reproducibility
+            # (Strategy might have used random UUIDs)
+            intent.event_id = self._gen_uuid()
+            intent.trace_id = self._gen_uuid()
+            intent.ts = ts_str
+
+            # Enrich with observability metadata
+            intent.meta.update({
+                "current_price": current_price,
+                "close": current_price,
+                "step_idx": self._step_count,
+                "bar_idx": bar_idx,
+                "bar_ts": ts_str,
+                "engine_version": "3C.5.2",
+                "risk_version": self.risk_version,
+            })
+            
+            # Convert to event dict
+            intent_dict = {
+                "type": "OrderIntent",
+                "payload": intent.to_dict(),
+            }
+            events.append(intent_dict)
+            self._event_count += 1
+            
+            # 2. Risk evaluation (Always output RiskDecisionV1 canonical)
+            decision_event_id = self._gen_uuid()
+            
+            if self.risk_version == "v0.6" and self._risk_v06:
+                # Convert to V1 contract
+                intent_v1 = OrderIntentV1(
+                    symbol=intent.symbol,
+                    side=intent.side,
+                    qty=intent.qty,
+                    notional=intent.notional,
+                    order_type=intent.order_type,
+                    limit_price=intent.limit_price,
+                    event_id=intent.event_id,
+                    trace_id=intent.trace_id,
+                    meta=intent.meta,
+                )
+                decision = self._risk_v06.assess(intent_v1)
+                
+                # Override with deterministic ID and TS
+                decision.event_id = decision_event_id
+                decision.ts = ts_str
+                
+                # Ensure trace_id propagation
+                if decision.trace_id != intent.trace_id:
+                    decision.trace_id = intent.trace_id
+                    
+            else:
+                # Use v0.4 shim but emit V1 contract
+                signal = {
+                    "assets": [intent.symbol],
+                    "deltas": {intent.symbol: 0.10},
+                }
+                allowed, annotated = self._risk_v04.filter_signal(signal, {}, nav_eur=10000.0)
+                rejection_reasons = annotated.get("risk_reasons", [])
+                
+                decision = RiskDecisionV1(
+                    ref_order_event_id=intent.event_id,
+                    allowed=allowed,
+                    rejection_reasons=rejection_reasons,
+                    trace_id=intent.trace_id,
+                    event_id=decision_event_id, # Deterministic ID
+                    ts=ts_str, # Deterministic TS
+                    extra={
+                        "risk_engine": "v0.4",
+                        "annotated": annotated,
+                        "step_idx": self._step_count,
+                    }
+                )
+
+            decision_dict = {
+                "type": "RiskDecisionV1",
+                "payload": decision.to_dict(),
+            }
+            events.append(decision_dict)
+            self._event_count += 1
+            
+            # 3. Execution (if allowed)
+            if decision.allowed:
+                exec_seed = self.seed + bar_idx + self._step_count
+                reports = simulate_execution([intent], self.execution_config, seed=exec_seed)
+                
+                for rep in reports:
+                    # Enforce V1 conversion/wrapping
+                    
+                    # Create canonical ExecutionReportV1
+                    rep_v1 = ExecutionReportV1(
+                        ref_order_event_id=rep.ref_order_event_id,
+                        status=rep.status,
+                        filled_qty=rep.filled_qty,
+                        avg_price=rep.avg_price,
+                        fee=rep.fee,
+                        slippage=rep.slippage,
+                        latency_ms=rep.latency_ms,
+                        ref_risk_event_id=decision.event_id,
+                        trace_id=intent.trace_id,
+                        event_id=self._gen_uuid(), # Deterministic ID
+                        ts=ts_str, # Deterministic TS
+                        extra=rep.extra or {}
+                    )
+                    
+                    # Add observability
+                    rep_v1.extra.update({
+                        "step_idx": self._step_count,
+                        "engine_version": "3C.5.2",
+                    })
+                    
+                    report_dict = {
+                        "type": "ExecutionReportV1",
+                        "payload": rep_v1.to_dict(),
+                    }
+                    events.append(report_dict)
+                    self._event_count += 1
+                    self._fill_count += 1
+                    
+                    # Apply to state store if available
+                    if self._state_store and rep_v1.status in ("FILLED", "PARTIALLY_FILLED"):
+                        self._state_store.apply_fill(
+                            symbol=intent.symbol,
+                            side=intent.side,
+                            qty=rep_v1.filled_qty,
+                            price=rep_v1.avg_price,
+                        )
+            else:
+                self._rejected_count += 1
+        
+        return events
+
+    def run(
+        self,
+        ohlcv_df: pd.DataFrame,
+        *,
+        max_steps: Optional[int] = None,
+        sleep_ms: int = 0,
+        warmup: int = 10,
+    ) -> Dict[str, Any]:
+        """
+        Run full simulation over OHLCV data.
+        
+        Args:
+            ohlcv_df: Full OHLCV DataFrame
+            max_steps: Maximum bars to process (None = all after warmup)
+            sleep_ms: Sleep between steps (for live-like feel)
+            warmup: Warmup period (bars to skip)
+            
+        Returns:
+            Dict with metrics and events
+        """
+        all_events = []
+        
+        if len(ohlcv_df) <= warmup:
+            logger.warning("Not enough data for simulation (need > %d rows)", warmup)
+            return {"events": [], "metrics": self._get_metrics()}
+        
+        end_idx = len(ohlcv_df)
+        if max_steps:
+            end_idx = min(warmup + max_steps, len(ohlcv_df))
+        
+        for i in range(warmup, end_idx):
+            # Slice up to current bar (inclusive)
+            current_slice = ohlcv_df.iloc[:i+1]
+            
+            step_events = self.step(current_slice, bar_idx=i)
+            all_events.extend(step_events)
+            
+            if sleep_ms > 0:
+                time.sleep(sleep_ms / 1000.0)
+        
+        return {
+            "events": all_events,
+            "metrics": self._get_metrics(),
+        }
+
+    def _get_metrics(self) -> Dict[str, Any]:
+        """Get current metrics."""
+        return {
+            "steps": self._step_count,
+            "events": self._event_count,
+            "fills": self._fill_count,
+            "rejected": self._rejected_count,
+        }
+
+    def get_positions(self) -> List[Dict[str, Any]]:
+        """Get current positions from state store."""
+        if self._state_store:
+            return self._state_store.list_positions()
+        return []
+
+    def close(self) -> None:
+        """Close resources."""
+        if self._state_store:
+            self._state_store.close()
+
+    def run_bus_mode(
+        self,
+        ohlcv_df: pd.DataFrame,
+        bus,  # InMemoryBus
+        *,
+        max_steps: Optional[int] = None,
+        warmup: int = 10,
+        max_drain_iterations: int = 100,
+        log_jsonl_path: Optional[Union[str, Path]] = None,
+        exchange_adapter: Optional[ExchangeAdapter] = None,
+    ) -> Dict[str, Any]:
+        """
+        Run simulation using bus-based event flow.
+        
+        Flow:
+        1. Generate OrderIntentV1 and publish to order_intent topic
+        2. RiskWorker processes → risk_decision topic
+        3. ExecWorker processes → execution_report topic
+        4. PositionStoreWorker processes → SQLite updates
+        
+        Args:
+            ohlcv_df: Full OHLCV DataFrame
+            bus: InMemoryBus instance
+            max_steps: Maximum bars to process (None = all after warmup)
+            warmup: Warmup period (bars to skip)
+            max_drain_iterations: Max iterations to drain queues (prevents deadlock)
+            
+        Returns:
+            Dict with metrics and published envelopes count
+            
+        Raises:
+            RuntimeError: If queues not drained within max_drain_iterations
+        """
+        from engine.bus_workers import (
+            RiskWorker, ExecWorker, PositionStoreWorker, DrainWorker,
+            TOPIC_ORDER_INTENT, TOPIC_RISK_DECISION, TOPIC_EXECUTION_REPORT
+        )
+        
+        # Initialize JSONL logger if path provided
+        jsonl_logger = None
+        if log_jsonl_path:
+            from engine.structured_jsonl_logger import get_jsonl_logger, log_event, close_jsonl_logger
+            jsonl_logger = get_jsonl_logger(log_jsonl_path)
+        
+        # Initialize workers
+        intent_cache: Dict[str, Dict] = {}  # Cache intents for ExecWorker
+        
+        risk_worker = RiskWorker(
+            self._risk_v04,
+            gen_event_id=self._gen_uuid,
+            jsonl_logger=jsonl_logger,
+        )
+        exec_worker = ExecWorker(
+            self.execution_config,
+            gen_event_id=self._gen_uuid,
+            intent_cache=intent_cache,
+            jsonl_logger=jsonl_logger,
+            exchange_adapter=exchange_adapter,
+        )
+        pos_worker = PositionStoreWorker(self._state_store, jsonl_logger=jsonl_logger) if self._state_store else None
+        # Drain execution_report if no pos_worker (prevents deadlock)
+        exec_report_drainer = DrainWorker(TOPIC_EXECUTION_REPORT) if not pos_worker else None
+        
+        published_count = 0
+        
+        if len(ohlcv_df) <= warmup:
+            logger.warning("Not enough data for simulation (need > %d rows)", warmup)
+            return {"metrics": self._get_metrics(), "published": 0}
+        
+        end_idx = len(ohlcv_df)
+        if max_steps:
+            end_idx = min(warmup + max_steps, len(ohlcv_df))
+        
+        # Phase 1: Publish all OrderIntentV1 to bus
+        for i in range(warmup, end_idx):
+            current_slice = ohlcv_df.iloc[:i+1]
+            self._step_count += 1
+            
+            if current_slice.empty:
+                continue
+            
+            last_row = current_slice.iloc[-1]
+            last_row = current_slice.iloc[-1]
+            if 'timestamp' in last_row:
+                asof_ts = last_row['timestamp']
+            else:
+                # Deterministic fallback
+                now_ns = self.time_provider.now_ns()
+                asof_ts = pd.Timestamp(now_ns, unit='ns', tz='UTC')
+            ts_str = asof_ts.isoformat() if hasattr(asof_ts, "isoformat") else str(asof_ts)
+            
+            intents = generate_order_intents(
+                current_slice, self.strategy_params, self.ticker, asof_ts
+            )
+            
+            for intent in intents:
+                # Deterministic IDs
+                intent.event_id = self._gen_uuid()
+                intent.trace_id = self._gen_uuid()
+                intent.ts = ts_str
+                
+                # Cache for ExecWorker (add bar_close for price fallback)
+                intent_dict = intent.to_dict()
+                if "meta" not in intent_dict or intent_dict["meta"] is None:
+                    intent_dict["meta"] = {}
+                intent_dict["meta"]["bar_close"] = last_row.get("close", 0.0) if hasattr(last_row, "get") else last_row["close"]
+                intent_cache[intent.event_id] = intent_dict
+                
+                # Publish to bus
+                bus.publish(
+                    topic=TOPIC_ORDER_INTENT,
+                    event_type="OrderIntentV1",
+                    trace_id=intent.trace_id,
+                    payload=intent_dict,
+                )
+                published_count += 1
+                self._event_count += 1
+                
+                # Log publish event
+                if jsonl_logger:
+                    from engine.structured_jsonl_logger import log_event
+                    log_event(
+                        jsonl_logger,
+                        trace_id=intent.trace_id,
+                        event_type="OrderIntentV1",
+                        step_id=self._step_count,
+                        action="publish",
+                        topic=TOPIC_ORDER_INTENT,
+                        extra={"event_id": intent.event_id, "symbol": intent.symbol},
+                    )
+        
+        # Phase 2: Drain queues with workers
+        drain_iter = 0
+        while drain_iter < max_drain_iterations:
+            drain_iter += 1
+            
+            # Process all workers in order
+            risk_processed = risk_worker.step(bus, max_items=100)
+            exec_processed = exec_worker.step(bus, max_items=100)
+            if pos_worker:
+                pos_processed = pos_worker.step(bus, max_items=100)
+            elif exec_report_drainer:
+                pos_processed = exec_report_drainer.step(bus, max_items=100)
+            else:
+                pos_processed = 0
+            
+            total_processed = risk_processed + exec_processed + pos_processed
+            
+            # Check if all queues are empty
+            intent_pending = bus.size(TOPIC_ORDER_INTENT)
+            decision_pending = bus.size(TOPIC_RISK_DECISION)
+            report_pending = bus.size(TOPIC_EXECUTION_REPORT)
+            
+            if intent_pending == 0 and decision_pending == 0 and report_pending == 0:
+                logger.info("Bus mode: all queues drained after %d iterations", drain_iter)
+                break
+            
+            if total_processed == 0 and (intent_pending + decision_pending + report_pending) > 0:
+                # Stuck: events in queue but no progress
+                raise RuntimeError(
+                    f"Bus mode deadlock: pending events but no progress. "
+                    f"intent={intent_pending}, decision={decision_pending}, report={report_pending}"
+                )
+        else:
+            raise RuntimeError(
+                f"Bus mode: max_drain_iterations ({max_drain_iterations}) exceeded. "
+                f"Queues not empty: intent={bus.size(TOPIC_ORDER_INTENT)}, "
+                f"decision={bus.size(TOPIC_RISK_DECISION)}, report={bus.size(TOPIC_EXECUTION_REPORT)}"
+            )
+        
+        # Update metrics from workers
+        self._fill_count = exec_worker._fill_count
+        self._rejected_count = risk_worker._processed_count - exec_worker._fill_count
+        
+        # Close JSONL logger
+        if jsonl_logger:
+            from engine.structured_jsonl_logger import log_event, close_jsonl_logger
+            log_event(
+                jsonl_logger,
+                trace_id="SYSTEM",
+                event_type="BusModeDone",
+                step_id=self._step_count,
+                action="complete",
+                extra={"published": published_count, "drain_iterations": drain_iter},
+            )
+            close_jsonl_logger(jsonl_logger)
+        
+        return {
+            "metrics": self._get_metrics(),
+            "published": published_count,
+            "drain_iterations": drain_iter,
+        }

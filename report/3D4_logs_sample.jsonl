@@ -1,0 +1,2 @@
+{"action":"publish","event_type":"OrderIntentV1","extra":{"event_id":"bdd640fb-0667-4ad1-9c80-317fa3b1799d","symbol":"BTC-USD"},"step_id":2,"topic":"order_intent","trace_id":"23b8c1e9-3924-46de-beb1-3b9046685257"}
+{"action":"complete","event_type":"BusModeDone","extra":{"drain_iterations":1,"published":1},"step_id":10,"trace_id":"SYSTEM"}

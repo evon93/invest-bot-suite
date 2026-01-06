@@ -4,7 +4,54 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-04) — Fase 3B: Integrated Live-Like Runner
+## Estado Actual (2026-01-06) — Fase 3E: Unified Live Runner & Determinism Gate
+
+- **Rama:** `feature/3E_6_closeout` (base `main`)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Unified Runner:** `tools/run_live_3E.py` (simulado v/s real, paper v/s stub).
+  - **Determinism Gate:** `tools/check_determinism_3E.py` (y en CI via `smoke_3E.yml`).
+  - **Observabilidad:** Evento `position_changed` en `PositionStoreWorker`.
+  - **Exchange Adapter:** Protocolo abstracto con implementaciones Paper (instant) y StubNetwork (latency).
+- **Handoff:**
+  - `ORCH_HANDOFF_post3E_close_20260106.md`
+  - `bridge_3E_to_3F_report.md`
+
+---
+
+- **Rama:** `main` (feature/3C_7_close merged indirectly)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Canonical Runner:** `tools/run_3D_canonical.py` (determinista, logs JSONL).
+  - **Traceable Workers:** `RiskWorker`, `ExecWorker`, `PositionStoreWorker` conectados vía `InMemoryBus`.
+  - **JSONL Logging:** Logs estructurados sin timestamps con trace_id.
+  - **Smoke Test:** `tests/test_3D_canonical_smoke.py`.
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3D_close_20260105.md`
+- **Notas Técnicas:**
+  - Validaciones estrictas de riesgo (`risk_rules_loader.py`).
+  - Métricas deterministas (`run_metrics.json`).
+
+---
+
+## Estado Actual (2026-01-04) — Fase 3C: Event Loop & Hardening
+
+- **Rama:** `main` (feature/3C_5_2_ds_hardening merged indirectly via handover)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **LoopStepper:** `engine/loop_stepper.py` E2E determinista.
+  - **Contracts V1:** `contracts/events_v1.py` (OrderIntentV1, RiskDecisionV1, ExecutionReportV1).
+  - **SQLite Position Store:** `state/position_store_sqlite.py` con `apply_fill` atómico y manejo de shorts/crosses.
+  - **CI Smoke:** `.github/workflows/smoke_3C.yml` + `data/ci_smoke.csv`.
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3C_close_20260104.md`
+  - `bridge_3C_to_3D_report.md`
+- **Auditorías Externas Resueltas:**
+  - DS-3C-4-2 (SQLite), DS-3C-5-1 (LoopStepper Determinism), G3/GR-3C-3-1 (Risk V1).
+
+---
+
+## Estado Anterior (2026-01-04) — Fase 3B: Integrated Live-Like Runner
 
 - **Rama:** `main` (feature/3B_integrated_runner merged indirectly)
 - **Estado:** ✅ COMPLETADO

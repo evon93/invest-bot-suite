@@ -1,0 +1,5 @@
+# Invalid risk rules config for testing fail-fast
+# Missing critical keys: kelly, risk_manager
+position_limits:
+  max_single_asset_pct: 0.10
+extra_stuff: true

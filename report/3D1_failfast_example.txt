@@ -1,0 +1,7 @@
+[3D Runner] Risk rules: tests\fixtures\invalid_risk_3D.yaml
+[3D Runner] Strict mode: True
+[3D Runner] Output: C:\Users\ivn_b\Desktop\invest-bot-suite\report\out_3D1_failfast
+
+[3D Runner] ERROR: Risk rules validation failed in tests\fixtures\invalid_risk_3D.yaml: missing critical keys: ['kelly', 'risk_manager']
+
+Exit code: 1
