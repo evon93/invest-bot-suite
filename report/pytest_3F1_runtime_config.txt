@@ -1,0 +1,24 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+plugins: anyio-4.9.0
+collecting ... collected 14 items
+
+tests/test_runtime_config_failfast.py::TestRuntimeConfigFromEnv::test_defaults_when_env_empty PASSED [  7%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigFromEnv::test_loads_values_from_env PASSED [ 14%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigFromEnv::test_whitespace_treated_as_missing PASSED [ 21%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigValidateFor::test_paper_simulated_no_secrets_ok PASSED [ 28%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigValidateFor::test_stub_simulated_no_secrets_ok PASSED [ 35%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigValidateFor::test_real_clock_without_secrets_fails PASSED [ 42%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigValidateFor::test_ccxt_sandbox_without_secrets_fails PASSED [ 50%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigValidateFor::test_ccxt_sandbox_requires_base_url PASSED [ 57%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigValidateFor::test_ccxt_sandbox_with_all_secrets_ok PASSED [ 64%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigValidateFor::test_error_message_does_not_contain_secret_values PASSED [ 71%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigValidateFor::test_unknown_exchange_requires_secrets PASSED [ 78%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigIntegration::test_full_flow_paper_mode PASSED [ 85%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigIntegration::test_full_flow_real_mode_fails_without_env PASSED [ 92%]
+tests/test_runtime_config_failfast.py::TestRuntimeConfigIntegration::test_full_flow_real_mode_with_env_works PASSED [100%]
+
+============================= 14 passed in 2.64s ==============================
