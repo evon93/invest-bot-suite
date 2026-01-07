@@ -5,9 +5,11 @@ Idempotency store for preventing duplicate execution of operations.
 """
 
 from __future__ import annotations
+import json
 import time
 from dataclasses import dataclass, field
-from typing import Callable, Dict, Protocol
+from pathlib import Path
+from typing import Callable, Dict, Protocol, Set
 
 
 class IdempotencyStore(Protocol):
@@ -87,3 +89,72 @@ class InMemoryIdempotencyStore:
     def size(self) -> int:
         """Return number of entries."""
         return len(self._seen)
+
+
+@dataclass
+class FileIdempotencyStore:
+    """
+    File-backed idempotency store using append-only JSONL.
+    
+    Keys persist across restarts for crash recovery.
+    Each key is written as a JSON line: {"key": "..."}
+    
+    On init, loads all existing keys from file.
+    On mark_once, appends new keys and flushes to disk.
+    """
+    file_path: Path
+    _seen: Set[str] = field(default_factory=set, init=False)
+    _file_handle: any = field(default=None, init=False)
+    
+    def __post_init__(self):
+        self.file_path = Path(self.file_path)
+        self._load_existing()
+        # Open file for appending
+        self._file_handle = open(self.file_path, "a", encoding="utf-8")
+    
+    def _load_existing(self) -> None:
+        """Load existing keys from file."""
+        if not self.file_path.exists():
+            return
+        
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        data = json.loads(line)
+                        self._seen.add(data["key"])
+                    except (json.JSONDecodeError, KeyError):
+                        # Skip malformed lines
+                        pass
+    
+    def mark_once(self, key: str) -> bool:
+        """
+        Mark a key as seen. Returns True if first time, False if duplicate.
+        
+        Appends new keys to file and flushes immediately for durability.
+        """
+        if key in self._seen:
+            return False
+        
+        self._seen.add(key)
+        
+        # Append to file with immediate flush
+        self._file_handle.write(json.dumps({"key": key}) + "\n")
+        self._file_handle.flush()
+        
+        return True
+    
+    def close(self) -> None:
+        """Close file handle."""
+        if self._file_handle:
+            self._file_handle.close()
+            self._file_handle = None
+    
+    def size(self) -> int:
+        """Return number of keys."""
+        return len(self._seen)
+    
+    def __del__(self):
+        self.close()
+

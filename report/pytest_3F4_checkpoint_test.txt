@@ -1,0 +1,15 @@
+﻿python : RiskManager initialized with 0 rules
+En línea: 1 Carácter: 85
++ ... lyContinue; python tools/run_live_3E.py --run-dir 
+report/runs/test_3F ...
++                 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (RiskManager initia    
+lized with 0 rules:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO: RiskManager initialized with 0 rules
+Created run directory: report\runs\test_3F4_run
+Starting run_live_3E with clock=simulated, exchange=paper...
+Simulation done. Published: 1
+Artifacts generated in report\out_3E_smoke

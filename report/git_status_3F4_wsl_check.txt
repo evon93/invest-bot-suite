@@ -1,0 +1,6 @@
+## feature/3F_4_crash_recovery_v0
+?? report/git_status_3F4_wsl_check.txt
+?? report/last_commit_3F4_wsl_check.txt
+?? report/pytest_3F4_wsl_check.txt
+?? report/python_3F4_wsl_check.txt
+?? report/python_exe_3F4_wsl_check.txt

@@ -1,0 +1,63 @@
+﻿diff --git a/engine/loop_stepper.py b/engine/loop_stepper.py
+index 2e83dcf..cf4491b 100644
+--- a/engine/loop_stepper.py
++++ b/engine/loop_stepper.py
+@@ -343,6 +343,9 @@ class LoopStepper:
+         log_jsonl_path: Optional[Union[str, Path]] = None,
+         exchange_adapter: Optional[ExchangeAdapter] = None,
+         idempotency_store = None,  # Optional IdempotencyStore for crash recovery
++        checkpoint = None,  # Optional Checkpoint for progress tracking
++        checkpoint_path: Optional[Path] = None,  # Path to save checkpoint
++        start_idx: int = 0,  # Start index for resume (0 = from beginning after warmup)
+     ) -> Dict[str, Any]:
+         """
+         Run simulation using bus-based event flow.
+@@ -408,7 +411,9 @@ class LoopStepper:
+             end_idx = min(warmup + max_steps, len(ohlcv_df))
+         
+         # Phase 1: Publish all OrderIntentV1 to bus
+-        for i in range(warmup, end_idx):
++        # Resume support: skip already processed indices
++        actual_start = warmup + start_idx
++        for i in range(actual_start, end_idx):
+             current_slice = ohlcv_df.iloc[:i+1]
+             self._step_count += 1
+             
+@@ -464,6 +469,11 @@ class LoopStepper:
+                         topic=TOPIC_ORDER_INTENT,
+                         extra={"event_id": intent.event_id, "symbol": intent.symbol},
+                     )
++            
++            # Update checkpoint after processing this bar index
++            if checkpoint and checkpoint_path:
++                checkpoint = checkpoint.update(i - warmup)  # idx relative to warmup
++                checkpoint.save_atomic(checkpoint_path)
+         
+         # Phase 2: Drain queues with workers
+         drain_iter = 0
+diff --git a/tools/run_live_3E.py b/tools/run_live_3E.py
+index 4da8764..dd226f6 100644
+--- a/tools/run_live_3E.py
++++ b/tools/run_live_3E.py
+@@ -193,6 +193,11 @@ def main():
+     ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
+     
+     print(f"Starting run_live_3E with clock={args.clock}, exchange={args.exchange}...")
++    if start_idx > 0:
++        print(f"  Resuming from index {start_idx}")
++    
++    # Determine checkpoint_path for saving during loop
++    ckpt_path = run_dir / "checkpoint.json" if run_dir else None
+     
+     try:
+         result = stepper.run_bus_mode(
+@@ -203,6 +208,9 @@ def main():
+             log_jsonl_path=trace_path,
+             exchange_adapter=exchange_adapter,
+             idempotency_store=idem_store,
++            checkpoint=checkpoint,
++            checkpoint_path=ckpt_path,
++            start_idx=start_idx,
+         )
+     finally:
+         stepper.close()
