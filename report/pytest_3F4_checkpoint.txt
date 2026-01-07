@@ -1,0 +1,23 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+plugins: anyio-4.9.0
+collecting ... collected 13 items
+
+tests/test_checkpoint_atomic_write_3F4.py::TestCheckpointAtomicWrite::test_save_and_load PASSED [  7%]
+tests/test_checkpoint_atomic_write_3F4.py::TestCheckpointAtomicWrite::test_checkpoint_always_parseable PASSED [ 15%]
+tests/test_checkpoint_atomic_write_3F4.py::TestCheckpointAtomicWrite::test_tmp_file_not_left_behind PASSED [ 23%]
+tests/test_checkpoint_atomic_write_3F4.py::TestCheckpointAtomicWrite::test_create_new_initial_values PASSED [ 30%]
+tests/test_checkpoint_atomic_write_3F4.py::TestCheckpointAtomicWrite::test_update_immutable PASSED [ 38%]
+tests/test_checkpoint_atomic_write_3F4.py::TestCheckpointAtomicWrite::test_load_nonexistent_raises PASSED [ 46%]
+tests/test_checkpoint_atomic_write_3F4.py::TestFileIdempotencyStore::test_persist_and_reload PASSED [ 53%]
+tests/test_checkpoint_atomic_write_3F4.py::TestFileIdempotencyStore::test_empty_file_on_first_use PASSED [ 61%]
+tests/test_checkpoint_atomic_write_3F4.py::TestFileIdempotencyStore::test_size_tracking PASSED [ 69%]
+tests/test_crash_recovery_resume_no_duplicates_3F4.py::TestCrashRecoveryResume::test_resume_no_duplicates PASSED [ 76%]
+tests/test_crash_recovery_resume_no_duplicates_3F4.py::TestCrashRecoveryResume::test_processed_count_final PASSED [ 84%]
+tests/test_crash_recovery_resume_no_duplicates_3F4.py::TestCrashRecoveryResume::test_multiple_crashes_and_resumes PASSED [ 92%]
+tests/test_crash_recovery_resume_no_duplicates_3F4.py::TestCrashRecoveryResume::test_resume_from_scratch_if_no_checkpoint PASSED [100%]
+
+============================= 13 passed in 2.72s ==============================
