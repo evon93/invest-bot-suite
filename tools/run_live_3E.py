@@ -33,7 +33,7 @@ from bus import InMemoryBus
 from engine.loop_stepper import LoopStepper
 from engine.run_metrics_3D5 import collect_metrics_from_jsonl
 from engine.time_provider import SimulatedTimeProvider, RealTimeProvider
-from engine.exchange_adapter import PaperExchangeAdapter, StubNetworkExchangeAdapter
+from engine.exchange_adapter import PaperExchangeAdapter, StubNetworkExchangeAdapter, SimulatedRealtimeAdapter
 from engine.runtime_config import RuntimeConfig
 from risk_rules_loader import load_risk_rules
 
@@ -90,7 +90,7 @@ def main():
     
     # 3E Features
     parser.add_argument("--clock", choices=["simulated", "real"], default="simulated", help="Time provider mode")
-    parser.add_argument("--exchange", choices=["paper", "stub"], default="paper", help="Exchange adapter mode")
+    parser.add_argument("--exchange", choices=["paper", "stub", "realish"], default="paper", help="Exchange adapter mode")
     parser.add_argument("--latency-steps", type=int, default=1, help="Latency steps for stub exchange")
     
     args = parser.parse_args()
@@ -118,7 +118,9 @@ def main():
         time_provider = SimulatedTimeProvider(seed=args.seed)
         
     # 2. Setup ExchangeAdapter
-    if args.exchange == "stub":
+    if args.exchange == "realish":
+        exchange_adapter = SimulatedRealtimeAdapter()
+    elif args.exchange == "stub":
         exchange_adapter = StubNetworkExchangeAdapter(latency_steps=args.latency_steps)
     else:
         exchange_adapter = PaperExchangeAdapter()
