@@ -193,6 +193,11 @@ def main():
     ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
     
     print(f"Starting run_live_3E with clock={args.clock}, exchange={args.exchange}...")
+    if start_idx > 0:
+        print(f"  Resuming from index {start_idx}")
+    
+    # Determine checkpoint_path for saving during loop
+    ckpt_path = run_dir / "checkpoint.json" if run_dir else None
     
     try:
         result = stepper.run_bus_mode(
@@ -203,6 +208,9 @@ def main():
             log_jsonl_path=trace_path,
             exchange_adapter=exchange_adapter,
             idempotency_store=idem_store,
+            checkpoint=checkpoint,
+            checkpoint_path=ckpt_path,
+            start_idx=start_idx,
         )
     finally:
         stepper.close()

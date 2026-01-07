@@ -1,0 +1,1 @@
+﻿903f923 3F.4.3: update checkpoint during loop (real resume)
