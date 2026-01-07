@@ -19,7 +19,7 @@ import logging
 from bus import InMemoryBus, BusEnvelope
 from contracts.events_v1 import OrderIntentV1, RiskDecisionV1, ExecutionReportV1
 from state.position_store_sqlite import PositionStoreSQLite
-from engine.exchange_adapter import ExchangeAdapter, PaperExchangeAdapter, ExecutionContext
+from engine.exchange_adapter import ExchangeAdapter, PaperExchangeAdapter, ExecutionContext, TransientNetworkError
 from engine.retry_policy import RetryPolicy, retry_call, RetryExhaustedError
 from engine.idempotency import IdempotencyStore, InMemoryIdempotencyStore
 
@@ -309,9 +309,9 @@ class ExecWorker:
         # Execute with retry if policy configured
         try:
             if self._retry_policy:
-                # Retry only on transient network errors
+                # Retry only on transient network errors (including SimulatedRealtimeAdapter's TransientNetworkError)
                 def is_retryable(e):
-                    return isinstance(e, (ConnectionError, TimeoutError, OSError))
+                    return isinstance(e, (ConnectionError, TimeoutError, OSError, TransientNetworkError))
                 
                 report, attempts = retry_call(
                     do_submit,

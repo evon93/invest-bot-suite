@@ -161,3 +161,91 @@ class StubNetworkExchangeAdapter:
         report.extra["simulated_latency_steps"] = self.latency_steps
         
         return report
+
+
+class TransientNetworkError(Exception):
+    """Simulated transient network error for testing retry logic."""
+    pass
+
+
+@dataclass
+class SimulatedRealtimeAdapter:
+    """
+    Real-ish adapter simulating exchange conditions:
+    - Configurable latencies (via sleep_fn, no real sleep in tests)
+    - Deterministic transient failures (hash-based, 1-of-N)
+    - Realistic responses (IDs, intermediate states)
+    
+    Gated: only activated with INVESTBOT_EXCHANGE_KIND=realish or --exchange realish
+    
+    This adapter does NOT require secrets - it's a local simulation.
+    """
+    failure_rate_1_in_n: int = 10  # 1 de cada 10 falla transitoriamente
+    base_latency_ms: int = 50
+    max_latency_ms: int = 500
+    slippage_bps: float = 10.0
+    fee_bps: float = 15.0
+    sleep_fn: Callable[[int], None] = field(default_factory=lambda: lambda ms: None)
+    _failure_count: int = field(default=0, init=False)
+    
+    def _should_fail_transient(self, op_key: str) -> bool:
+        """
+        Deterministic failure based on hash of op_key.
+        Returns True if this operation should fail transiently.
+        """
+        import hashlib
+        hash_int = int(hashlib.sha256(op_key.encode()).hexdigest()[:8], 16)
+        return (hash_int % self.failure_rate_1_in_n) == 0
+    
+    def _compute_latency_ms(self, op_key: str) -> int:
+        """
+        Compute deterministic latency based on hash of op_key.
+        Returns latency in milliseconds.
+        """
+        import hashlib
+        hash_int = int(hashlib.sha256(op_key.encode()).hexdigest()[8:16], 16)
+        # Range: base_latency_ms to max_latency_ms
+        latency_range = self.max_latency_ms - self.base_latency_ms
+        latency = self.base_latency_ms + (hash_int % max(1, latency_range))
+        return latency
+    
+    def submit(
+        self,
+        intent: OrderIntentV1,
+        decision: RiskDecisionV1,
+        context: ExecutionContext,
+        report_event_id: str,
+        extra_meta: Optional[Dict[str, Any]] = None
+    ) -> ExecutionReportV1:
+        """
+        Submit with simulated real-world conditions.
+        
+        May raise TransientNetworkError for testing retry logic.
+        """
+        meta = extra_meta or {}
+        
+        # Generate op_key for deterministic behavior
+        op_key = f"realish:{decision.ref_order_event_id}:{report_event_id}"
+        
+        # Simulate transient failure (deterministic)
+        if self._should_fail_transient(op_key):
+            self._failure_count += 1
+            raise TransientNetworkError(
+                f"Simulated transient failure for op_key hash (attempt may be retried)"
+            )
+        
+        # Simulate latency (via injectable sleep_fn - no-op in tests)
+        latency_ms = self._compute_latency_ms(op_key)
+        self.sleep_fn(latency_ms)
+        
+        # Delegate core logic to Paper adapter with higher slippage/fees
+        paper = PaperExchangeAdapter(slippage_bps=self.slippage_bps, fee_bps=self.fee_bps)
+        report = paper.submit(intent, decision, context, report_event_id, extra_meta)
+        
+        # Enrich with realish metadata
+        report.latency_ms = float(latency_ms)
+        report.extra["adapter"] = "SimulatedRealtimeAdapter"
+        report.extra["simulated_latency_ms"] = latency_ms
+        report.extra["failure_rate_1_in_n"] = self.failure_rate_1_in_n
+        
+        return report

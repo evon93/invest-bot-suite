@@ -98,8 +98,8 @@ class RuntimeConfig:
         mode_clock = mode_clock.lower().strip()
         exchange_kind = exchange_kind.lower().strip()
         
-        # Paper and stub exchanges don't require secrets
-        if exchange_kind in ("paper", "stub"):
+        # Paper, stub, and realish (local simulation) don't require secrets
+        if exchange_kind in ("paper", "stub", "realish"):
             return
         
         # For non-paper exchanges, check if secrets are required

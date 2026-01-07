@@ -1,0 +1,28 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+plugins: anyio-4.9.0
+collecting ... collected 12 items
+
+tests/test_realish_adapter_gating_3F3.py::TestGatingNoEnvVarsRequired::test_paper_mode_no_env_vars_required PASSED [  8%]
+tests/test_realish_adapter_gating_3F3.py::TestGatingNoEnvVarsRequired::test_stub_mode_no_env_vars_required PASSED [ 16%]
+tests/test_realish_adapter_gating_3F3.py::TestGatingNoEnvVarsRequired::test_realish_mode_no_env_vars_required PASSED [ 25%]
+tests/test_realish_adapter_gating_3F3.py::TestSimulatedRealtimeAdapter::test_adapter_can_instantiate PASSED [ 33%]
+tests/test_realish_adapter_gating_3F3.py::TestSimulatedRealtimeAdapter::test_adapter_submit_success PASSED [ 41%]
+tests/test_realish_adapter_gating_3F3.py::TestSimulatedRealtimeAdapter::test_transient_failure_deterministic PASSED [ 50%]
+tests/test_realish_adapter_gating_3F3.py::TestSimulatedRealtimeAdapter::test_latency_deterministic PASSED [ 58%]
+tests/test_realish_adapter_gating_3F3.py::TestSimulatedRealtimeAdapter::test_no_real_sleep_by_default PASSED [ 66%]
+tests/test_realish_adapter_gating_3F3.py::TestTransientNetworkError::test_exception_exists PASSED [ 75%]
+tests/test_realish_adapter_integration_3F3.py::TestRealishIntegration::test_realish_full_pipeline_with_bus SKIPPED [ 83%]
+tests/test_realish_adapter_integration_3F3.py::TestRealishIntegration::test_realish_with_idempotency SKIPPED [ 91%]
+tests/test_realish_adapter_integration_3F3.py::TestSkipWhenNotEnabled::test_skip_message SKIPPED [100%]
+
+============================== warnings summary ===============================
+tests\test_realish_adapter_integration_3F3.py:16
+  C:\Users\ivn_b\Desktop\invest-bot-suite\tests\test_realish_adapter_integration_3F3.py:16: PytestUnknownMarkWarning: Unknown pytest.mark.integration - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.integration
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=================== 9 passed, 3 skipped, 1 warning in 0.66s ===================
