@@ -4,7 +4,28 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-06) — Fase 3E: Unified Live Runner & Determinism Gate
+## Estado Actual (2026-01-08) — Fase 3F: Live Execution Readiness
+
+- **Rama:** `feature/3F_6_closeout` (base `main`)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Runtime Config:** `engine/runtime_config.py` con fail-fast validation.
+  - **Retry/Backoff:** `engine/retry_policy.py` con jitter determinista (hash-based).
+  - **Idempotencia:** `engine/idempotency.py` (InMemory + File stores).
+  - **Real-ish Adapter:** `SimulatedRealtimeAdapter` con fallos transitorios deterministas.
+  - **Crash Recovery:** `engine/checkpoint.py` con atomic save (tmp+rename).
+  - **CLI:** `--run-dir` / `--resume` en `tools/run_live_3E.py`.
+  - **CI:** `.github/workflows/smoke_3F.yml` (pytest + determinism gate).
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3F_close_20260108.md`
+  - `report/bridge_3F_to_3G_report.md`
+- **Verificación:**
+  - pytest: 432 passed, 10 skipped
+  - determinism: MATCH
+
+---
+
+## Estado Anterior (2026-01-06) — Fase 3E: Unified Live Runner & Determinism Gate
 
 - **Rama:** `feature/3E_6_closeout` (base `main`)
 - **Estado:** ✅ COMPLETADO
