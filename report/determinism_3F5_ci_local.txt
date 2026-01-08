@@ -1,0 +1,22 @@
+﻿python : RiskManager initialized with 0 rules
+En línea: 1 Carácter: 1
++ python tools/check_determinism_3E.py --seed 42 --clock 
+simulated --ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (RiskManager init 
+   ialized with 0 rules:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO: RiskManager initialized with 0 rules
+Starting run_live_3E with clock=simulated, exchange=paper...
+Simulation done. Published: 9
+Artifacts generated in report\det_a
+RiskManager initialized with 0 rules
+INFO: RiskManager initialized with 0 rules
+Starting run_live_3E with clock=simulated, exchange=paper...
+Simulation done. Published: 9
+Artifacts generated in report\det_b
+Running A -> report\det_a
+Running B -> report\det_b
+Determinism Verified: MATCH
