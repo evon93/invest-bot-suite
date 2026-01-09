@@ -4,7 +4,26 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-08) — Fase 3F: Live Execution Readiness
+## Estado Actual (2026-01-09) — Fase 3G: Observability, Persistence & CI Hardening
+
+- **Rama:** `feature/AG-3G-7-1_closeout` (base `feature/3F_6_closeout`)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **SQLite Idempotency:** `engine/idempotency.py` (WAL mode, atomic).
+  - **Metrics Engine:** `engine/metrics_collector.py` (Real-time tracking, file-first persistence).
+  - **CI Smoke 3G:** `.github/workflows/smoke_3G.yml` (metrics smoke test).
+  - **CCXT Sandbox:** `engine/ccxt_sandbox_adapter.py` (Lazy load, failsafe).
+  - **Wiring:** `tools/run_live_3E.py` soporta `--idempotency-backend sqlite` y `--enable-metrics`.
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3G_close_20260109.md`
+  - `report/bridge_3G_to_next_report.md`
+- **Verificación:**
+  - CI Smoke 3G: PASS
+  - Pytest: 482 passed, 10 skipped
+
+---
+
+## Estado Anterior (2026-01-08) — Fase 3F: Live Execution Readiness
 
 - **Rama:** `feature/3F_6_closeout` (base `main`)
 - **Estado:** ✅ COMPLETADO
