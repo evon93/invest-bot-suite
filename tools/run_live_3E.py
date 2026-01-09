@@ -42,6 +42,7 @@ from engine.idempotency import (
     SQLiteIdempotencyStore,
     IdempotencyStore,
 )
+from engine.metrics_collector import MetricsCollector, MetricsWriter, NoOpMetricsCollector
 from risk_rules_loader import load_risk_rules
 
 # Configure basic logging
@@ -113,6 +114,25 @@ def build_idempotency_store(run_dir: Path, backend: str) -> IdempotencyStore:
         raise ValueError(f"Unknown idempotency backend: {backend}")
 
 
+def build_metrics(run_dir: Optional[Path], enabled: bool) -> tuple:
+    """
+    Build metrics collector and writer based on configuration.
+    
+    Args:
+        run_dir: Run directory for metrics files (can be None)
+        enabled: Whether metrics collection is enabled
+        
+    Returns:
+        Tuple of (MetricsCollector or NoOpMetricsCollector, MetricsWriter)
+    """
+    if not enabled:
+        return NoOpMetricsCollector(), MetricsWriter(run_dir=None)
+    
+    collector = MetricsCollector()
+    writer = MetricsWriter(run_dir=run_dir)
+    return collector, writer
+
+
 def main():
     parser = argparse.ArgumentParser(description="Unified Live Runner 3E")
     
@@ -136,6 +156,14 @@ def main():
         choices=["file", "sqlite", "memory"],
         default="file",
         help="Idempotency store backend (default: file=JSONL, sqlite=WAL DB, memory=in-process)"
+    )
+    
+    # 3G.3: Observability metrics
+    parser.add_argument(
+        "--enable-metrics",
+        action="store_true",
+        default=False,
+        help="Enable real-time metrics collection (writes to run_dir/metrics_*.json)"
     )
     
     args = parser.parse_args()
@@ -231,12 +259,20 @@ def main():
     # Generate Data
     ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
     
+    # 3G.3: Setup metrics collection
+    metrics_collector, metrics_writer = build_metrics(run_dir, args.enable_metrics)
+    if args.enable_metrics and run_dir:
+        print(f"  Metrics enabled: {run_dir}/metrics_*.json")
+    
     print(f"Starting run_live_3E with clock={args.clock}, exchange={args.exchange}...")
     if start_idx > 0:
         print(f"  Resuming from index {start_idx}")
     
     # Determine checkpoint_path for saving during loop
     ckpt_path = run_dir / "checkpoint.json" if run_dir else None
+    
+    # Start metrics tracking for the run
+    metrics_collector.start("run_main")
     
     try:
         result = stepper.run_bus_mode(
@@ -251,11 +287,21 @@ def main():
             checkpoint_path=ckpt_path,
             start_idx=start_idx,
         )
+        # End metrics with success
+        metrics_collector.end("run_main", status="FILLED")
+    except Exception as exc:
+        # End metrics with error
+        metrics_collector.end("run_main", status="ERROR", reason=type(exc).__name__)
+        raise
     finally:
         stepper.close()
         # Close idempotency store if used
         if idem_store:
             idem_store.close()
+        # Write metrics summary
+        if metrics_writer.enabled:
+            metrics_writer.write_summary(metrics_collector.snapshot_summary())
+            metrics_writer.close()
         
     print(f"Simulation done. Published: {result.get('published', 0)}")
     

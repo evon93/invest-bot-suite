@@ -1,0 +1,39 @@
+# AG-3G-3-2 Smoke Test
+
+## Smoke Test No Ejecutado
+
+El smoke test requiere ejecutar el runner completo con --run-dir y --enable-metrics.
+No fue ejecutado porque:
+1. No existe modo "quick" sin efectos secundarios
+2. El runner genera archivos persistentes
+
+## Reproducción Manual
+
+```bash
+# Ejecutar en WSL
+cd /mnt/c/Users/ivn_b/Desktop/invest-bot-suite
+source .venv/bin/activate
+
+# Run con metrics enabled
+python tools/run_live_3E.py \
+  --outdir /tmp/out_smoke \
+  --run-dir /tmp/run_smoke \
+  --enable-metrics \
+  --max-steps 10
+
+# Verificar archivos generados
+ls -la /tmp/run_smoke/
+# Esperado:
+# - checkpoint.json
+# - idempotency_keys.jsonl
+# - metrics_summary.json
+
+cat /tmp/run_smoke/metrics_summary.json
+```
+
+## Verificación Alternativa
+
+Los tests unitarios en `test_run_live_metrics_wiring.py` cubren:
+- `build_metrics()` crea collector/writer correctos
+- Workflow completo genera `metrics_summary.json`
+- Contiene datos esperados
