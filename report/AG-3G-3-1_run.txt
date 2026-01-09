@@ -1,0 +1,32 @@
+# AG-3G-3-1 Baseline Run Log
+# Date: 2026-01-09
+
+## 1) git status -sb
+## feature/AG-3G-2-2_wire_sqlite_backend
+?? report/det_a/
+?? report/det_b/
+?? report/det_close_a/
+?? report/det_close_b/
+
+## 2) git branch --show-current
+feature/AG-3G-2-2_wire_sqlite_backend (before checkout)
+feature/AG-3G-3-1_observability_v0 (after checkout)
+
+## 3) git rev-parse HEAD
+b0a4e8d
+
+## 4) git log -1 --oneline
+b0a4e8d AG-3G-2-2: optional sqlite idempotency backend wiring + tests
+
+## DESCUBRIMIENTO
+
+### Módulo Existente
+- engine/run_metrics_3D5.py: recolección post-hoc desde JSONL
+- Genera run_metrics.json con contadores (intents, decisions, fills, etc.)
+
+### Punto de Instrumentación
+- tools/run_live_3E.py: loop principal
+- Wiring mínimo: pendiente (opcional para este ticket, core es MetricsCollector)
+
+### No Existe
+- carpeta observability/ -> creamos engine/metrics_collector.py
