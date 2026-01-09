@@ -36,7 +36,12 @@ from engine.time_provider import SimulatedTimeProvider, RealTimeProvider
 from engine.exchange_adapter import PaperExchangeAdapter, StubNetworkExchangeAdapter, SimulatedRealtimeAdapter
 from engine.runtime_config import RuntimeConfig
 from engine.checkpoint import Checkpoint
-from engine.idempotency import FileIdempotencyStore
+from engine.idempotency import (
+    FileIdempotencyStore,
+    InMemoryIdempotencyStore,
+    SQLiteIdempotencyStore,
+    IdempotencyStore,
+)
 from risk_rules_loader import load_risk_rules
 
 # Configure basic logging
@@ -82,6 +87,32 @@ def make_ohlcv_df(n_bars: int = 50, seed: int = 42) -> pd.DataFrame:
     return df
 
 
+def build_idempotency_store(run_dir: Path, backend: str) -> IdempotencyStore:
+    """
+    Build idempotency store based on backend selection.
+    
+    Args:
+        run_dir: Run directory for persistent stores
+        backend: One of 'file', 'sqlite', 'memory'
+        
+    Returns:
+        Configured IdempotencyStore instance
+        
+    Raises:
+        ValueError: If backend is unknown
+    """
+    if backend == "memory":
+        return InMemoryIdempotencyStore()
+    elif backend == "sqlite":
+        db_path = run_dir / "idempotency.db"
+        return SQLiteIdempotencyStore(db_path=db_path)
+    elif backend == "file":
+        jsonl_path = run_dir / "idempotency_keys.jsonl"
+        return FileIdempotencyStore(file_path=jsonl_path)
+    else:
+        raise ValueError(f"Unknown idempotency backend: {backend}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Unified Live Runner 3E")
     
@@ -98,6 +129,14 @@ def main():
     # 3F.4: Crash recovery
     parser.add_argument("--run-dir", type=str, help="Run directory for checkpoint/idempotency (creates new run)")
     parser.add_argument("--resume", type=str, help="Resume from existing run directory (mutually exclusive with --run-dir)")
+    
+    # 3G.2: Idempotency backend selection
+    parser.add_argument(
+        "--idempotency-backend",
+        choices=["file", "sqlite", "memory"],
+        default="file",
+        help="Idempotency store backend (default: file=JSONL, sqlite=WAL DB, memory=in-process)"
+    )
     
     args = parser.parse_args()
     
@@ -158,7 +197,7 @@ def main():
     # 3F.4: Setup run directory and crash recovery
     run_dir: Optional[Path] = None
     checkpoint: Optional[Checkpoint] = None
-    idem_store: Optional[FileIdempotencyStore] = None
+    idem_store: Optional[IdempotencyStore] = None
     start_idx = 0
     
     if args.resume:
@@ -170,15 +209,15 @@ def main():
         checkpoint = Checkpoint.load(checkpoint_path)
         start_idx = checkpoint.last_processed_idx + 1
         print(f"Resuming from run_id={checkpoint.run_id}, start_idx={start_idx}")
-        idem_store = FileIdempotencyStore(run_dir / "idempotency_keys.jsonl")
+        idem_store = build_idempotency_store(run_dir, args.idempotency_backend)
     elif args.run_dir:
         run_dir = Path(args.run_dir)
         run_dir.mkdir(parents=True, exist_ok=True)
         run_id = f"run_{args.seed}_{args.max_steps}"
         checkpoint = Checkpoint.create_new(run_id)
         checkpoint.save_atomic(run_dir / "checkpoint.json")
-        idem_store = FileIdempotencyStore(run_dir / "idempotency_keys.jsonl")
-        print(f"Created run directory: {run_dir}")
+        idem_store = build_idempotency_store(run_dir, args.idempotency_backend)
+        print(f"Created run directory: {run_dir} (idempotency={args.idempotency_backend})")
         
     # 3. Initialize LoopStepper
     bus = InMemoryBus()
