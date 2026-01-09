@@ -158,3 +158,106 @@ class FileIdempotencyStore:
     def __del__(self):
         self.close()
 
+
+@dataclass
+class SQLiteIdempotencyStore:
+    """
+    SQLite-backed idempotency store with WAL mode for concurrency.
+    
+    Provides atomic mark_once via INSERT OR IGNORE.
+    Thread-safe via internal lock.
+    
+    Features:
+    - WAL mode for better concurrent read/write performance
+    - INSERT OR IGNORE for atomic "first-writer-wins" semantics
+    - Thread-safe for multi-threaded access
+    - Persists across restarts for crash recovery
+    
+    Attributes:
+        db_path: Path to SQLite database file
+        timeout_s: Database lock timeout in seconds
+        synchronous: PRAGMA synchronous mode (NORMAL or FULL)
+    """
+    db_path: Path
+    timeout_s: float = 30.0
+    synchronous: str = "NORMAL"
+    _conn: any = field(default=None, init=False, repr=False)
+    _lock: any = field(default=None, init=False, repr=False)
+    
+    def __post_init__(self):
+        import sqlite3
+        import threading
+        
+        self.db_path = Path(self.db_path)
+        self._lock = threading.Lock()
+        
+        # Ensure parent directory exists
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Connect with WAL mode
+        self._conn = sqlite3.connect(
+            str(self.db_path),
+            timeout=self.timeout_s,
+            check_same_thread=False,  # We manage thread safety via lock
+            isolation_level=None,  # Autocommit mode
+        )
+        
+        # Configure WAL and synchronous mode
+        self._conn.execute("PRAGMA journal_mode=WAL")
+        self._conn.execute(f"PRAGMA synchronous={self.synchronous}")
+        
+        # Create table if not exists
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS idempotency_keys (
+                key TEXT PRIMARY KEY,
+                created_at REAL NOT NULL
+            )
+        """)
+    
+    def mark_once(self, key: str) -> bool:
+        """
+        Mark a key as seen. Returns True if first time, False if duplicate.
+        
+        Uses INSERT OR IGNORE for atomic first-writer-wins semantics.
+        Thread-safe via internal lock.
+        
+        Args:
+            key: Unique operation key
+            
+        Returns:
+            True if this is the first time seeing this key
+            False if this key was already seen
+        """
+        import time
+        
+        with self._lock:
+            cursor = self._conn.execute(
+                "INSERT OR IGNORE INTO idempotency_keys (key, created_at) VALUES (?, ?)",
+                (key, time.time())
+            )
+            # rowcount = 1 if inserted, 0 if already existed
+            return cursor.rowcount == 1
+    
+    def contains(self, key: str) -> bool:
+        """Check if a key exists (for testing/debugging)."""
+        with self._lock:
+            cursor = self._conn.execute(
+                "SELECT 1 FROM idempotency_keys WHERE key = ?",
+                (key,)
+            )
+            return cursor.fetchone() is not None
+    
+    def size(self) -> int:
+        """Return number of keys in store."""
+        with self._lock:
+            cursor = self._conn.execute("SELECT COUNT(*) FROM idempotency_keys")
+            return cursor.fetchone()[0]
+    
+    def close(self) -> None:
+        """Close database connection."""
+        if self._conn:
+            self._conn.close()
+            self._conn = None
+    
+    def __del__(self):
+        self.close()

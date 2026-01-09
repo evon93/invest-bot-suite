@@ -1,0 +1,40 @@
+# AG-3G-2-1 Baseline Run Log
+# Date: 2026-01-09
+
+## 1) git status -sb
+## main...origin/main
+?? report/det_a/
+?? report/det_b/
+?? report/det_close_a/
+?? report/det_close_b/
+
+## 2) git branch --show-current
+main (before checkout)
+feature/AG-3G-2-1_sqlite_idempotency_store (after checkout)
+
+## 3) git rev-parse HEAD
+741365dbb94bc0feeaa8988e23175b2d3c9263df
+
+## 4) git log -1 --oneline
+741365d Merge pull request #21 from evon93/feature/3F_6_closeout
+
+## DESCUBRIMIENTO
+
+### IdempotencyStore Protocol
+- File: engine/idempotency.py
+- Interface: `IdempotencyStore` Protocol
+- Method: `mark_once(key: str) -> bool` (True = first, False = duplicate)
+
+### Implementaciones Existentes
+- `InMemoryIdempotencyStore`: TTL-based, in-memory (no persistence)
+- `FileIdempotencyStore`: JSONL append-only (persistence, no concurrency)
+
+### Wiring Actual
+- `tools/run_live_3E.py` lines 161-180:
+  - `--run-dir`: usa FileIdempotencyStore(run_dir / "idempotency_keys.jsonl")
+  - `--resume`: reutiliza el mismo archivo
+- `engine/bus_workers.py` line 24: imports from idempotency
+
+### Contratos
+- Key: event_id (string, único por operación)
+- Retorno: bool (True = proceder, False = skip duplicate)
