@@ -2,10 +2,12 @@
 engine/loop_stepper.py
 
 Deterministic live-like loop stepper for Phase 3C.
+Extended with granular metrics in AG-3H-1-1.
 
 Provides:
 - step(bar) -> list[dict]: Process single bar, return event dicts
 - run(bars, max_steps, sleep_ms) -> dict: Run full simulation
+- run_bus_mode(): Bus-based event flow with optional metrics instrumentation
 """
 
 import json
@@ -346,6 +348,7 @@ class LoopStepper:
         checkpoint = None,  # Optional Checkpoint for progress tracking
         checkpoint_path: Optional[Path] = None,  # Path to save checkpoint
         start_idx: int = 0,  # Start index for resume (0 = from beginning after warmup)
+        metrics_collector = None,  # Optional MetricsCollector for granular observability (3H.1)
     ) -> Dict[str, Any]:
         """
         Run simulation using bus-based event flow.
@@ -402,6 +405,11 @@ class LoopStepper:
         
         published_count = 0
         
+        # Helper for deterministic metrics clock
+        def _metrics_clock():
+            """Return deterministic time for metrics (seconds from time_provider)."""
+            return self.time_provider.now_ns() / 1e9
+        
         if len(ohlcv_df) <= warmup:
             logger.warning("Not enough data for simulation (need > %d rows)", warmup)
             return {"metrics": self._get_metrics(), "published": 0}
@@ -430,9 +438,15 @@ class LoopStepper:
                 asof_ts = pd.Timestamp(now_ns, unit='ns', tz='UTC')
             ts_str = asof_ts.isoformat() if hasattr(asof_ts, "isoformat") else str(asof_ts)
             
+            # Metrics: start strategy stage
+            strategy_t0 = _metrics_clock() if metrics_collector else 0.0
+            
             intents = generate_order_intents(
                 current_slice, self.strategy_params, self.ticker, asof_ts
             )
+            
+            # Metrics: end strategy stage (per intent)
+            strategy_t1 = _metrics_clock() if metrics_collector else 0.0
             
             for intent in intents:
                 # Deterministic IDs
@@ -469,6 +483,17 @@ class LoopStepper:
                         topic=TOPIC_ORDER_INTENT,
                         extra={"event_id": intent.event_id, "symbol": intent.symbol},
                     )
+                
+                # Record strategy stage metric
+                if metrics_collector:
+                    metrics_collector.record_stage(
+                        stage="strategy",
+                        step_id=self._step_count,
+                        trace_id=intent.trace_id,
+                        t_start=strategy_t0,
+                        t_end=strategy_t1,
+                        outcome="ok",
+                    )
             
             # Update checkpoint after processing this bar index
             if checkpoint and checkpoint_path:
@@ -480,15 +505,57 @@ class LoopStepper:
         while drain_iter < max_drain_iterations:
             drain_iter += 1
             
-            # Process all workers in order
+            # -- Risk Worker Stage --
+            risk_t0 = _metrics_clock() if metrics_collector else 0.0
             risk_processed = risk_worker.step(bus, max_items=100)
+            risk_t1 = _metrics_clock() if metrics_collector else 0.0
+            
+            # Record risk stage metrics (one per processed item)
+            if metrics_collector and risk_processed > 0:
+                # We record aggregate for the batch with a synthetic trace_id
+                metrics_collector.record_stage(
+                    stage="risk",
+                    step_id=self._step_count,
+                    trace_id=f"batch_risk_{drain_iter}",
+                    t_start=risk_t0,
+                    t_end=risk_t1,
+                    outcome="ok",
+                )
+            
+            # -- Exec Worker Stage --
+            exec_t0 = _metrics_clock() if metrics_collector else 0.0
             exec_processed = exec_worker.step(bus, max_items=100)
+            exec_t1 = _metrics_clock() if metrics_collector else 0.0
+            
+            if metrics_collector and exec_processed > 0:
+                metrics_collector.record_stage(
+                    stage="exec",
+                    step_id=self._step_count,
+                    trace_id=f"batch_exec_{drain_iter}",
+                    t_start=exec_t0,
+                    t_end=exec_t1,
+                    outcome="ok",
+                )
+            
+            # -- Position Store Stage --
+            pos_t0 = _metrics_clock() if metrics_collector else 0.0
             if pos_worker:
                 pos_processed = pos_worker.step(bus, max_items=100)
             elif exec_report_drainer:
                 pos_processed = exec_report_drainer.step(bus, max_items=100)
             else:
                 pos_processed = 0
+            pos_t1 = _metrics_clock() if metrics_collector else 0.0
+            
+            if metrics_collector and pos_processed > 0:
+                metrics_collector.record_stage(
+                    stage="position",
+                    step_id=self._step_count,
+                    trace_id=f"batch_position_{drain_iter}",
+                    t_start=pos_t0,
+                    t_end=pos_t1,
+                    outcome="ok",
+                )
             
             total_processed = risk_processed + exec_processed + pos_processed
             

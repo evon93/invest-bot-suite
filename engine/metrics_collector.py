@@ -5,12 +5,13 @@ Real-time metrics collection for event-driven loop observability.
 
 Features:
 - Latency tracking per message (start/end)
+- Granular stage timing (strategy, risk, exec, position) with step_id/trace_id
 - Counters: processed, allowed, rejected, filled, errors, retries, dupes_filtered
 - Percentile calculation (p50, p95) with empty-set safety
 - Deterministic clock injection for tests
 - File-first persistence (NDJSON + summary JSON)
 
-Part of ticket AG-3G-3-1.
+Part of ticket AG-3G-3-1, extended in AG-3H-1-1.
 """
 
 from __future__ import annotations
@@ -50,6 +51,11 @@ class MetricsCollector:
     # Error breakdown
     _errors_by_reason: Dict[str, int] = field(default_factory=dict, init=False)
     _rejects_by_reason: Dict[str, int] = field(default_factory=dict, init=False)
+    
+    # Stage-level granular metrics (AG-3H-1-1)
+    _stage_events: List[Dict[str, Any]] = field(default_factory=list, init=False)
+    _stage_latencies: Dict[str, List[float]] = field(default_factory=dict, init=False)
+    _stage_outcomes: Dict[str, Dict[str, int]] = field(default_factory=dict, init=False)
     
     def start(self, msg_id: str, t: Optional[float] = None) -> None:
         """
@@ -111,6 +117,59 @@ class MetricsCollector:
             if reason:
                 self._errors_by_reason[reason] = self._errors_by_reason.get(reason, 0) + 1
     
+    def record_stage(
+        self,
+        stage: str,
+        step_id: int,
+        trace_id: str,
+        t_start: float,
+        t_end: float,
+        outcome: str = "ok",
+        reason: Optional[str] = None,
+    ) -> None:
+        """
+        Record a single stage execution with timing and outcome.
+        
+        Args:
+            stage: Stage name (e.g., "strategy", "risk", "exec", "position")
+            step_id: Monotonic step counter within the run
+            trace_id: Trace ID for correlation
+            t_start: Start timestamp (from clock_fn or injected)
+            t_end: End timestamp
+            outcome: Outcome status ("ok", "rejected", "error")
+            reason: Optional reason for rejection/error
+        """
+        dt = t_end - t_start
+        
+        # Store event for NDJSON output
+        event = {
+            "stage": stage,
+            "step_id": step_id,
+            "trace_id": trace_id,
+            "t_start": t_start,
+            "t_end": t_end,
+            "dt": dt,
+            "outcome": outcome,
+        }
+        if reason:
+            event["reason"] = reason
+        self._stage_events.append(event)
+        
+        # Aggregate latencies per stage
+        if stage not in self._stage_latencies:
+            self._stage_latencies[stage] = []
+        self._stage_latencies[stage].append(dt)
+        
+        # Aggregate outcomes per stage
+        if stage not in self._stage_outcomes:
+            self._stage_outcomes[stage] = {}
+        outcome_lower = outcome.lower()
+        self._stage_outcomes[stage][outcome_lower] = self._stage_outcomes[stage].get(outcome_lower, 0) + 1
+    
+    def get_stage_events(self) -> List[Dict[str, Any]]:
+        """Return list of stage events for NDJSON output."""
+        return self._stage_events
+    
     def _percentile(self, p: float) -> Optional[float]:
         """
         Calculate percentile safely.
@@ -126,6 +185,16 @@ class MetricsCollector:
         idx = max(0, min(n - 1, idx))
         return sorted_lat[idx]
     
+    def _percentile_for_list(self, data: List[float], p: float) -> Optional[float]:
+        """Calculate percentile for a given list."""
+        if not data:
+            return None
+        sorted_data = sorted(data)
+        n = len(sorted_data)
+        idx = int(p / 100.0 * (n - 1))
+        idx = max(0, min(n - 1, idx))
+        return sorted_data[idx]
+    
     def snapshot_summary(self) -> Dict[str, Any]:
         """
         Get current metrics snapshot.
@@ -133,6 +202,21 @@ class MetricsCollector:
         Returns:
             Dictionary with all metrics, safe for JSON serialization.
         """
+        # Build stage summaries
+        stages_by_name = {}
+        for stage, latencies in sorted(self._stage_latencies.items()):
+            p50 = self._percentile_for_list(latencies, 50)
+            p95 = self._percentile_for_list(latencies, 95)
+            stages_by_name[stage] = {
+                "count": len(latencies),
+                "p50_ms": round(p50 * 1000, 3) if p50 is not None else None,
+                "p95_ms": round(p95 * 1000, 3) if p95 is not None else None,
+            }
+        
+        outcomes_by_stage = {}
+        for stage, outcomes in sorted(self._stage_outcomes.items()):
+            outcomes_by_stage[stage] = dict(sorted(outcomes.items()))
+        
         return {
             "processed": self._processed,
             "allowed": self._allowed,
@@ -146,6 +230,9 @@ class MetricsCollector:
             "latency_count": len(self._latencies),
             "errors_by_reason": dict(sorted(self._errors_by_reason.items())),
             "rejects_by_reason": dict(sorted(self._rejects_by_reason.items())),
+            "stages_by_name": stages_by_name,
+            "outcomes_by_stage": outcomes_by_stage,
+            "stage_events_count": len(self._stage_events),
         }
     
     def reset(self) -> None:
@@ -161,6 +248,9 @@ class MetricsCollector:
         self._dupes_filtered = 0
         self._errors_by_reason.clear()
         self._rejects_by_reason.clear()
+        self._stage_events.clear()
+        self._stage_latencies.clear()
+        self._stage_outcomes.clear()
 
 
 class MetricsWriter:
@@ -242,6 +332,21 @@ class NoOpMetricsCollector:
         t: Optional[float] = None
     ) -> None:
         pass
+    
+    def record_stage(
+        self,
+        stage: str,
+        step_id: int,
+        trace_id: str,
+        t_start: float,
+        t_end: float,
+        outcome: str = "ok",
+        reason: Optional[str] = None,
+    ) -> None:
+        pass
+    
+    def get_stage_events(self) -> List[Dict[str, Any]]:
+        return []
     
     def snapshot_summary(self) -> Dict[str, Any]:
         return {}

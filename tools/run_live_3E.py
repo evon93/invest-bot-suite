@@ -286,6 +286,7 @@ def main():
             checkpoint=checkpoint,
             checkpoint_path=ckpt_path,
             start_idx=start_idx,
+            metrics_collector=metrics_collector,  # 3H.1: granular observability
         )
         # End metrics with success
         metrics_collector.end("run_main", status="FILLED")
@@ -298,8 +299,10 @@ def main():
         # Close idempotency store if used
         if idem_store:
             idem_store.close()
-        # Write metrics summary
+        # 3H.1: Write stage events to NDJSON before summary
         if metrics_writer.enabled:
+            for event in metrics_collector.get_stage_events():
+                metrics_writer.append_event(event)
             metrics_writer.write_summary(metrics_collector.snapshot_summary())
             metrics_writer.close()
         
