@@ -114,13 +114,21 @@ def build_idempotency_store(run_dir: Path, backend: str) -> IdempotencyStore:
         raise ValueError(f"Unknown idempotency backend: {backend}")
 
 
-def build_metrics(run_dir: Optional[Path], enabled: bool) -> tuple:
+def build_metrics(
+    run_dir: Optional[Path],
+    enabled: bool,
+    *,
+    rotate_max_mb: Optional[int] = None,
+    rotate_max_lines: Optional[int] = None,
+) -> tuple:
     """
     Build metrics collector and writer based on configuration.
     
     Args:
         run_dir: Run directory for metrics files (can be None)
         enabled: Whether metrics collection is enabled
+        rotate_max_mb: Optional max MB before rotation
+        rotate_max_lines: Optional max lines before rotation
         
     Returns:
         Tuple of (MetricsCollector or NoOpMetricsCollector, MetricsWriter)
@@ -129,7 +137,11 @@ def build_metrics(run_dir: Optional[Path], enabled: bool) -> tuple:
         return NoOpMetricsCollector(), MetricsWriter(run_dir=None)
     
     collector = MetricsCollector()
-    writer = MetricsWriter(run_dir=run_dir)
+    writer = MetricsWriter(
+        run_dir=run_dir,
+        rotate_max_mb=rotate_max_mb,
+        rotate_max_lines=rotate_max_lines,
+    )
     return collector, writer
 
 
@@ -164,6 +176,20 @@ def main():
         action="store_true",
         default=False,
         help="Enable real-time metrics collection (writes to run_dir/metrics_*.json)"
+    )
+    
+    # 3H.2: Metrics rotation
+    parser.add_argument(
+        "--metrics-rotate-max-mb",
+        type=int,
+        default=None,
+        help="Max metrics.ndjson size in MB before rotation (default: no rotation)"
+    )
+    parser.add_argument(
+        "--metrics-rotate-max-lines",
+        type=int,
+        default=None,
+        help="Max metrics.ndjson lines before rotation (default: no rotation)"
     )
     
     args = parser.parse_args()
@@ -259,8 +285,13 @@ def main():
     # Generate Data
     ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
     
-    # 3G.3: Setup metrics collection
-    metrics_collector, metrics_writer = build_metrics(run_dir, args.enable_metrics)
+    # 3G.3 + 3H.2: Setup metrics collection with optional rotation
+    metrics_collector, metrics_writer = build_metrics(
+        run_dir,
+        args.enable_metrics,
+        rotate_max_mb=args.metrics_rotate_max_mb,
+        rotate_max_lines=args.metrics_rotate_max_lines,
+    )
     if args.enable_metrics and run_dir:
         print(f"  Metrics enabled: {run_dir}/metrics_*.json")
     

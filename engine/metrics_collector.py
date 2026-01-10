@@ -255,32 +255,119 @@ class MetricsCollector:
 
 class MetricsWriter:
     """
-    File-first metrics writer.
+    File-first metrics writer with optional rotation.
     
     Writes:
-    - metrics.ndjson: Append-only event stream
+    - metrics.ndjson: Append-only event stream (rotated to .1, .2, etc. if enabled)
     - metrics_summary.json: Final summary
+    
+    Rotation:
+    - Disabled by default (back-compat)
+    - Enable via rotate_max_mb or rotate_max_lines
+    - Atomic: close+flush -> rename -> reopen
+    - Check threshold every 100 writes for efficiency
     """
     
-    def __init__(self, run_dir: Optional[Path] = None):
+    # Check rotation every N writes to avoid overhead
+    _ROTATION_CHECK_INTERVAL = 100
+    
+    def __init__(
+        self,
+        run_dir: Optional[Path] = None,
+        *,
+        rotate_max_mb: Optional[int] = None,
+        rotate_max_lines: Optional[int] = None,
+    ):
         """
         Initialize writer.
         
         Args:
             run_dir: Directory for output files. If None, operates in no-op mode.
+            rotate_max_mb: Max size in MB before rotation (None = disabled)
+            rotate_max_lines: Max lines before rotation (None = disabled)
         """
         self._run_dir = Path(run_dir) if run_dir else None
         self._ndjson_handle = None
+        self._ndjson_path: Optional[Path] = None
+        
+        # Rotation config
+        self._rotate_max_bytes = rotate_max_mb * 1024 * 1024 if rotate_max_mb else None
+        self._rotate_max_lines = rotate_max_lines
+        
+        # Counters
+        self._bytes_written = 0
+        self._lines_written = 0
+        self._writes_since_check = 0
+        self._rotation_count = 0  # Number of rotations performed
+        
+        # Dynamic check interval: check every write if max_lines is small
+        if rotate_max_lines and rotate_max_lines < self._ROTATION_CHECK_INTERVAL:
+            self._check_interval = 1  # Check every write
+        else:
+            self._check_interval = self._ROTATION_CHECK_INTERVAL
         
         if self._run_dir:
             self._run_dir.mkdir(parents=True, exist_ok=True)
-            ndjson_path = self._run_dir / "metrics.ndjson"
-            self._ndjson_handle = open(ndjson_path, "a", encoding="utf-8")
+            self._ndjson_path = self._run_dir / "metrics.ndjson"
+            self._ndjson_handle = open(self._ndjson_path, "a", encoding="utf-8")
     
     @property
     def enabled(self) -> bool:
         """Return True if writer is active (has run_dir)."""
         return self._run_dir is not None
+    
+    @property
+    def rotation_count(self) -> int:
+        """Return number of rotations performed."""
+        return self._rotation_count
+    
+    def _should_rotate(self) -> bool:
+        """Check if rotation threshold is exceeded."""
+        if self._rotate_max_bytes and self._bytes_written >= self._rotate_max_bytes:
+            return True
+        if self._rotate_max_lines and self._lines_written >= self._rotate_max_lines:
+            return True
+        return False
+    
+    def _find_next_rotation_suffix(self) -> int:
+        """Find the next rotation suffix (1, 2, 3, ...)."""
+        if not self._run_dir:
+            return 1
+        
+        # Find existing rotated files
+        existing = list(self._run_dir.glob("metrics.ndjson.*"))
+        if not existing:
+            return 1
+        
+        # Extract suffixes and find max
+        suffixes = []
+        for p in existing:
+            suffix = p.suffix.lstrip(".")
+            if suffix.isdigit():
+                suffixes.append(int(suffix))
+        
+        return max(suffixes, default=0) + 1
+    
+    def _rotate(self) -> None:
+        """Perform atomic rotation: close -> rename -> reopen."""
+        if not self._ndjson_handle or not self._ndjson_path:
+            return
+        
+        # Close and flush current file
+        self._ndjson_handle.close()
+        
+        # Rename to next suffix
+        suffix = self._find_next_rotation_suffix()
+        rotated_path = self._run_dir / f"metrics.ndjson.{suffix}"
+        self._ndjson_path.rename(rotated_path)
+        
+        # Reset counters
+        self._bytes_written = 0
+        self._lines_written = 0
+        self._rotation_count += 1
+        
+        # Reopen fresh file
+        self._ndjson_handle = open(self._ndjson_path, "a", encoding="utf-8")
     
     def append_event(self, payload: Dict[str, Any]) -> None:
         """
@@ -290,8 +377,20 @@ class MetricsWriter:
             payload: Event data (will be JSON-serialized)
         """
         if self._ndjson_handle:
-            self._ndjson_handle.write(json.dumps(payload, sort_keys=True) + "\n")
+            line = json.dumps(payload, sort_keys=True) + "\n"
+            self._ndjson_handle.write(line)
             self._ndjson_handle.flush()
+            
+            # Update counters
+            self._bytes_written += len(line.encode("utf-8"))
+            self._lines_written += 1
+            self._writes_since_check += 1
+            
+            # Check rotation periodically
+            if self._writes_since_check >= self._check_interval:
+                self._writes_since_check = 0
+                if self._should_rotate():
+                    self._rotate()
     
     def write_summary(self, summary: Dict[str, Any]) -> None:
         """
