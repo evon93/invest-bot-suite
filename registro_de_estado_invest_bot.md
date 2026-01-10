@@ -4,7 +4,32 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-09) — Fase 3G: Observability, Persistence & CI Hardening
+## Estado Actual (2026-01-10) — Fase 3H: Live Loop Observability & Supervision
+
+- **Rama:** `main` (@520fffe)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Granular Metrics:** `engine/metrics_collector.py` (record_stage, stages_by_name, outcomes_by_stage).
+  - **Metrics Rotation:** --metrics-rotate-max-mb/lines para runs 24/7.
+  - **HTML Dashboard:** `tools/render_metrics_dashboard_3H.py` (self-contained, sin deps).
+  - **24/7 Supervisor:** `tools/supervisor_live_3E_3H.py` (restart automático, backoff determinista).
+  - **CI Smoke 3H:** `.github/workflows/smoke_3H.yml` (metrics + rotation + dashboard).
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3H_close_20260110.md`
+  - `report/bridge_3H_to_next_report.md`
+- **Verificación:**
+  - CI Smoke 3H: PASS
+  - Pytest: 520 passed, 10 skipped
+- **Commits:**
+  - AG-3H-1-1: `ccbb2e8` (granular metrics)
+  - AG-3H-2-1: `ec6db3a` (rotation)
+  - AG-3H-3-1: `cdc4e88` (dashboard)
+  - AG-3H-4-1: `3e3a9ab` (supervisor)
+  - AG-3H-6-1: `520fffe` (CI smoke)
+
+---
+
+## Estado Anterior (2026-01-09) — Fase 3G: Observability, Persistence & CI Hardening
 
 - **Rama:** `feature/AG-3G-7-1_closeout` (base `feature/3F_6_closeout`)
 - **Estado:** ✅ COMPLETADO
