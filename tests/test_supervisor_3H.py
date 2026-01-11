@@ -212,7 +212,8 @@ class TestSupervisorStateAndLogs:
         assert "Supervisor started" in content
         assert "Starting child" in content
         assert "exited with code 1" in content
-        assert "exited cleanly" in content
+        # AG-3I-2-1: Message changed from 'exited cleanly' to 'shutting down'
+        assert "shutting down" in content.lower() or "child_clean_exit" in content
     
     def test_custom_log_file_path(self, tmp_path: Path):
         """Custom log file path should be respected."""
