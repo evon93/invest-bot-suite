@@ -161,11 +161,12 @@ class TestRenderHtml:
             {"stage": "<script>alert('xss')</script>", "step_id": 1, "trace_id": "x", "outcome": "ok", "dt": 0},
         ]
         
-        html = render_html({}, events, tmp_path)
+        html_content = render_html({}, events, tmp_path)
         
-        # Script tag should be escaped
-        assert "<script>" not in html
-        assert "&lt;script&gt;" in html
+        # User-supplied script tag should be escaped (not the legitimate JS in head)
+        # The malicious XSS payload should appear escaped in the events table
+        assert "&lt;script&gt;alert" in html_content
+        assert "&lt;/script&gt;" in html_content
 
 
 class TestDashboardIntegration:
@@ -201,3 +202,119 @@ class TestDashboardIntegration:
         assert len(content) > 500  # Should have substantial content
         assert "strategy" in content
         assert "5" in content  # events shown
+
+
+class TestDashboardV1Features:
+    """Tests for AG-3I-4-1 Dashboard v1 features."""
+    
+    def test_generated_at_with_injectable_now_fn(self, tmp_path: Path):
+        """Should use now_fn for deterministic timestamp in tests."""
+        from datetime import datetime, timezone
+        
+        fixed_dt = datetime(2026, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        
+        html_content = render_html({}, [], tmp_path, now_fn=lambda: fixed_dt)
+        
+        assert "Generated at:" in html_content
+        assert "2026-01-15T12:00:00+00:00" in html_content
+    
+    def test_run_id_from_summary(self, tmp_path: Path):
+        """Should display run_id from summary metadata."""
+        summary = {"run_id": "my_custom_run_123"}
+        
+        html_content = render_html(summary, [], tmp_path)
+        
+        assert "Run ID:" in html_content
+        assert "my_custom_run_123" in html_content
+    
+    def test_run_id_fallback_to_dir_name(self, tmp_path: Path):
+        """Should fall back to run_dir name if run_id not in summary."""
+        # tmp_path will have a name like tmpXXXXXX
+        html_content = render_html({}, [], tmp_path)
+        
+        assert "Run ID:" in html_content
+        # tmp_path name should be used as fallback
+        assert tmp_path.name in html_content
+    
+    def test_top_stages_section_exists(self, tmp_path: Path):
+        """Should contain Top Stages by P95 section."""
+        summary = {
+            "stages_by_name": {
+                "strategy": {"count": 100, "p50_ms": 0.5, "p95_ms": 1.0},
+                "risk": {"count": 80, "p50_ms": 0.3, "p95_ms": 2.5},
+                "exec": {"count": 50, "p50_ms": 1.0, "p95_ms": 5.0},
+            },
+        }
+        
+        html_content = render_html(summary, [], tmp_path)
+        
+        assert "Top Stages by P95" in html_content
+    
+    def test_top_stages_sorted_descending(self, tmp_path: Path):
+        """Top stages should be sorted by P95 descending."""
+        summary = {
+            "stages_by_name": {
+                "strategy": {"count": 100, "p50_ms": 0.5, "p95_ms": 1.0},    # lowest p95
+                "risk": {"count": 80, "p50_ms": 0.3, "p95_ms": 2.5},         # middle
+                "exec": {"count": 50, "p50_ms": 1.0, "p95_ms": 5.0},         # highest p95
+            },
+        }
+        
+        html_content = render_html(summary, [], tmp_path)
+        
+        # Find the positions in the HTML to verify order
+        exec_pos = html_content.find(">exec<") if ">exec<" in html_content else html_content.find("exec")
+        risk_pos = html_content.find(">risk<") if ">risk<" in html_content else html_content.find("risk")
+        strategy_pos = html_content.find(">strategy<") if ">strategy<" in html_content else html_content.find("strategy")
+        
+        # exec (5.0) should appear before risk (2.5) which should appear before strategy (1.0)
+        # In the Top Stages section (not the regular Stages section)
+        top_stages_start = html_content.find("Top Stages by P95")
+        stages_section_start = html_content.find("<!-- Stages Section -->")
+        
+        # Extract just the Top Stages section
+        top_section = html_content[top_stages_start:stages_section_start]
+        
+        exec_in_top = top_section.find("exec")
+        risk_in_top = top_section.find("risk")
+        strategy_in_top = top_section.find("strategy")
+        
+        assert exec_in_top < risk_in_top < strategy_in_top, (
+            f"Expected exec < risk < strategy in Top Stages section: "
+            f"exec={exec_in_top}, risk={risk_in_top}, strategy={strategy_in_top}"
+        )
+    
+    def test_top_stages_handles_missing_p95(self, tmp_path: Path):
+        """Should handle stages with missing p95_ms gracefully."""
+        summary = {
+            "stages_by_name": {
+                "strategy": {"count": 100, "p50_ms": 0.5},  # No p95_ms
+                "risk": {"count": 80, "p95_ms": 2.5},       # Has p95_ms
+            },
+        }
+        
+        html_content = render_html(summary, [], tmp_path)
+        
+        # Should not crash, and should contain both stages
+        assert "Top Stages by P95" in html_content
+        assert "strategy" in html_content
+        assert "risk" in html_content
+        assert "N/A" in html_content  # strategy should show N/A for p95
+    
+    def test_js_refresh_script_present(self, tmp_path: Path):
+        """Should contain JS for querystring-based refresh."""
+        html_content = render_html({}, [], tmp_path)
+        
+        # Check for refresh-related JS patterns
+        assert "URLSearchParams" in html_content
+        assert "refresh" in html_content
+        assert "refresh-meta" in html_content
+        assert "refresh-indicator" in html_content
+    
+    def test_refresh_indicator_hidden_by_default(self, tmp_path: Path):
+        """Refresh indicator should be hidden by default (no ?refresh=N)."""
+        html_content = render_html({}, [], tmp_path)
+        
+        # Check that indicator has display:none by default
+        assert 'style="display:none;' in html_content or "style='display:none;" in html_content
+
