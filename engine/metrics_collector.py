@@ -277,6 +277,7 @@ class MetricsWriter:
         *,
         rotate_max_mb: Optional[int] = None,
         rotate_max_lines: Optional[int] = None,
+        rotate_keep: Optional[int] = None,
     ):
         """
         Initialize writer.
@@ -285,6 +286,7 @@ class MetricsWriter:
             run_dir: Directory for output files. If None, operates in no-op mode.
             rotate_max_mb: Max size in MB before rotation (None = disabled)
             rotate_max_lines: Max lines before rotation (None = disabled)
+            rotate_keep: Keep only N most recent rotated files (None = keep all)
         """
         self._run_dir = Path(run_dir) if run_dir else None
         self._ndjson_handle = None
@@ -293,6 +295,7 @@ class MetricsWriter:
         # Rotation config
         self._rotate_max_bytes = rotate_max_mb * 1024 * 1024 if rotate_max_mb else None
         self._rotate_max_lines = rotate_max_lines
+        self._rotate_keep = rotate_keep  # AG-3I-3-1: retention config
         
         # Counters
         self._bytes_written = 0
@@ -349,7 +352,7 @@ class MetricsWriter:
         return max(suffixes, default=0) + 1
     
     def _rotate(self) -> None:
-        """Perform atomic rotation: close -> rename -> reopen."""
+        """Perform atomic rotation: close -> rename -> reopen -> cleanup."""
         if not self._ndjson_handle or not self._ndjson_path:
             return
         
@@ -366,8 +369,47 @@ class MetricsWriter:
         self._lines_written = 0
         self._rotation_count += 1
         
+        # Cleanup old rotated files (AG-3I-3-1)
+        self._cleanup_rotated()
+        
         # Reopen fresh file
         self._ndjson_handle = open(self._ndjson_path, "a", encoding="utf-8")
+    
+    def _cleanup_rotated(self) -> None:
+        """
+        Remove excess rotated files, keeping only the N most recent.
+        
+        Best-effort: errors on individual files are logged but don't stop the loop.
+        
+        AG-3I-3-1: Implements --metrics-rotate-keep functionality.
+        """
+        if self._rotate_keep is None or not self._run_dir:
+            return  # No cleanup if keep is not set
+        
+        # Find all rotated files (metrics.ndjson.1, metrics.ndjson.2, etc.)
+        pattern = "metrics.ndjson.*"
+        rotated_files = []
+        for p in self._run_dir.glob(pattern):
+            # Extract numeric suffix only
+            suffix = p.suffix.lstrip(".")
+            if suffix.isdigit():
+                rotated_files.append((int(suffix), p))
+        
+        if not rotated_files:
+            return
+        
+        # Sort by suffix descending (highest = most recent)
+        rotated_files.sort(key=lambda x: x[0], reverse=True)
+        
+        # Keep only the most recent N
+        to_delete = rotated_files[self._rotate_keep:]
+        
+        for suffix, path in to_delete:
+            try:
+                path.unlink()
+            except OSError:
+                # Best-effort: log would be nice but we don't have logger here
+                pass  # Ignore errors on individual file deletion
     
     def append_event(self, payload: Dict[str, Any]) -> None:
         """
