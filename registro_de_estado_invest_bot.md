@@ -4,7 +4,27 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-10) — Fase 3H: Live Loop Observability & Supervision
+## Estado Actual (2026-01-11) — Fase 3I: Time Signals & Retention
+
+- **Rama:** `main` (will be merged from `feature/AG-3I-7-1_closeout`)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Deterministic Time:** `SimulatedTimeProvider` + Batch Latency Contract.
+  - **Graceful Shutdown:** `StopController` para SIGINT/SIGTERM en Supervisor.
+  - **Metrics Retention:** `--metrics-rotate-keep N` (best-effort cleanup).
+  - **Dashboard V1:** Timestamp UTC, Run ID, Top Stages by P95, Auto-refresh JS.
+  - **CI Smoke 3I:** `.github/workflows/smoke_3I.yml` (e2e live loop validation).
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3I_close_20260111.md`
+  - `report/bridge_3I_to_next_report.md`
+- **Verificación:**
+  - CI Smoke 3I: PASS
+  - Pytest: 565 passed, 10 skipped
+- **Auditoría Externa:** Hallazgos DeepSeek (3I-1-2, 3I-3-1) incorporados al backlog en bridge report.
+
+---
+
+## Estado Anterior (2026-01-10) — Fase 3H: Live Loop Observability & Supervision
 
 - **Rama:** `main` (@520fffe)
 - **Estado:** ✅ COMPLETADO
