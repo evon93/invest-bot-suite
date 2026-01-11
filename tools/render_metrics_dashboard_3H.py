@@ -8,15 +8,18 @@ No external dependencies - uses only Python stdlib.
 Generates a self-contained HTML file with:
 - Overview: totals and outcomes
 - Stage table: counts and latency percentiles
+- Top stages by p95 (AG-3I-4-1)
 - Latest events: tail of metrics.ndjson (including rotated files)
+- Auto-refresh via querystring ?refresh=N (AG-3I-4-1)
 
-Part of ticket AG-3H-3-1.
+Part of ticket AG-3H-3-1, extended in AG-3I-4-1.
 """
 
 import argparse
 import json
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 import html
 
 
@@ -71,8 +74,18 @@ def render_html(
     summary: Dict[str, Any],
     events: List[Dict[str, Any]],
     run_dir: Path,
+    *,
+    now_fn: Optional[Callable[[], datetime]] = None,
 ) -> str:
-    """Render HTML dashboard from summary and events."""
+    """
+    Render HTML dashboard from summary and events.
+    
+    Args:
+        summary: Metrics summary dict
+        events: List of stage events
+        run_dir: Run directory path (for display)
+        now_fn: Optional function returning current datetime (for testing)
+    """
     
     # Extract data
     processed = summary.get("processed", 0)
@@ -94,6 +107,16 @@ def render_html(
     errors_by_reason = summary.get("errors_by_reason", {})
     rejects_by_reason = summary.get("rejects_by_reason", {})
     
+    # AG-3I-4-1: Generated at timestamp and run_id
+    if now_fn:
+        generated_at = now_fn()
+    else:
+        generated_at = datetime.now(timezone.utc)
+    generated_at_str = generated_at.isoformat()
+    
+    # run_id: try to get from summary metadata, fallback to run_dir name, else unknown
+    run_id = summary.get("run_id") or str(run_dir.name) or "unknown"
+    
     # Build HTML
     html_parts = [
         "<!DOCTYPE html>",
@@ -101,6 +124,7 @@ def render_html(
         "<head>",
         "  <meta charset=\"UTF-8\">",
         "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+        "  <meta id=\"refresh-meta\">",  # Will be activated by JS if ?refresh=N
         f"  <title>Metrics Dashboard - {html.escape(str(run_dir.name))}</title>",
         "  <style>",
         "    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 20px; background: #f5f5f5; }",
@@ -126,12 +150,34 @@ def render_html(
         "    .badge-error { background: #f8d7da; color: #721c24; }",
         "    .badge-rejected { background: #fff3cd; color: #856404; }",
         "    .empty { color: #999; font-style: italic; }",
+        "    .meta-info { color: #666; font-size: 0.85em; margin-bottom: 20px; }",
+        "    .refresh-indicator { background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 4px; display: inline-block; }",
+        "    .top-stages { margin-top: 15px; }",
         "  </style>",
+        "  <script>",
+        "    // AG-3I-4-1: Auto-refresh via ?refresh=N querystring",
+        "    (function() {",
+        "      const params = new URLSearchParams(window.location.search);",
+        "      const refresh = parseInt(params.get('refresh'), 10);",
+        "      if (refresh > 0) {",
+        "        const meta = document.getElementById('refresh-meta');",
+        "        if (meta) { meta.setAttribute('http-equiv', 'refresh'); meta.setAttribute('content', refresh.toString()); }",
+        "        document.addEventListener('DOMContentLoaded', function() {",
+        "          const indicator = document.getElementById('refresh-indicator');",
+        "          if (indicator) { indicator.style.display = 'inline-block'; indicator.textContent = 'auto-refresh: ' + refresh + 's'; }",
+        "        });",
+        "      }",
+        "    })();",
+        "  </script>",
         "</head>",
         "<body>",
         "  <div class=\"container\">",
         f"    <h1>Metrics Dashboard</h1>",
-        f"    <p>Run: <strong>{html.escape(str(run_dir))}</strong></p>",
+        "    <div class=\"meta-info\">",
+        f"      <p>Run: <strong>{html.escape(str(run_dir))}</strong></p>",
+        f"      <p>Run ID: <strong>{html.escape(run_id)}</strong></p>",
+        f"      <p>Generated at: <strong>{html.escape(generated_at_str)}</strong> <span id=\"refresh-indicator\" class=\"refresh-indicator\" style=\"display:none;\"></span></p>",
+        "    </div>",
         "",
         "    <!-- Overview Section -->",
         "    <div class=\"card\">",
@@ -157,6 +203,40 @@ def render_html(
         "      </div>",
         "    </div>",
         "",
+        "    <!-- Top Stages by P95 Section (AG-3I-4-1) -->",
+        "    <div class=\"card top-stages\">",
+        "      <h2>Top Stages by P95</h2>",
+    ]
+    
+    # Sort stages by p95 descending
+    if stages:
+        sorted_by_p95 = sorted(
+            stages.items(),
+            key=lambda x: x[1].get("p95_ms", 0) if isinstance(x[1].get("p95_ms"), (int, float)) else 0,
+            reverse=True
+        )
+        html_parts.extend([
+            "      <table>",
+            "        <thead><tr><th>Stage</th><th>P95 (ms)</th><th>Count</th></tr></thead>",
+            "        <tbody>",
+        ])
+        for stage_name, stage_data in sorted_by_p95:
+            p95_val = stage_data.get("p95_ms", "N/A")
+            cnt = stage_data.get("count", 0)
+            html_parts.append(
+                f"          <tr><td><strong>{html.escape(stage_name)}</strong></td>"
+                f"<td>{p95_val}</td><td>{cnt}</td></tr>"
+            )
+        html_parts.extend([
+            "        </tbody>",
+            "      </table>",
+        ])
+    else:
+        html_parts.append("      <p class=\"empty\">No stage data available</p>")
+    html_parts.append("    </div>")
+    
+    html_parts.extend([
+        "",
         "    <!-- Stages Section -->",
         "    <div class=\"card\">",
         "      <h2>Stages</h2>",
@@ -166,7 +246,7 @@ def render_html(
         "          <tr><th>Stage</th><th>Count</th><th>P50 (ms)</th><th>P95 (ms)</th><th>Outcomes</th></tr>",
         "        </thead>",
         "        <tbody>",
-    ]
+    ])
     
     if stages:
         for stage_name in sorted(stages.keys()):
