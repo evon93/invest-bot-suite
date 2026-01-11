@@ -118,6 +118,7 @@ def build_metrics(
     run_dir: Optional[Path],
     enabled: bool,
     *,
+    time_provider=None,
     rotate_max_mb: Optional[int] = None,
     rotate_max_lines: Optional[int] = None,
 ) -> tuple:
@@ -127,6 +128,7 @@ def build_metrics(
     Args:
         run_dir: Run directory for metrics files (can be None)
         enabled: Whether metrics collection is enabled
+        time_provider: Optional TimeProvider for deterministic clock (simulated mode)
         rotate_max_mb: Optional max MB before rotation
         rotate_max_lines: Optional max lines before rotation
         
@@ -136,7 +138,14 @@ def build_metrics(
     if not enabled:
         return NoOpMetricsCollector(), MetricsWriter(run_dir=None)
     
-    collector = MetricsCollector()
+    # Use time_provider for deterministic clock if available
+    if time_provider and hasattr(time_provider, 'now_ns'):
+        clock_fn = lambda: time_provider.now_ns() / 1e9
+    else:
+        import time
+        clock_fn = time.monotonic
+    
+    collector = MetricsCollector(clock_fn=clock_fn)
     writer = MetricsWriter(
         run_dir=run_dir,
         rotate_max_mb=rotate_max_mb,
@@ -286,9 +295,11 @@ def main():
     ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
     
     # 3G.3 + 3H.2: Setup metrics collection with optional rotation
+    # 3I.1: Pass time_provider for deterministic clock in simulated mode
     metrics_collector, metrics_writer = build_metrics(
         run_dir,
         args.enable_metrics,
+        time_provider=time_provider,
         rotate_max_mb=args.metrics_rotate_max_mb,
         rotate_max_lines=args.metrics_rotate_max_lines,
     )

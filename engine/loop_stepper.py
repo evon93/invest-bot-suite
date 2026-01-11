@@ -34,6 +34,15 @@ from state.position_store_sqlite import PositionStoreSQLite
 
 logger = logging.getLogger(__name__)
 
+# Deterministic stage latency deltas for simulated clock mode (nanoseconds)
+# These are advanced between metrics timing points to ensure non-zero latencies
+STAGE_LATENCY_NS = {
+    "strategy": 1_000_000,   # 1ms - signal generation
+    "risk": 500_000,         # 0.5ms - risk evaluation
+    "exec": 2_000_000,       # 2ms - execution/exchange latency
+    "position": 300_000,     # 0.3ms - position update
+}
+
 
 class LoopStepper:
     """
@@ -445,8 +454,23 @@ class LoopStepper:
                 current_slice, self.strategy_params, self.ticker, asof_ts
             )
             
+            # Advance simulated time for strategy stage (deterministic latency)
+            if hasattr(self.time_provider, 'advance_ns'):
+                self.time_provider.advance_ns(STAGE_LATENCY_NS["strategy"])
+            
             # Metrics: end strategy stage (per intent)
             strategy_t1 = _metrics_clock() if metrics_collector else 0.0
+            
+            # Record strategy stage metric (once per bar, regardless of intents generated)
+            if metrics_collector:
+                metrics_collector.record_stage(
+                    stage="strategy",
+                    step_id=self._step_count,
+                    trace_id=f"bar_{i}",
+                    t_start=strategy_t0,
+                    t_end=strategy_t1,
+                    outcome="ok" if intents else "no_signal",
+                )
             
             for intent in intents:
                 # Deterministic IDs
@@ -483,17 +507,6 @@ class LoopStepper:
                         topic=TOPIC_ORDER_INTENT,
                         extra={"event_id": intent.event_id, "symbol": intent.symbol},
                     )
-                
-                # Record strategy stage metric
-                if metrics_collector:
-                    metrics_collector.record_stage(
-                        stage="strategy",
-                        step_id=self._step_count,
-                        trace_id=intent.trace_id,
-                        t_start=strategy_t0,
-                        t_end=strategy_t1,
-                        outcome="ok",
-                    )
             
             # Update checkpoint after processing this bar index
             if checkpoint and checkpoint_path:
@@ -508,6 +521,9 @@ class LoopStepper:
             # -- Risk Worker Stage --
             risk_t0 = _metrics_clock() if metrics_collector else 0.0
             risk_processed = risk_worker.step(bus, max_items=100)
+            # Advance simulated time for risk stage
+            if hasattr(self.time_provider, 'advance_ns') and risk_processed > 0:
+                self.time_provider.advance_ns(STAGE_LATENCY_NS["risk"] * risk_processed)
             risk_t1 = _metrics_clock() if metrics_collector else 0.0
             
             # Record risk stage metrics (one per processed item)
@@ -525,6 +541,9 @@ class LoopStepper:
             # -- Exec Worker Stage --
             exec_t0 = _metrics_clock() if metrics_collector else 0.0
             exec_processed = exec_worker.step(bus, max_items=100)
+            # Advance simulated time for exec stage
+            if hasattr(self.time_provider, 'advance_ns') and exec_processed > 0:
+                self.time_provider.advance_ns(STAGE_LATENCY_NS["exec"] * exec_processed)
             exec_t1 = _metrics_clock() if metrics_collector else 0.0
             
             if metrics_collector and exec_processed > 0:
@@ -545,6 +564,9 @@ class LoopStepper:
                 pos_processed = exec_report_drainer.step(bus, max_items=100)
             else:
                 pos_processed = 0
+            # Advance simulated time for position stage
+            if hasattr(self.time_provider, 'advance_ns') and pos_processed > 0:
+                self.time_provider.advance_ns(STAGE_LATENCY_NS["position"] * pos_processed)
             pos_t1 = _metrics_clock() if metrics_collector else 0.0
             
             if metrics_collector and pos_processed > 0:
