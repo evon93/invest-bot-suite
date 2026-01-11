@@ -35,12 +35,25 @@ from state.position_store_sqlite import PositionStoreSQLite
 logger = logging.getLogger(__name__)
 
 # Deterministic stage latency deltas for simulated clock mode (nanoseconds)
-# These are advanced between metrics timing points to ensure non-zero latencies
+# These are advanced between metrics timing points to ensure non-zero latencies.
+#
+# BATCH LATENCY CONTRACT (AG-3I-1-2):
+# - strategy: Fixed latency per bar (1ms). Applied once per bar regardless of
+#   whether intents are generated. Represents signal generation cost.
+#
+# - risk, exec, position: Variable latency per item (batch scaling).
+#   Total latency = STAGE_LATENCY_NS[stage] * processed
+#   Where 'processed' is the number of items processed in that drain iteration.
+#   This models backlog/batch processing costs accurately in simulated mode.
+#
+# Example: If risk_worker processes 3 items in one step:
+#   risk_latency_ns = 500_000 * 3 = 1_500_000 ns (1.5ms)
+#
 STAGE_LATENCY_NS = {
-    "strategy": 1_000_000,   # 1ms - signal generation
-    "risk": 500_000,         # 0.5ms - risk evaluation
-    "exec": 2_000_000,       # 2ms - execution/exchange latency
-    "position": 300_000,     # 0.3ms - position update
+    "strategy": 1_000_000,   # 1ms - signal generation (per bar)
+    "risk": 500_000,         # 0.5ms - risk evaluation (per item)
+    "exec": 2_000_000,       # 2ms - execution/exchange latency (per item)
+    "position": 300_000,     # 0.3ms - position update (per item)
 }
 
 
