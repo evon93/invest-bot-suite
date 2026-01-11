@@ -121,6 +121,7 @@ def build_metrics(
     time_provider=None,
     rotate_max_mb: Optional[int] = None,
     rotate_max_lines: Optional[int] = None,
+    rotate_keep: Optional[int] = None,
 ) -> tuple:
     """
     Build metrics collector and writer based on configuration.
@@ -131,6 +132,7 @@ def build_metrics(
         time_provider: Optional TimeProvider for deterministic clock (simulated mode)
         rotate_max_mb: Optional max MB before rotation
         rotate_max_lines: Optional max lines before rotation
+        rotate_keep: Optional keep only N rotated files (AG-3I-3-1)
         
     Returns:
         Tuple of (MetricsCollector or NoOpMetricsCollector, MetricsWriter)
@@ -150,6 +152,7 @@ def build_metrics(
         run_dir=run_dir,
         rotate_max_mb=rotate_max_mb,
         rotate_max_lines=rotate_max_lines,
+        rotate_keep=rotate_keep,
     )
     return collector, writer
 
@@ -199,6 +202,13 @@ def main():
         type=int,
         default=None,
         help="Max metrics.ndjson lines before rotation (default: no rotation)"
+    )
+    # AG-3I-3-1: Rotation retention
+    parser.add_argument(
+        "--metrics-rotate-keep",
+        type=int,
+        default=None,
+        help="Keep only N most recent rotated files (default: keep all)"
     )
     
     args = parser.parse_args()
@@ -302,6 +312,7 @@ def main():
         time_provider=time_provider,
         rotate_max_mb=args.metrics_rotate_max_mb,
         rotate_max_lines=args.metrics_rotate_max_lines,
+        rotate_keep=args.metrics_rotate_keep,
     )
     if args.enable_metrics and run_dir:
         print(f"  Metrics enabled: {run_dir}/metrics_*.json")
