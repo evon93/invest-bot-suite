@@ -44,6 +44,7 @@ from engine.idempotency import (
 )
 from engine.metrics_collector import MetricsCollector, MetricsWriter, NoOpMetricsCollector
 from risk_rules_loader import load_risk_rules
+from strategy_engine.strategy_registry import get_strategy_fn, STRATEGY_VERSIONS, DEFAULT_STRATEGY
 
 # Configure basic logging
 logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s')
@@ -170,6 +171,14 @@ def main():
     parser.add_argument("--exchange", choices=["paper", "stub", "realish"], default="paper", help="Exchange adapter mode")
     parser.add_argument("--latency-steps", type=int, default=1, help="Latency steps for stub exchange")
     
+    # AG-3J-1-1: Strategy version selection
+    parser.add_argument(
+        "--strategy",
+        choices=STRATEGY_VERSIONS,
+        default=DEFAULT_STRATEGY,
+        help=f"Strategy version to use (default: {DEFAULT_STRATEGY})"
+    )
+    
     # 3F.4: Crash recovery
     parser.add_argument("--run-dir", type=str, help="Run directory for checkpoint/idempotency (creates new run)")
     parser.add_argument("--resume", type=str, help="Resume from existing run directory (mutually exclusive with --run-dir)")
@@ -253,6 +262,7 @@ def main():
         "exchange": args.exchange,
         "seed": args.seed,
         "latency_steps": args.latency_steps if args.exchange == "stub" else 0,
+        "strategy": args.strategy,  # AG-3J-1-1
         "max_steps": args.max_steps,
         "timestamp_start": str(pd.Timestamp.now(tz="UTC")),
     }
@@ -294,10 +304,16 @@ def main():
         
     # 3. Initialize LoopStepper
     bus = InMemoryBus()
+    
+    # AG-3J-1-1: Get strategy function based on CLI flag
+    strategy_fn = get_strategy_fn(args.strategy)
+    print(f"  Strategy: {args.strategy}")
+    
     stepper = LoopStepper(
         state_db=db_path,
         seed=args.seed,
         time_provider=time_provider,
+        strategy_fn=strategy_fn,  # AG-3J-1-1: Inject strategy
         # Risk rules defaults for now or could expose arg
     )
     

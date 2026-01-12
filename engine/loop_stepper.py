@@ -27,7 +27,7 @@ from contracts.event_messages import OrderIntent
 from risk_manager_v0_6 import RiskManagerV06
 from risk_manager_v_0_4 import RiskManager as RiskManagerV04
 from adapters.risk_input_adapter import adapt_order_intent_to_risk_input
-from strategy_engine.strategy_v0_7 import generate_order_intents
+from strategy_engine.strategy_registry import get_strategy_fn, DEFAULT_STRATEGY
 from execution.execution_adapter_v0_2 import simulate_execution
 from state.position_store_sqlite import PositionStoreSQLite
 
@@ -76,6 +76,7 @@ class LoopStepper:
         state_db: Optional[Union[str, Path]] = None,
         time_provider: Optional[TimeProvider] = None,
         seed: int = 42,
+        strategy_fn = None,  # AG-3J-1-1: Strategy function injection
     ):
         """
         Initialize the loop stepper.
@@ -116,6 +117,9 @@ class LoopStepper:
         self._fill_count = 0
         self._rejected_count = 0
         self._rejected_count = 0
+        
+        # AG-3J-1-1: Strategy function (default to v0_7)
+        self._strategy_fn = strategy_fn if strategy_fn else get_strategy_fn(DEFAULT_STRATEGY)
 
     def _gen_uuid(self) -> str:
         """Generate deterministic UUID based on seed."""
@@ -154,7 +158,7 @@ class LoopStepper:
         ts_str = asof_ts.isoformat() if hasattr(asof_ts, "isoformat") else str(asof_ts)
 
         # 1. Strategy: Generate order intents
-        intents = generate_order_intents(
+        intents = self._strategy_fn(
             ohlcv_slice, self.strategy_params, self.ticker, asof_ts
         )
         
@@ -463,7 +467,7 @@ class LoopStepper:
             # Metrics: start strategy stage
             strategy_t0 = _metrics_clock() if metrics_collector else 0.0
             
-            intents = generate_order_intents(
+            intents = self._strategy_fn(
                 current_slice, self.strategy_params, self.ticker, asof_ts
             )
             
