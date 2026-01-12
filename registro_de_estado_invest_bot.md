@@ -4,27 +4,33 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-11) — Fase 3I: Time Signals & Retention
+## Estado Actual (2026-01-12) — Fase 3J: Strategy v0.8 Selector
 
-- **Rama:** `main` (will be merged from `feature/AG-3I-7-1_closeout`)
+- **Rama:** `main` (merged from feature branches 3J)
+- **HEAD:** `6d18465` — AG-3J-5-1: CI smoke gate 3J
 - **Estado:** ✅ COMPLETADO
 - **Entregables:**
-  - **Deterministic Time:** `SimulatedTimeProvider` + Batch Latency Contract.
-  - **Graceful Shutdown:** `StopController` para SIGINT/SIGTERM en Supervisor.
-  - **Metrics Retention:** `--metrics-rotate-keep N` (best-effort cleanup).
-  - **Dashboard V1:** Timestamp UTC, Run ID, Top Stages by P95, Auto-refresh JS.
-  - **CI Smoke 3I:** `.github/workflows/smoke_3I.yml` (e2e live loop validation).
+  - **Strategy Selector:** CLI `--strategy {v0_7,v0_8}` en run_live_3E.py
+  - **Strategy v0.8:** EMA crossover (determinista, no-lookahead, NaN-safe)
+  - **Validation Harness:** `tools/run_strategy_validation_3J.py` (offline)
+  - **Live Smoke Tests:** 6 tests en `test_run_live_3E_smoke_3J4.py`
+  - **CI Gate 3J:** `.github/workflows/smoke_3J.yml`
 - **Handoff:**
-  - `report/ORCH_HANDOFF_post3I_close_20260111.md`
-  - `report/bridge_3I_to_next_report.md`
+  - `report/ORCH_HANDOFF_post3J_close_20260112.md`
+  - `report/bridge_3J_to_3K_report.md`
 - **Verificación:**
-  - CI Smoke 3I: PASS
-  - Pytest: 565 passed, 10 skipped
-- **Auditoría Externa:** Hallazgos DeepSeek (3I-1-2, 3I-3-1) incorporados al backlog en bridge report.
+  - Pytest: 615 passed, 10 skipped
+  - CI Smoke 3J: tests + scripts + artifact verify
+- **Commits mergeados:**
+  - AG-3J-1-1 + AG-3J-2-1: `42eec7e` (PR #29)
+  - AG-3J-3-1: `9ce5319` (validation harness)
+  - AG-3J-4-1: `585e1b9` (live smoke)
+  - AG-3J-5-1: `6d18465` (CI gate)
+- **Auditoría Externa:** DS-3J-1-1, DS-3J-2-1 en report/external_ai/inbox_external/
 
 ---
 
-## Estado Anterior (2026-01-10) — Fase 3H: Live Loop Observability & Supervision
+## Estado Anterior (2026-01-11) — Fase 3I: Time Signals & Retention
 
 - **Rama:** `main` (@520fffe)
 - **Estado:** ✅ COMPLETADO
