@@ -1,0 +1,92 @@
+name: Smoke Test 3J (Strategy v0.8 Selector + Validation Harness)
+
+on:
+  push:
+    branches: [ "main", "develop", "feature/*" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  workflow_dispatch:
+
+jobs:
+  smoke-3j:
+    runs-on: ubuntu-latest
+    env:
+      RUN_DIR: ${{ runner.temp }}/run_3j
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install pytest pytest-cov
+
+      - name: Run Pytest (Full Suite)
+        run: |
+          python -m pytest -q
+
+      - name: Strategy Validation Harness Tests (3J.3)
+        run: |
+          python -m pytest -q tests/test_strategy_validation_runner_3J3.py
+
+      - name: Live Smoke Tests (3J.4)
+        run: |
+          python -m pytest -q tests/test_run_live_3E_smoke_3J4.py
+
+      - name: Smoke Test - run_live_3E with Strategy v0.8
+        run: |
+          python tools/run_live_3E.py \
+            --outdir ${RUN_DIR} \
+            --strategy v0_8 \
+            --max-steps 30 \
+            --clock simulated \
+            --exchange paper \
+            --seed 42
+
+      - name: Smoke Test - Offline Validation Harness
+        run: |
+          python tools/run_strategy_validation_3J.py \
+            --outdir ${RUN_DIR}/validation \
+            --strategy v0_8 \
+            --n-bars 50 \
+            --seed 42
+
+      - name: Verify Artifacts Created
+        run: |
+          echo "=== Verifying run_live_3E artifacts ==="
+          test -f ${RUN_DIR}/run_meta.json || exit 1
+          echo "✓ run_meta.json exists"
+          cat ${RUN_DIR}/run_meta.json | grep '"strategy": "v0_8"' || exit 1
+          echo "✓ strategy is v0_8"
+          
+          test -f ${RUN_DIR}/events.ndjson || exit 1
+          echo "✓ events.ndjson exists"
+          
+          echo ""
+          echo "=== Verifying validation harness artifacts ==="
+          test -f ${RUN_DIR}/validation/run_meta.json || exit 1
+          echo "✓ validation/run_meta.json exists"
+          
+          test -f ${RUN_DIR}/validation/signals.ndjson || exit 1
+          echo "✓ validation/signals.ndjson exists"
+          
+          test -f ${RUN_DIR}/validation/metrics_summary.json || exit 1
+          echo "✓ validation/metrics_summary.json exists"
+          
+          echo ""
+          echo "=== Smoke 3J passed ==="
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-3j-artifacts
+          path: |
+            ${{ runner.temp }}/run_3j/
