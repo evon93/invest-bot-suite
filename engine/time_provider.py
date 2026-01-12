@@ -112,8 +112,21 @@ class FrozenTimeProvider:
         self._step += n
 
     def set_utc(self, dt: datetime) -> None:
-        """Set frozen UTC datetime."""
-        self.frozen_utc = dt
+        """
+        Set frozen UTC datetime.
+        
+        Args:
+            dt: Must be tz-aware. If not UTC, will be converted to UTC.
+        
+        Raises:
+            ValueError: If dt is naive (no tzinfo).
+        
+        AG-3I-1-2: Added tz validation per DS audit.
+        """
+        if dt.tzinfo is None:
+            raise ValueError("set_utc() requires tz-aware datetime, got naive")
+        # Normalize to UTC if different timezone
+        self.frozen_utc = dt.astimezone(timezone.utc)
 
     def advance_monotonic_ns(self, delta_ns: int) -> None:
         """Advance monotonic nanoseconds (must be >= 0 for monotonicity)."""
@@ -153,7 +166,14 @@ class SimulatedTimeProvider:
         return self.epoch_utc + timedelta(seconds=elapsed_seconds)
 
     def monotonic_ns(self) -> int:
-        """Return simulated monotonic nanoseconds (same as now_ns for simulation)."""
+        """
+        Return simulated monotonic nanoseconds.
+        
+        Note (AG-3I-1-2): In simulation mode, this returns the same counter as
+        now_ns(). This differs from real systems where monotonic_ns() and
+        time_ns() are independent clocks. The simulation uses a single internal
+        counter (_now_ns) for both, ensuring determinism and simplicity.
+        """
         return self._now_ns
 
     def now_ns(self) -> int:

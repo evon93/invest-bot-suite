@@ -123,6 +123,34 @@ class TestFrozenTimeProvider:
         assert dt.tzinfo is not None, "now_utc() returned naive datetime"
         assert dt.tzinfo == timezone.utc
 
+    # AG-3I-1-2: Tests for tz validation in set_utc()
+
+    def test_set_utc_naive_datetime_raises(self):
+        """set_utc() should raise ValueError for naive datetime (AG-3I-1-2)."""
+        provider = FrozenTimeProvider()
+        
+        naive_dt = datetime(2025, 6, 15, 12, 0, 0)  # No tzinfo
+        
+        with pytest.raises(ValueError, match="tz-aware"):
+            provider.set_utc(naive_dt)
+
+    def test_set_utc_normalizes_non_utc_to_utc(self):
+        """set_utc() should normalize non-UTC timezone to UTC (AG-3I-1-2)."""
+        from datetime import timedelta
+        
+        provider = FrozenTimeProvider()
+        
+        # Create a datetime in a non-UTC timezone (UTC+2)
+        tz_plus2 = timezone(timedelta(hours=2))
+        dt_plus2 = datetime(2025, 6, 15, 14, 0, 0, tzinfo=tz_plus2)  # 14:00 UTC+2 = 12:00 UTC
+        
+        provider.set_utc(dt_plus2)
+        result = provider.now_utc()
+        
+        # Should be normalized to UTC
+        assert result.tzinfo == timezone.utc
+        assert result.hour == 12  # 14:00 UTC+2 = 12:00 UTC
+
 
 class TestSimulatedTimeProviderExtensions:
     """Tests for SimulatedTimeProvider AG-3I-1-1 extensions."""
