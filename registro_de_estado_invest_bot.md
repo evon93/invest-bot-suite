@@ -4,33 +4,32 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-12) — Fase 3J: Strategy v0.8 Selector
+## Estado Actual (2026-01-13) — Fase 3K: Market Data & Execution Standardization
 
-- **Rama:** `main` (merged from feature branches 3J)
-- **HEAD:** `6d18465` — AG-3J-5-1: CI smoke gate 3J
+- **Rama:** `main` (pendiente merge de feature branches 3K)
+- **HEAD:** `cbdf245` — AG-3K-3-1: standardize ExecutionAdapter + shims + tests
 - **Estado:** ✅ COMPLETADO
 - **Entregables:**
-  - **Strategy Selector:** CLI `--strategy {v0_7,v0_8}` en run_live_3E.py
-  - **Strategy v0.8:** EMA crossover (determinista, no-lookahead, NaN-safe)
-  - **Validation Harness:** `tools/run_strategy_validation_3J.py` (offline)
-  - **Live Smoke Tests:** 6 tests en `test_run_live_3E_smoke_3J4.py`
-  - **CI Gate 3J:** `.github/workflows/smoke_3J.yml`
+  - **MarketDataAdapter:** Protocol + `FixtureMarketDataAdapter` (offline CSV)
+  - **Hardening poll():** `up_to_ts` para no-lookahead, EOF consistente, schema validation
+  - **CCXT Gated Feed:** `CCXTMarketDataAdapter` con network gating (`--allow-network`)
+  - **ExecutionAdapter:** Protocol + `SimExecutionAdapter` + `ExchangeAdapterShim`
+  - **CLI wiring:** `--data {synthetic,fixture,ccxt}`, `--allow-network`, `--ccxt-*` flags
 - **Handoff:**
-  - `report/ORCH_HANDOFF_post3J_close_20260112.md`
-  - `report/bridge_3J_to_3K_report.md`
+  - `report/ORCH_HANDOFF_post3K_close_20260113.md`
+  - `report/bridge_3K_to_next_report.md`
 - **Verificación:**
-  - Pytest: 615 passed, 10 skipped
-  - CI Smoke 3J: tests + scripts + artifact verify
-- **Commits mergeados:**
-  - AG-3J-1-1 + AG-3J-2-1: `42eec7e` (PR #29)
-  - AG-3J-3-1: `9ce5319` (validation harness)
-  - AG-3J-4-1: `585e1b9` (live smoke)
-  - AG-3J-5-1: `6d18465` (CI gate)
-- **Auditoría Externa:** DS-3J-1-1, DS-3J-2-1 en report/external_ai/inbox_external/
+  - Pytest: 675 passed, 10 skipped
+  - Smoke tests: out_3K1_smoke, out_3K2_smoke, out_3K3_smoke
+- **Commits:**
+  - AG-3K-1-1: `322f404` (MarketDataAdapter + fixture)
+  - AG-3K-1-2: `e298c49` (hardening poll/EOF/schema)
+  - AG-3K-2-1: `845962e` (CCXT gated feed)
+  - AG-3K-3-1: `cbdf245` (ExecutionAdapter standardization)
 
 ---
 
-## Estado Anterior (2026-01-11) — Fase 3I: Time Signals & Retention
+## Estado Anterior (2026-01-12) — Fase 3J: Strategy v0.8 Selector
 
 - **Rama:** `main` (@520fffe)
 - **Estado:** ✅ COMPLETADO
