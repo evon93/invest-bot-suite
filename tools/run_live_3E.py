@@ -179,6 +179,20 @@ def main():
         help=f"Strategy version to use (default: {DEFAULT_STRATEGY})"
     )
     
+    # AG-3K-1-1: Data source selection
+    parser.add_argument(
+        "--data",
+        choices=["synthetic", "fixture"],
+        default="synthetic",
+        help="Data source: synthetic (default) or fixture (offline CSV)"
+    )
+    parser.add_argument(
+        "--fixture-path",
+        type=str,
+        default=None,
+        help="Path to fixture CSV (required if --data fixture)"
+    )
+    
     # 3F.4: Crash recovery
     parser.add_argument("--run-dir", type=str, help="Run directory for checkpoint/idempotency (creates new run)")
     parser.add_argument("--resume", type=str, help="Resume from existing run directory (mutually exclusive with --run-dir)")
@@ -226,6 +240,10 @@ def main():
     if args.run_dir and args.resume:
         parser.error("--run-dir and --resume are mutually exclusive")
     
+    # AG-3K-1-1: Validate fixture path requirement
+    if args.data == "fixture" and not args.fixture_path:
+        parser.error("--fixture-path is required when --data fixture")
+    
     # Validate runtime config for non-paper modes (fail-fast)
     cfg = RuntimeConfig.from_env()
     cfg.validate_for(args.clock, args.exchange)
@@ -263,6 +281,8 @@ def main():
         "seed": args.seed,
         "latency_steps": args.latency_steps if args.exchange == "stub" else 0,
         "strategy": args.strategy,  # AG-3J-1-1
+        "data_source": args.data,  # AG-3K-1-1
+        "fixture_path": args.fixture_path if args.data == "fixture" else None,  # AG-3K-1-1
         "max_steps": args.max_steps,
         "timestamp_start": str(pd.Timestamp.now(tz="UTC")),
     }
@@ -318,7 +338,15 @@ def main():
     )
     
     # Generate Data
-    ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
+    # AG-3K-1-1: Support fixture data source
+    if args.data == "fixture":
+        from engine.market_data.fixture_adapter import FixtureMarketDataAdapter
+        fixture_adapter = FixtureMarketDataAdapter(Path(args.fixture_path))
+        ohlcv = fixture_adapter.to_dataframe()
+        print(f"  Data source: fixture ({args.fixture_path}, {len(ohlcv)} bars)")
+    else:
+        ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
+        print(f"  Data source: synthetic ({len(ohlcv)} bars)")
     
     # 3G.3 + 3H.2: Setup metrics collection with optional rotation
     # 3I.1: Pass time_provider for deterministic clock in simulated mode
