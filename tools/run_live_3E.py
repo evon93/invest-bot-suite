@@ -179,6 +179,54 @@ def main():
         help=f"Strategy version to use (default: {DEFAULT_STRATEGY})"
     )
     
+    # AG-3K-1-1 + AG-3K-2-1: Data source selection
+    parser.add_argument(
+        "--data",
+        choices=["synthetic", "fixture", "ccxt"],
+        default="synthetic",
+        help="Data source: synthetic (default), fixture (offline CSV), or ccxt (network)"
+    )
+    parser.add_argument(
+        "--fixture-path",
+        type=str,
+        default=None,
+        help="Path to fixture CSV (required if --data fixture)"
+    )
+    
+    # AG-3K-2-1: CCXT configuration
+    parser.add_argument(
+        "--ccxt-exchange",
+        type=str,
+        default="binance",
+        help="CCXT exchange name (default: binance)"
+    )
+    parser.add_argument(
+        "--ccxt-symbol",
+        type=str,
+        default="BTC/USDT",
+        help="Trading pair for CCXT (default: BTC/USDT)"
+    )
+    parser.add_argument(
+        "--ccxt-timeframe",
+        type=str,
+        default="1h",
+        help="CCXT timeframe (default: 1h)"
+    )
+    parser.add_argument(
+        "--ccxt-limit",
+        type=int,
+        default=100,
+        help="CCXT fetch limit per request (default: 100)"
+    )
+    
+    # AG-3K-2-1: Network gating
+    parser.add_argument(
+        "--allow-network",
+        action="store_true",
+        default=False,
+        help="Allow network access for CCXT (required for --data ccxt)"
+    )
+    
     # 3F.4: Crash recovery
     parser.add_argument("--run-dir", type=str, help="Run directory for checkpoint/idempotency (creates new run)")
     parser.add_argument("--resume", type=str, help="Resume from existing run directory (mutually exclusive with --run-dir)")
@@ -226,6 +274,10 @@ def main():
     if args.run_dir and args.resume:
         parser.error("--run-dir and --resume are mutually exclusive")
     
+    # AG-3K-1-1: Validate fixture path requirement
+    if args.data == "fixture" and not args.fixture_path:
+        parser.error("--fixture-path is required when --data fixture")
+    
     # Validate runtime config for non-paper modes (fail-fast)
     cfg = RuntimeConfig.from_env()
     cfg.validate_for(args.clock, args.exchange)
@@ -263,6 +315,8 @@ def main():
         "seed": args.seed,
         "latency_steps": args.latency_steps if args.exchange == "stub" else 0,
         "strategy": args.strategy,  # AG-3J-1-1
+        "data_source": args.data,  # AG-3K-1-1
+        "fixture_path": args.fixture_path if args.data == "fixture" else None,  # AG-3K-1-1
         "max_steps": args.max_steps,
         "timestamp_start": str(pd.Timestamp.now(tz="UTC")),
     }
@@ -318,7 +372,72 @@ def main():
     )
     
     # Generate Data
-    ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
+    # AG-3K-1-1 + AG-3K-2-1: Support fixture and ccxt data sources
+    if args.data == "fixture":
+        from engine.market_data.fixture_adapter import FixtureMarketDataAdapter
+        fixture_adapter = FixtureMarketDataAdapter(Path(args.fixture_path))
+        ohlcv = fixture_adapter.to_dataframe()
+        print(f"  Data source: fixture ({args.fixture_path}, {len(ohlcv)} bars)")
+    elif args.data == "ccxt":
+        # AG-3K-2-1: CCXT with network gating
+        from engine.market_data.ccxt_adapter import (
+            CCXTMarketDataAdapter, CCXTConfig, MockOHLCVClient, NetworkDisabledError
+        )
+        
+        ccxt_config = CCXTConfig(
+            exchange=args.ccxt_exchange,
+            symbol=args.ccxt_symbol,
+            timeframe=args.ccxt_timeframe,
+            limit=args.ccxt_limit,
+        )
+        
+        if args.allow_network:
+            # Try to use real CCXT client
+            try:
+                from engine.market_data.ccxt_adapter import create_ccxt_client
+                ccxt_client = create_ccxt_client(ccxt_config.exchange)
+                print(f"  Data source: ccxt (LIVE network enabled)")
+            except ImportError as e:
+                print(f"WARNING: {e}")
+                print("  Falling back to MockOHLCVClient")
+                ccxt_client = MockOHLCVClient(seed=args.seed)
+        else:
+            # Network not allowed - error with clear message
+            print("ERROR: --data ccxt requires --allow-network flag")
+            print("       Network access is disabled by default for safety.")
+            print("       Use --allow-network to enable real CCXT connections,")
+            print("       or use --data fixture for offline testing.")
+            sys.exit(1)
+        
+        ccxt_adapter = CCXTMarketDataAdapter(
+            client=ccxt_client,
+            config=ccxt_config,
+            allow_network=args.allow_network,
+        )
+        
+        # For LoopStepper compatibility, prefetch data into DataFrame
+        # Note: This is a temporary bridge until LoopStepper supports adapter directly
+        events = ccxt_adapter.poll(max_items=args.max_steps + 10)
+        if not events:
+            print("ERROR: CCXT returned no data")
+            sys.exit(1)
+        
+        # pd already imported globally at line 29
+        ohlcv = pd.DataFrame([
+            {
+                "timestamp": pd.Timestamp(e.ts, unit="ms", tz="UTC"),
+                "open": e.open,
+                "high": e.high,
+                "low": e.low,
+                "close": e.close,
+                "volume": e.volume,
+            }
+            for e in events
+        ])
+        print(f"  Data source: ccxt ({ccxt_config.exchange}, {len(ohlcv)} bars)")
+    else:
+        ohlcv = make_ohlcv_df(n_bars=args.max_steps + 10, seed=args.seed)
+        print(f"  Data source: synthetic ({len(ohlcv)} bars)")
     
     # 3G.3 + 3H.2: Setup metrics collection with optional rotation
     # 3I.1: Pass time_provider for deterministic clock in simulated mode
