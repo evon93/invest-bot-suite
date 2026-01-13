@@ -268,6 +268,14 @@ def main():
         help="Keep only N most recent rotated files (default: keep all)"
     )
     
+    # AG-3L-1-1: Data mode selection (adapter vs dataframe bridge)
+    parser.add_argument(
+        "--data-mode",
+        choices=["dataframe", "adapter"],
+        default="dataframe",
+        help="Data consumption mode: dataframe (default, current behavior) or adapter (direct poll)"
+    )
+    
     args = parser.parse_args()
     
     # Validate mutually exclusive args
@@ -372,12 +380,18 @@ def main():
     )
     
     # Generate Data
-    # AG-3K-1-1 + AG-3K-2-1: Support fixture and ccxt data sources
+    # AG-3K-1-1 + AG-3K-2-1 + AG-3L-1-1: Support fixture and ccxt data sources
+    fixture_adapter = None  # AG-3L-1-1: Keep reference for adapter mode
     if args.data == "fixture":
         from engine.market_data.fixture_adapter import FixtureMarketDataAdapter
         fixture_adapter = FixtureMarketDataAdapter(Path(args.fixture_path))
-        ohlcv = fixture_adapter.to_dataframe()
-        print(f"  Data source: fixture ({args.fixture_path}, {len(ohlcv)} bars)")
+        if args.data_mode == "adapter":
+            # AG-3L-1-1: Will use run_adapter_mode() - skip DataFrame conversion
+            ohlcv = None
+            print(f"  Data source: fixture ({args.fixture_path}, {len(fixture_adapter)} bars, adapter mode)")
+        else:
+            ohlcv = fixture_adapter.to_dataframe()
+            print(f"  Data source: fixture ({args.fixture_path}, {len(ohlcv)} bars)")
     elif args.data == "ccxt":
         # AG-3K-2-1: CCXT with network gating
         from engine.market_data.ccxt_adapter import (
@@ -463,19 +477,30 @@ def main():
     metrics_collector.start("run_main")
     
     try:
-        result = stepper.run_bus_mode(
-            ohlcv, 
-            bus,
-            max_steps=args.max_steps,
-            warmup=5,
-            log_jsonl_path=trace_path,
-            exchange_adapter=exchange_adapter,
-            idempotency_store=idem_store,
-            checkpoint=checkpoint,
-            checkpoint_path=ckpt_path,
-            start_idx=start_idx,
-            metrics_collector=metrics_collector,  # 3H.1: granular observability
-        )
+        # AG-3L-1-1: Use run_adapter_mode() for direct adapter consumption
+        if args.data_mode == "adapter" and fixture_adapter is not None:
+            result = stepper.run_adapter_mode(
+                fixture_adapter,
+                max_steps=args.max_steps,
+                warmup=5,
+                log_jsonl_path=trace_path,
+                metrics_collector=metrics_collector,
+            )
+        else:
+            # Default: use run_bus_mode() with DataFrame
+            result = stepper.run_bus_mode(
+                ohlcv, 
+                bus,
+                max_steps=args.max_steps,
+                warmup=5,
+                log_jsonl_path=trace_path,
+                exchange_adapter=exchange_adapter,
+                idempotency_store=idem_store,
+                checkpoint=checkpoint,
+                checkpoint_path=ckpt_path,
+                start_idx=start_idx,
+                metrics_collector=metrics_collector,  # 3H.1: granular observability
+            )
         # End metrics with success
         metrics_collector.end("run_main", status="FILLED")
     except Exception as exc:

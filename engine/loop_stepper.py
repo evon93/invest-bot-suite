@@ -642,3 +642,190 @@ class LoopStepper:
             "published": published_count,
             "drain_iterations": drain_iter,
         }
+
+    def run_adapter_mode(
+        self,
+        adapter,  # MarketDataAdapter Protocol
+        *,
+        max_steps: Optional[int] = None,
+        warmup: int = 10,
+        log_jsonl_path: Optional[Union[str, Path]] = None,
+        metrics_collector = None,
+    ) -> Dict[str, Any]:
+        """
+        Run simulation consuming events directly from MarketDataAdapter.
+        
+        AG-3L-1-1: Direct adapter integration without public DataFrame bridge.
+        
+        Flow:
+        1. Use adapter.peek_next_ts() to know next event timestamp
+        2. Call adapter.poll(max_items=1, up_to_ts=current_step_ts)
+        3. Guard: assert no event has ts > current_step_ts (no-lookahead)
+        4. Build incremental OHLCV slice internally (private helper)
+        5. Call step() with the slice
+        
+        Args:
+            adapter: MarketDataAdapter instance (must implement poll, peek_next_ts)
+            max_steps: Maximum bars to process (None = all after warmup)
+            warmup: Warmup period (bars to skip)
+            log_jsonl_path: Optional path for JSONL logging
+            metrics_collector: Optional MetricsCollector for observability
+            
+        Returns:
+            Dict with metrics and events
+            
+        Raises:
+            AssertionError: If adapter returns event with ts > current_step_ts (lookahead)
+        """
+        all_events = []
+        
+        # Initialize JSONL logger if path provided
+        jsonl_logger = None
+        if log_jsonl_path:
+            from engine.structured_jsonl_logger import get_jsonl_logger, log_event, close_jsonl_logger
+            jsonl_logger = get_jsonl_logger(log_jsonl_path)
+        
+        # Internal OHLCV accumulator (private - NOT exposed as API)
+        # This is the "shim interno" that builds DataFrame incrementally for step()
+        _ohlcv_rows = []
+        
+        # Helper for deterministic metrics clock
+        def _metrics_clock():
+            return self.time_provider.now_ns() / 1e9
+        
+        # Track consumed events
+        consumed_count = 0
+        step_count = 0
+        
+        # Warmup phase: consume without processing
+        warmup_consumed = 0
+        while warmup_consumed < warmup:
+            next_ts = adapter.peek_next_ts()
+            if next_ts is None:
+                # Not enough data for warmup
+                logger.warning(
+                    "Adapter exhausted during warmup (consumed %d of %d required)",
+                    warmup_consumed, warmup
+                )
+                break
+            
+            # Consume event for warmup
+            events = adapter.poll(max_items=1)
+            if not events:
+                break
+            
+            event = events[0]
+            # Accumulate to internal slice
+            _ohlcv_rows.append({
+                "timestamp": pd.Timestamp(event.ts, unit="ms", tz="UTC"),
+                "open": event.open,
+                "high": event.high,
+                "low": event.low,
+                "close": event.close,
+                "volume": event.volume,
+            })
+            warmup_consumed += 1
+            consumed_count += 1
+        
+        if warmup_consumed < warmup:
+            return {"events": [], "metrics": self._get_metrics(), "consumed": consumed_count}
+        
+        # Main processing loop
+        end_steps = max_steps if max_steps else float('inf')
+        
+        while step_count < end_steps:
+            next_ts = adapter.peek_next_ts()
+            if next_ts is None:
+                # Adapter exhausted
+                break
+            
+            # Current step timestamp is the next event's ts
+            current_step_ts = next_ts
+            
+            # Poll with up_to_ts boundary (no-lookahead enforcement)
+            events = adapter.poll(max_items=1, up_to_ts=current_step_ts)
+            
+            if not events:
+                # No more events within boundary
+                break
+            
+            event = events[0]
+            
+            # NO-LOOKAHEAD GUARD (critical invariant)
+            assert event.ts <= current_step_ts, (
+                f"Lookahead violation: event.ts={event.ts} > current_step_ts={current_step_ts}"
+            )
+            
+            # Accumulate to internal OHLCV slice
+            _ohlcv_rows.append({
+                "timestamp": pd.Timestamp(event.ts, unit="ms", tz="UTC"),
+                "open": event.open,
+                "high": event.high,
+                "low": event.low,
+                "close": event.close,
+                "volume": event.volume,
+            })
+            consumed_count += 1
+            
+            # Build DataFrame slice for step()
+            ohlcv_slice = pd.DataFrame(_ohlcv_rows)
+            
+            # Metrics: start strategy stage
+            strategy_t0 = _metrics_clock() if metrics_collector else 0.0
+            
+            # Process with step()
+            bar_idx = len(_ohlcv_rows) - 1
+            step_events_list = self.step(ohlcv_slice, bar_idx=bar_idx)
+            all_events.extend(step_events_list)
+            step_count += 1
+            
+            # Advance simulated time for strategy stage
+            if hasattr(self.time_provider, 'advance_ns'):
+                self.time_provider.advance_ns(STAGE_LATENCY_NS["strategy"])
+            
+            strategy_t1 = _metrics_clock() if metrics_collector else 0.0
+            
+            # Record strategy stage metric
+            if metrics_collector:
+                metrics_collector.record_stage(
+                    stage="strategy",
+                    step_id=self._step_count,
+                    trace_id=f"adapter_bar_{bar_idx}",
+                    t_start=strategy_t0,
+                    t_end=strategy_t1,
+                    outcome="ok" if step_events_list else "no_signal",
+                )
+            
+            # Log to JSONL
+            if jsonl_logger and step_events_list:
+                from engine.structured_jsonl_logger import log_event
+                for evt in step_events_list:
+                    log_event(
+                        jsonl_logger,
+                        trace_id=evt.get("payload", {}).get("trace_id", "unknown"),
+                        event_type=evt.get("type", "unknown"),
+                        step_id=self._step_count,
+                        action="emit",
+                        extra={"bar_idx": bar_idx},
+                    )
+        
+        # Close JSONL logger
+        if jsonl_logger:
+            from engine.structured_jsonl_logger import log_event, close_jsonl_logger
+            log_event(
+                jsonl_logger,
+                trace_id="SYSTEM",
+                event_type="AdapterModeDone",
+                step_id=self._step_count,
+                action="complete",
+                extra={"consumed": consumed_count, "steps": step_count},
+            )
+            close_jsonl_logger(jsonl_logger)
+        
+        return {
+            "events": all_events,
+            "metrics": self._get_metrics(),
+            "consumed": consumed_count,
+            "steps_processed": step_count,
+        }
+
