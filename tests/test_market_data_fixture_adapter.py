@@ -4,14 +4,16 @@ tests/test_market_data_fixture_adapter.py
 Unit tests for FixtureMarketDataAdapter.
 
 AG-3K-1-1: Tests for poll(), ordering, epoch ms conversion, and no-lookahead.
+AG-3K-1-2: Hardening tests for schema validation, gaps, NaNs, up_to_ts, EOF.
 """
 
 import pytest
 from pathlib import Path
 import subprocess
 import json
+import pandas as pd
 
-from engine.market_data.fixture_adapter import FixtureMarketDataAdapter
+from engine.market_data.fixture_adapter import FixtureMarketDataAdapter, FixtureSchemaError
 from engine.market_data.market_data_adapter import MarketDataEvent
 
 
@@ -161,3 +163,189 @@ class TestRunnerFixtureMode:
             meta = json.load(f)
         assert meta["data_source"] == "fixture"
         assert meta["fixture_path"] == str(FIXTURE_PATH)
+
+
+class TestHardeningFeatures:
+    """AG-3K-1-2: Hardening tests for schema, gaps, NaNs, up_to_ts, EOF."""
+    
+    # --- up_to_ts (No-Lookahead) Tests ---
+    
+    def test_poll_up_to_ts_respects_boundary(self):
+        """poll(up_to_ts=X) returns only events with ts <= X."""
+        adapter = FixtureMarketDataAdapter(FIXTURE_PATH)
+        
+        # Get first event's ts
+        first_ts = adapter.peek_next_ts()
+        assert first_ts is not None
+        
+        # Poll with up_to_ts = first_ts (should get only 1 event)
+        batch = adapter.poll(max_items=100, up_to_ts=first_ts)
+        assert len(batch) == 1
+        assert batch[0].ts == first_ts
+        
+        # Remaining events still available
+        assert adapter.remaining() == 9
+    
+    def test_poll_up_to_ts_blocks_future_events(self):
+        """poll(up_to_ts=X) never returns events with ts > X."""
+        adapter = FixtureMarketDataAdapter(FIXTURE_PATH)
+        
+        # First bar ts: 1705276800000 (2024-01-15 00:00:00 UTC)
+        # Second bar ts: 1705280400000 (2024-01-15 01:00:00 UTC)
+        boundary_ts = 1705276800000  # Only first bar
+        
+        batch = adapter.poll(max_items=100, up_to_ts=boundary_ts)
+        
+        for event in batch:
+            assert event.ts <= boundary_ts, f"Lookahead: {event.ts} > {boundary_ts}"
+    
+    def test_poll_up_to_ts_buffers_future_events(self):
+        """Events beyond up_to_ts remain available for future polls."""
+        adapter = FixtureMarketDataAdapter(FIXTURE_PATH)
+        
+        # Poll with strict boundary (only first 2 bars)
+        boundary_ts = 1705280400000  # 2024-01-15 01:00:00 UTC
+        batch1 = adapter.poll(max_items=100, up_to_ts=boundary_ts)
+        
+        assert len(batch1) == 2  # First two bars only
+        assert adapter.remaining() == 8  # Rest still buffered
+        
+        # Now poll with higher boundary
+        batch2 = adapter.poll(max_items=100, up_to_ts=boundary_ts + 7200000)  # +2 hours
+        assert len(batch2) == 2  # Two more bars
+    
+    # --- EOF Behavior Tests ---
+    
+    def test_eof_returns_empty_list_not_exception(self):
+        """EOF returns [] consistently, not exception."""
+        adapter = FixtureMarketDataAdapter(FIXTURE_PATH)
+        
+        # Exhaust
+        adapter.poll(max_items=100)
+        
+        # Multiple EOF calls should all return []
+        assert adapter.poll() == []
+        assert adapter.poll() == []
+        assert adapter.poll(max_items=1000) == []
+    
+    def test_is_exhausted_flag(self):
+        """is_exhausted() correctly reports EOF state."""
+        adapter = FixtureMarketDataAdapter(FIXTURE_PATH)
+        
+        assert not adapter.is_exhausted()
+        
+        adapter.poll(max_items=100)
+        
+        assert adapter.is_exhausted()
+        
+        # Reset clears exhaustion
+        adapter.reset()
+        assert not adapter.is_exhausted()
+    
+    def test_peek_next_ts_returns_none_at_eof(self):
+        """peek_next_ts() returns None when exhausted."""
+        adapter = FixtureMarketDataAdapter(FIXTURE_PATH)
+        
+        assert adapter.peek_next_ts() is not None
+        
+        adapter.poll(max_items=100)
+        
+        assert adapter.peek_next_ts() is None
+    
+    # --- Schema Validation Tests ---
+    
+    def test_schema_rejects_negative_prices(self, tmp_path):
+        """Negative prices trigger FixtureSchemaError."""
+        csv = tmp_path / "bad.csv"
+        csv.write_text(
+            "timestamp,open,high,low,close,volume\n"
+            "2024-01-15 00:00:00+00:00,-100.0,110.0,90.0,105.0,1000\n"
+        )
+        
+        with pytest.raises(FixtureSchemaError, match="non-positive"):
+            FixtureMarketDataAdapter(csv)
+    
+    def test_schema_rejects_invalid_ohlc_high_low(self, tmp_path):
+        """Invalid OHLC (high < low) triggers error."""
+        csv = tmp_path / "bad_ohlc.csv"
+        csv.write_text(
+            "timestamp,open,high,low,close,volume\n"
+            "2024-01-15 00:00:00+00:00,100.0,95.0,105.0,100.0,1000\n"  # high < low
+        )
+        
+        with pytest.raises(FixtureSchemaError, match="Invalid OHLC"):
+            FixtureMarketDataAdapter(csv)
+    
+    def test_schema_strict_false_allows_minor_issues(self, tmp_path):
+        """strict=False skips OHLC relationship checks."""
+        csv = tmp_path / "relaxed.csv"
+        csv.write_text(
+            "timestamp,open,high,low,close,volume\n"
+            "2024-01-15 00:00:00+00:00,100.0,95.0,105.0,100.0,1000\n"  # high < low but strict=False
+        )
+        
+        # This would fail with strict=True, but passes with strict=False
+        # Note: ohlcv_loader still validates NaN/duplicates/monotonicity
+        # Only OHLC relationship check is skipped
+        adapter = FixtureMarketDataAdapter(csv, strict=False)
+        assert len(adapter) == 1
+    
+    # --- Gaps Detection Tests ---
+    
+    def test_gaps_detected_in_fixture(self, tmp_path):
+        """Temporal gaps are detected and flagged."""
+        csv = tmp_path / "gaps.csv"
+        csv.write_text(
+            "timestamp,open,high,low,close,volume\n"
+            "2024-01-15 00:00:00+00:00,100.0,110.0,95.0,105.0,1000\n"
+            "2024-01-15 01:00:00+00:00,105.0,115.0,100.0,110.0,1100\n"
+            "2024-01-15 05:00:00+00:00,110.0,120.0,105.0,115.0,1200\n"  # 4-hour gap
+        )
+        
+        adapter = FixtureMarketDataAdapter(csv)
+        assert adapter.has_gaps is True
+    
+    def test_no_gaps_in_regular_fixture(self):
+        """Regular fixture without gaps is flagged correctly."""
+        adapter = FixtureMarketDataAdapter(FIXTURE_PATH)
+        # The 3K1 fixture has hourly bars, no gaps
+        assert adapter.has_gaps is False
+    
+    # --- NaN Handling Tests (via ohlcv_loader) ---
+    
+    def test_nan_in_ohlcv_raises_error(self, tmp_path):
+        """NaN values in OHLCV columns trigger error (strict mode)."""
+        csv = tmp_path / "nans.csv"
+        csv.write_text(
+            "timestamp,open,high,low,close,volume\n"
+            "2024-01-15 00:00:00+00:00,100.0,110.0,95.0,,1000\n"  # NaN close
+        )
+        
+        # ohlcv_loader raises ValueError for NaN in required columns
+        with pytest.raises(ValueError, match="NaN"):
+            FixtureMarketDataAdapter(csv)
+    
+    # --- UTC Enforcement Tests ---
+    
+    def test_utc_conversion_from_offset_timezone(self, tmp_path):
+        """Timestamps with offset are converted to UTC epoch ms."""
+        csv = tmp_path / "offset.csv"
+        # 2024-01-15 00:00:00-05:00 = 2024-01-15 05:00:00 UTC
+        csv.write_text(
+            "timestamp,open,high,low,close,volume\n"
+            "2024-01-15 00:00:00-05:00,100.0,110.0,95.0,105.0,1000\n"
+        )
+        
+        adapter = FixtureMarketDataAdapter(csv)
+        events = adapter.poll(max_items=1)
+        
+        # Expected: 2024-01-15 05:00:00 UTC = 1705294800000
+        expected_ts = 1705294800000
+        assert events[0].ts == expected_ts
+    
+    def test_utc_epoch_ms_is_integer(self):
+        """All timestamps are integers (not floats)."""
+        adapter = FixtureMarketDataAdapter(FIXTURE_PATH)
+        for event in adapter.poll(max_items=100):
+            assert isinstance(event.ts, int), f"ts is {type(event.ts)}, expected int"
+
