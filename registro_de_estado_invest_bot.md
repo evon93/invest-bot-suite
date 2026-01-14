@@ -4,7 +4,29 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-14) — Fase 3L: MarketDataAdapter Integration & Hardening
+## Estado Actual (2026-01-14) — Fase 3M: Adapter Mode End-to-End & Checkpoint/Resume
+
+- **Rama:** `main` (post merge 3M.2 + H0)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Adapter Mode E2E:** `run_adapter_mode()` con `ExchangeAdapter` (paper/stub).
+  - **Checkpoint/Resume:** Reanudación determinista desde disco (`checkpoint.json`, `state.db`) sin duplicar eventos.
+  - **Report Hygiene:** Normalización UTF-8 de artefactos antiguos en `report/`.
+  - **Tests:** Nuevos tests de integración `end-to-end` e `idempotencia`.
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3M_close_20260114.md`
+  - `report/bridge_3M_to_next_report.md`
+- **Verificación:**
+  - Pytest: 729 passed, 11 skipped
+  - Smoke tests: adapter-mode first_run + resume (idempotency verified)
+- **Commits:**
+  - AG-3M-1-1: `c957bc3` (Adapter Mode E2E)
+  - AG-3M-2-1: `5620a1d` (Checkpoint/Resume)
+  - AG-3M-0-1: `33c3382` (Report H0 cleanup)
+
+---
+
+## Estado Anterior (2026-01-14) — Fase 3L: MarketDataAdapter Integration & Hardening
 
 - **Rama:** `feature/AG-3L-4-1_closeout` (pendiente merge a main)
 - **HEAD:** `3de4827` — AG-3L-3-1: MockOHLCVClient edge-cases + strict validation
