@@ -843,12 +843,16 @@ class LoopStepper:
         log_jsonl_path: Optional[Union[str, Path]] = None,
         metrics_collector = None,
         exchange_adapter: Optional[ExchangeAdapter] = None,
+        checkpoint = None,  # AG-3M-2-1: Optional Checkpoint for progress tracking
+        checkpoint_path: Optional[Path] = None,  # AG-3M-2-1: Path to save checkpoint
+        start_idx: int = 0,  # AG-3M-2-1: Resume from this step index
     ) -> Dict[str, Any]:
         """
         Run simulation consuming events directly from MarketDataAdapter.
         
         AG-3L-1-1: Direct adapter integration without public DataFrame bridge.
         AG-3M-1-1: End-to-end execution via ExchangeAdapter (paper/stub).
+        AG-3M-2-1: Checkpoint/resume support for crash recovery.
         
         Flow:
         1. Use adapter.peek_next_ts() to know next event timestamp
@@ -856,6 +860,7 @@ class LoopStepper:
         3. Guard: assert no event has ts > current_step_ts (no-lookahead)
         4. Build incremental OHLCV slice internally (private helper)
         5. Process: Strategy -> Risk -> Exec (via exchange_adapter) -> PositionStore
+        6. Save checkpoint after each step (if checkpoint provided)
         
         Args:
             adapter: MarketDataAdapter instance (must implement poll, peek_next_ts)
@@ -864,6 +869,9 @@ class LoopStepper:
             log_jsonl_path: Optional path for JSONL logging
             metrics_collector: Optional MetricsCollector for observability
             exchange_adapter: Optional ExchangeAdapter for execution (paper/stub)
+            checkpoint: Optional Checkpoint for progress tracking (AG-3M-2-1)
+            checkpoint_path: Path to save checkpoint (AG-3M-2-1)
+            start_idx: Resume from this step index (AG-3M-2-1)
             
         Returns:
             Dict with metrics and events
@@ -891,38 +899,67 @@ class LoopStepper:
         consumed_count = 0
         step_count = 0
         
-        # Warmup phase: consume without processing
-        warmup_consumed = 0
-        while warmup_consumed < warmup:
-            next_ts = adapter.peek_next_ts()
-            if next_ts is None:
-                # Not enough data for warmup
-                logger.warning(
-                    "Adapter exhausted during warmup (consumed %d of %d required)",
-                    warmup_consumed, warmup
-                )
-                break
-            
-            # Consume event for warmup
-            events = adapter.poll(max_items=1)
-            if not events:
-                break
-            
-            event = events[0]
-            # Accumulate to internal slice
-            _ohlcv_rows.append({
-                "timestamp": pd.Timestamp(event.ts, unit="ms", tz="UTC"),
-                "open": event.open,
-                "high": event.high,
-                "low": event.low,
-                "close": event.close,
-                "volume": event.volume,
-            })
-            warmup_consumed += 1
-            consumed_count += 1
+        # AG-3M-2-1: Resume support
+        # If resuming (start_idx > 0), we need to:
+        # 1. Skip warmup (already done in previous run)
+        # 2. Skip already-processed steps
+        # 3. Rebuild _ohlcv_rows to have correct slice for strategy
+        is_resuming = start_idx > 0
         
-        if warmup_consumed < warmup:
-            return {"events": [], "metrics": self._get_metrics(), "consumed": consumed_count}
+        # Warmup phase: consume without processing (skip if resuming)
+        warmup_consumed = 0
+        if not is_resuming:
+            while warmup_consumed < warmup:
+                next_ts = adapter.peek_next_ts()
+                if next_ts is None:
+                    logger.warning(
+                        "Adapter exhausted during warmup (consumed %d of %d required)",
+                        warmup_consumed, warmup
+                    )
+                    break
+                
+                events = adapter.poll(max_items=1)
+                if not events:
+                    break
+                
+                event = events[0]
+                _ohlcv_rows.append({
+                    "timestamp": pd.Timestamp(event.ts, unit="ms", tz="UTC"),
+                    "open": event.open,
+                    "high": event.high,
+                    "low": event.low,
+                    "close": event.close,
+                    "volume": event.volume,
+                })
+                warmup_consumed += 1
+                consumed_count += 1
+            
+            if warmup_consumed < warmup:
+                return {"events": [], "metrics": self._get_metrics(), "consumed": consumed_count}
+        else:
+            # Resuming: skip warmup + already processed steps
+            # We need to consume (warmup + start_idx) events to rebuild state
+            skip_count = warmup + start_idx
+            for _ in range(skip_count):
+                next_ts = adapter.peek_next_ts()
+                if next_ts is None:
+                    break
+                events = adapter.poll(max_items=1)
+                if not events:
+                    break
+                event = events[0]
+                _ohlcv_rows.append({
+                    "timestamp": pd.Timestamp(event.ts, unit="ms", tz="UTC"),
+                    "open": event.open,
+                    "high": event.high,
+                    "low": event.low,
+                    "close": event.close,
+                    "volume": event.volume,
+                })
+                consumed_count += 1
+            
+            logger.info("Resumed adapter-mode: skipped %d events (warmup=%d, processed=%d)",
+                       consumed_count, warmup, start_idx)
         
         # Main processing loop
         end_steps = max_steps if max_steps else float('inf')
@@ -1011,6 +1048,12 @@ class LoopStepper:
                         action="emit",
                         extra={"bar_idx": bar_idx},
                     )
+            
+            # AG-3M-2-1: Update and save checkpoint after each step
+            if checkpoint and checkpoint_path:
+                # step_count is 1-indexed here (incremented above), use as processed index
+                checkpoint = checkpoint.update(start_idx + step_count - 1)
+                checkpoint.save_atomic(checkpoint_path)
         
         # Close JSONL logger
         if jsonl_logger:
