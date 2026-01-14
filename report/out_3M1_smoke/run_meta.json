@@ -1,0 +1,13 @@
+{
+  "branch": "main",
+  "clock": "simulated",
+  "commit": "e758802a747c1bf40d9f8482fc414eb650193e7d",
+  "data_source": "fixture",
+  "exchange": "paper",
+  "fixture_path": "tests/fixtures/ohlcv_fixture_3K1.csv",
+  "latency_steps": 0,
+  "max_steps": 10,
+  "seed": 42,
+  "strategy": "v0_7",
+  "timestamp_start": "2026-01-14 18:20:28.191237+00:00"
+}

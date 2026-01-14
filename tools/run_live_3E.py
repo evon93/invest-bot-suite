@@ -477,7 +477,7 @@ def main():
     metrics_collector.start("run_main")
     
     try:
-        # AG-3L-1-1: Use run_adapter_mode() for direct adapter consumption
+        # AG-3L-1-1 + AG-3M-1-1: Use run_adapter_mode() for direct adapter consumption
         if args.data_mode == "adapter" and fixture_adapter is not None:
             result = stepper.run_adapter_mode(
                 fixture_adapter,
@@ -485,6 +485,7 @@ def main():
                 warmup=5,
                 log_jsonl_path=trace_path,
                 metrics_collector=metrics_collector,
+                exchange_adapter=exchange_adapter,  # AG-3M-1-1: End-to-end via ExchangeAdapter
             )
         else:
             # Default: use run_bus_mode() with DataFrame
