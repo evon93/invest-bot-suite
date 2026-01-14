@@ -31,6 +31,116 @@ class NetworkDisabledError(RuntimeError):
     pass
 
 
+class OHLCVValidationError(ValueError):
+    """Raised when OHLCV data fails strict validation."""
+    pass
+
+
+def validate_ohlcv_data(
+    data: List[List],
+    strict: bool = True,
+) -> dict:
+    """
+    Validate OHLCV data against strict contract.
+    
+    AG-3L-3-1: Strict contract for OHLCV data:
+    - Timestamps MUST be strictly increasing (out-of-order → OHLCVValidationError)
+    - No duplicate timestamps allowed (duplicates → OHLCVValidationError)
+    - Gaps are allowed but flagged via 'has_gaps' in result
+    - All timestamps are epoch ms UTC (positive integers)
+    - OHLC relationships: high >= max(open, close), low <= min(open, close)
+    
+    Args:
+        data: List of [timestamp_ms, open, high, low, close, volume] lists.
+        strict: If True, raise on validation failures. If False, log warnings.
+        
+    Returns:
+        Dict with validation results: {'valid': bool, 'has_gaps': bool, 'issues': list}
+        
+    Raises:
+        OHLCVValidationError: If strict=True and validation fails.
+    """
+    issues = []
+    has_gaps = False
+    
+    if not data:
+        return {'valid': True, 'has_gaps': False, 'issues': []}
+    
+    prev_ts = None
+    seen_ts = set()
+    deltas = []
+    
+    for i, candle in enumerate(data):
+        if len(candle) < 6:
+            msg = f"Candle {i}: insufficient elements (need 6, got {len(candle)})"
+            issues.append(msg)
+            if strict:
+                raise OHLCVValidationError(msg)
+            continue
+        
+        ts, o, h, l, c, v = candle[0], candle[1], candle[2], candle[3], candle[4], candle[5]
+        
+        # Check timestamp is positive integer
+        if not isinstance(ts, (int, float)) or ts <= 0:
+            msg = f"Candle {i}: invalid timestamp {ts} (must be positive epoch ms)"
+            issues.append(msg)
+            if strict:
+                raise OHLCVValidationError(msg)
+        
+        # Check for duplicates
+        if ts in seen_ts:
+            msg = f"Candle {i}: duplicate timestamp {ts}"
+            issues.append(msg)
+            if strict:
+                raise OHLCVValidationError(msg)
+        seen_ts.add(ts)
+        
+        # Check monotonic (out-of-order)
+        if prev_ts is not None:
+            if ts <= prev_ts:
+                msg = f"Candle {i}: out-of-order timestamp {ts} <= previous {prev_ts}"
+                issues.append(msg)
+                if strict:
+                    raise OHLCVValidationError(msg)
+            deltas.append(ts - prev_ts)
+        prev_ts = ts
+        
+        # Check OHLC relationships
+        if h < max(o, c):
+            msg = f"Candle {i}: high {h} < max(open, close) = {max(o, c)}"
+            issues.append(msg)
+            if strict:
+                raise OHLCVValidationError(msg)
+        
+        if l > min(o, c):
+            msg = f"Candle {i}: low {l} > min(open, close) = {min(o, c)}"
+            issues.append(msg)
+            if strict:
+                raise OHLCVValidationError(msg)
+        
+        # Check volume non-negative
+        if v < 0:
+            msg = f"Candle {i}: negative volume {v}"
+            issues.append(msg)
+            if strict:
+                raise OHLCVValidationError(msg)
+    
+    # Detect gaps (delta > 1.5x median)
+    if len(deltas) >= 2:
+        sorted_deltas = sorted(deltas)
+        median_delta = sorted_deltas[len(sorted_deltas) // 2]
+        gap_count = sum(1 for d in deltas if d > 1.5 * median_delta)
+        if gap_count > 0:
+            has_gaps = True
+            logger.warning(f"OHLCV data has {gap_count} gaps (median delta: {median_delta}ms)")
+    
+    return {
+        'valid': len(issues) == 0,
+        'has_gaps': has_gaps,
+        'issues': issues,
+    }
+
+
 class OHLCVClient(Protocol):
     """
     Protocol for OHLCV data client (ccxt-like interface).
@@ -283,7 +393,17 @@ class MockOHLCVClient:
     """
     Mock OHLCV client for testing without network.
     
-    Generates deterministic fake data based on seed.
+    Generates deterministic fake data based on seed, or accepts injected data.
+    
+    AG-3L-3-1 Strict Contract:
+    - Timestamps MUST be strictly increasing (out-of-order → OHLCVValidationError)
+    - No duplicate timestamps allowed (duplicates → OHLCVValidationError)
+    - Gaps are allowed but flagged via has_gaps property
+    - All timestamps are epoch ms UTC
+    - OHLC relationships: high >= max(open, close), low <= min(open, close)
+    
+    Attributes:
+        has_gaps: True if data contains temporal gaps.
     """
     
     def __init__(
@@ -292,25 +412,41 @@ class MockOHLCVClient:
         n_bars: int = 50,
         start_ts: int = 1705276800000,  # 2024-01-15 00:00:00 UTC
         interval_ms: int = 3600000,  # 1 hour
+        data: Optional[List[List]] = None,  # AG-3L-3-1: Optional injected data
+        strict: bool = True,  # AG-3L-3-1: Strict validation by default
     ):
         """
         Initialize mock client.
         
         Args:
-            seed: Random seed for determinism.
-            n_bars: Number of bars to generate.
-            start_ts: Start timestamp (epoch ms UTC).
-            interval_ms: Interval between bars in milliseconds.
+            seed: Random seed for determinism (ignored if data provided).
+            n_bars: Number of bars to generate (ignored if data provided).
+            start_ts: Start timestamp (epoch ms UTC) (ignored if data provided).
+            interval_ms: Interval between bars in milliseconds (ignored if data provided).
+            data: Optional pre-built OHLCV data [[ts, o, h, l, c, v], ...].
+                  If provided, this data is used instead of generating.
+            strict: If True, validate data and raise on failures.
+                    If False, log warnings but continue.
         """
-        import random
-        self._rng = random.Random(seed)
-        self._n_bars = n_bars
-        self._start_ts = start_ts
-        self._interval_ms = interval_ms
-        self._generated = self._generate_data()
+        self._strict = strict
+        self.has_gaps = False
+        
+        if data is not None:
+            # Use injected data with validation
+            validation = validate_ohlcv_data(data, strict=strict)
+            self.has_gaps = validation['has_gaps']
+            self._generated = data
+        else:
+            # Generate deterministic data
+            import random
+            self._rng = random.Random(seed)
+            self._n_bars = n_bars
+            self._start_ts = start_ts
+            self._interval_ms = interval_ms
+            self._generated = self._generate_data()
     
     def _generate_data(self) -> List[List]:
-        """Generate fake OHLCV data."""
+        """Generate fake OHLCV data (always valid, no gaps)."""
         data = []
         price = 42000.0
         
