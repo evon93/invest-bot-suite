@@ -4,32 +4,33 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-13) — Fase 3K: Market Data & Execution Standardization
+## Estado Actual (2026-01-14) — Fase 3L: MarketDataAdapter Integration & Hardening
 
-- **Rama:** `main` (pendiente merge de feature branches 3K)
-- **HEAD:** `cbdf245` — AG-3K-3-1: standardize ExecutionAdapter + shims + tests
+- **Rama:** `feature/AG-3L-4-1_closeout` (pendiente merge a main)
+- **HEAD:** `3de4827` — AG-3L-3-1: MockOHLCVClient edge-cases + strict validation
 - **Estado:** ✅ COMPLETADO
 - **Entregables:**
-  - **MarketDataAdapter:** Protocol + `FixtureMarketDataAdapter` (offline CSV)
-  - **Hardening poll():** `up_to_ts` para no-lookahead, EOF consistente, schema validation
-  - **CCXT Gated Feed:** `CCXTMarketDataAdapter` con network gating (`--allow-network`)
-  - **ExecutionAdapter:** Protocol + `SimExecutionAdapter` + `ExchangeAdapterShim`
-  - **CLI wiring:** `--data {synthetic,fixture,ccxt}`, `--allow-network`, `--ccxt-*` flags
+  - **LoopStepper Adapter Mode:** `run_adapter_mode()` consume `MarketDataAdapter.poll(up_to_ts)` directamente
+  - **No-Lookahead Guard:** Assertion `event.ts <= current_step_ts` en cada step
+  - **CCXT Opcional:** `requirements-ccxt.txt` con `ccxt==4.4.54` (no en CI)
+  - **Tests Gated:** Tests CCXT que solo corren con `INVESTBOT_ALLOW_NETWORK=1`
+  - **MockOHLCVClient Hardening:** `validate_ohlcv_data()` con policy estricta
+  - **Strict Default:** Duplicados/out-of-order → `OHLCVValidationError`
+  - **CLI:** `--data-mode adapter` en `run_live_3E.py`
 - **Handoff:**
-  - `report/ORCH_HANDOFF_post3K_close_20260113.md`
-  - `report/bridge_3K_to_next_report.md`
+  - `report/ORCH_HANDOFF_post3L_close_20260114.md`
+  - `report/bridge_3L_to_next_report.md`
 - **Verificación:**
-  - Pytest: 675 passed, 10 skipped
-  - Smoke tests: out_3K1_smoke, out_3K2_smoke, out_3K3_smoke
+  - Pytest: 711 passed, 11 skipped
+  - Smoke tests: out_3L4_smoke (adapter mode)
 - **Commits:**
-  - AG-3K-1-1: `322f404` (MarketDataAdapter + fixture)
-  - AG-3K-1-2: `e298c49` (hardening poll/EOF/schema)
-  - AG-3K-2-1: `845962e` (CCXT gated feed)
-  - AG-3K-3-1: `cbdf245` (ExecutionAdapter standardization)
+  - AG-3L-1-1: `261b987` (LoopStepper.run_adapter_mode)
+  - AG-3L-2-1: `de07ef5` (CCXT optional + gated tests)
+  - AG-3L-3-1: `3de4827` (MockOHLCVClient hardening)
 
 ---
 
-## Estado Anterior (2026-01-12) — Fase 3J: Strategy v0.8 Selector
+## Estado Anterior (2026-01-13) — Fase 3K: Market Data & Execution Standardization
 
 - **Rama:** `main` (@520fffe)
 - **Estado:** ✅ COMPLETADO
