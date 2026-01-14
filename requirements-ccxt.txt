@@ -1,0 +1,13 @@
+# Dependencia opcional para desarrollo local con exchanges reales
+# NO incluir en CI - solo para testing local con network habilitado
+#
+# Instalación:
+#   pip install -r requirements-ccxt.txt
+#
+# Uso:
+#   export INVESTBOT_ALLOW_NETWORK=1
+#   export INVESTBOT_CCXT_EXCHANGE=binance
+#   export INVESTBOT_CCXT_SYMBOL=BTC/USDT
+#   python -m pytest tests/test_ccxt_market_data_real_gated_3L2.py -v
+
+ccxt==4.4.54
