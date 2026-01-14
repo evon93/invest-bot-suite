@@ -643,6 +643,197 @@ class LoopStepper:
             "drain_iterations": drain_iter,
         }
 
+    def _step_with_adapter(
+        self,
+        ohlcv_slice: pd.DataFrame,
+        bar_idx: int,
+        exchange_adapter: ExchangeAdapter,
+        current_step_ts: int,
+    ) -> List[Dict[str, Any]]:
+        """
+        Process single bar with ExchangeAdapter for execution.
+        
+        AG-3M-1-1: End-to-end wiring:
+        Strategy -> Risk -> Exec (via ExchangeAdapter) -> PositionStore
+        
+        Args:
+            ohlcv_slice: OHLCV DataFrame up to current bar
+            bar_idx: Current bar index
+            exchange_adapter: ExchangeAdapter instance (paper/stub)
+            current_step_ts: Current step timestamp in milliseconds
+            
+        Returns:
+            List of event dicts (OrderIntent, RiskDecisionV1, ExecutionReportV1)
+        """
+        from engine.exchange_adapter import ExecutionContext
+        
+        events = []
+        self._step_count += 1
+        
+        if ohlcv_slice.empty:
+            return events
+        
+        # Advance logical time
+        self.time_provider.advance_steps(1)
+        
+        last_row = ohlcv_slice.iloc[-1]
+        
+        if 'timestamp' in last_row:
+            asof_ts = last_row['timestamp']
+        else:
+            now_ns = self.time_provider.now_ns()
+            asof_ts = pd.Timestamp(now_ns, unit='ns', tz='UTC')
+        current_price = float(last_row['close'])
+        ts_str = asof_ts.isoformat() if hasattr(asof_ts, "isoformat") else str(asof_ts)
+        
+        # 1. Strategy: Generate order intents
+        intents = self._strategy_fn(
+            ohlcv_slice, self.strategy_params, self.ticker, asof_ts
+        )
+        
+        for intent in intents:
+            # Deterministic IDs
+            intent.event_id = self._gen_uuid()
+            intent.trace_id = self._gen_uuid()
+            intent.ts = ts_str
+            
+            # Enrich with metadata
+            intent.meta.update({
+                "current_price": current_price,
+                "close": current_price,
+                "step_idx": self._step_count,
+                "bar_idx": bar_idx,
+                "bar_ts": ts_str,
+                "engine_version": "3M.1",
+                "risk_version": self.risk_version,
+            })
+            
+            # Emit OrderIntent event
+            intent_dict = {
+                "type": "OrderIntent",
+                "payload": intent.to_dict(),
+            }
+            events.append(intent_dict)
+            self._event_count += 1
+            
+            # 2. Risk evaluation
+            decision_event_id = self._gen_uuid()
+            
+            if self.risk_version == "v0.6" and self._risk_v06:
+                intent_v1 = OrderIntentV1(
+                    symbol=intent.symbol,
+                    side=intent.side,
+                    qty=intent.qty,
+                    notional=intent.notional,
+                    order_type=intent.order_type,
+                    limit_price=intent.limit_price,
+                    event_id=intent.event_id,
+                    trace_id=intent.trace_id,
+                    meta=intent.meta,
+                )
+                decision = self._risk_v06.assess(intent_v1)
+                decision.event_id = decision_event_id
+                decision.ts = ts_str
+                if decision.trace_id != intent.trace_id:
+                    decision.trace_id = intent.trace_id
+            else:
+                signal = {
+                    "assets": [intent.symbol],
+                    "deltas": {intent.symbol: 0.10},
+                }
+                allowed, annotated = self._risk_v04.filter_signal(signal, {}, nav_eur=10000.0)
+                rejection_reasons = annotated.get("risk_reasons", [])
+                
+                decision = RiskDecisionV1(
+                    ref_order_event_id=intent.event_id,
+                    allowed=allowed,
+                    rejection_reasons=rejection_reasons,
+                    trace_id=intent.trace_id,
+                    event_id=decision_event_id,
+                    ts=ts_str,
+                    extra={
+                        "risk_engine": "v0.4",
+                        "annotated": annotated,
+                        "step_idx": self._step_count,
+                    }
+                )
+            
+            # Emit RiskDecisionV1 event
+            decision_dict = {
+                "type": "RiskDecisionV1",
+                "payload": decision.to_dict(),
+            }
+            events.append(decision_dict)
+            self._event_count += 1
+            
+            # 3. Execution via ExchangeAdapter (if allowed)
+            if decision.allowed:
+                # Create OrderIntentV1 for adapter
+                intent_v1 = OrderIntentV1(
+                    symbol=intent.symbol,
+                    side=intent.side,
+                    qty=intent.qty,
+                    notional=intent.notional,
+                    order_type=intent.order_type,
+                    limit_price=intent.limit_price,
+                    event_id=intent.event_id,
+                    trace_id=intent.trace_id,
+                    meta=intent.meta,
+                )
+                
+                # Build execution context
+                context: ExecutionContext = {
+                    "step_id": self._step_count,
+                    "time_provider": self.time_provider,
+                }
+                
+                # Submit via ExchangeAdapter
+                report_event_id = self._gen_uuid()
+                extra_meta = {
+                    "current_price": current_price,
+                    "close": current_price,
+                    "bar_close": current_price,
+                    "ts": ts_str,
+                }
+                
+                report = exchange_adapter.submit(
+                    intent=intent_v1,
+                    decision=decision,
+                    context=context,
+                    report_event_id=report_event_id,
+                    extra_meta=extra_meta,
+                )
+                
+                # Enrich report with observability
+                report.extra = report.extra or {}
+                report.extra.update({
+                    "step_idx": self._step_count,
+                    "engine_version": "3M.1",
+                    "adapter_mode": True,
+                })
+                
+                # Emit ExecutionReportV1 event
+                report_dict = {
+                    "type": "ExecutionReportV1",
+                    "payload": report.to_dict(),
+                }
+                events.append(report_dict)
+                self._event_count += 1
+                self._fill_count += 1
+                
+                # 4. Apply to PositionStore if available
+                if self._state_store and report.status in ("FILLED", "PARTIALLY_FILLED"):
+                    self._state_store.apply_fill(
+                        symbol=intent.symbol,
+                        side=intent.side,
+                        qty=report.filled_qty,
+                        price=report.avg_price,
+                    )
+            else:
+                self._rejected_count += 1
+        
+        return events
+
     def run_adapter_mode(
         self,
         adapter,  # MarketDataAdapter Protocol
@@ -651,18 +842,25 @@ class LoopStepper:
         warmup: int = 10,
         log_jsonl_path: Optional[Union[str, Path]] = None,
         metrics_collector = None,
+        exchange_adapter: Optional[ExchangeAdapter] = None,
+        checkpoint = None,  # AG-3M-2-1: Optional Checkpoint for progress tracking
+        checkpoint_path: Optional[Path] = None,  # AG-3M-2-1: Path to save checkpoint
+        start_idx: int = 0,  # AG-3M-2-1: Resume from this step index
     ) -> Dict[str, Any]:
         """
         Run simulation consuming events directly from MarketDataAdapter.
         
         AG-3L-1-1: Direct adapter integration without public DataFrame bridge.
+        AG-3M-1-1: End-to-end execution via ExchangeAdapter (paper/stub).
+        AG-3M-2-1: Checkpoint/resume support for crash recovery.
         
         Flow:
         1. Use adapter.peek_next_ts() to know next event timestamp
         2. Call adapter.poll(max_items=1, up_to_ts=current_step_ts)
         3. Guard: assert no event has ts > current_step_ts (no-lookahead)
         4. Build incremental OHLCV slice internally (private helper)
-        5. Call step() with the slice
+        5. Process: Strategy -> Risk -> Exec (via exchange_adapter) -> PositionStore
+        6. Save checkpoint after each step (if checkpoint provided)
         
         Args:
             adapter: MarketDataAdapter instance (must implement poll, peek_next_ts)
@@ -670,6 +868,10 @@ class LoopStepper:
             warmup: Warmup period (bars to skip)
             log_jsonl_path: Optional path for JSONL logging
             metrics_collector: Optional MetricsCollector for observability
+            exchange_adapter: Optional ExchangeAdapter for execution (paper/stub)
+            checkpoint: Optional Checkpoint for progress tracking (AG-3M-2-1)
+            checkpoint_path: Path to save checkpoint (AG-3M-2-1)
+            start_idx: Resume from this step index (AG-3M-2-1)
             
         Returns:
             Dict with metrics and events
@@ -697,38 +899,67 @@ class LoopStepper:
         consumed_count = 0
         step_count = 0
         
-        # Warmup phase: consume without processing
-        warmup_consumed = 0
-        while warmup_consumed < warmup:
-            next_ts = adapter.peek_next_ts()
-            if next_ts is None:
-                # Not enough data for warmup
-                logger.warning(
-                    "Adapter exhausted during warmup (consumed %d of %d required)",
-                    warmup_consumed, warmup
-                )
-                break
-            
-            # Consume event for warmup
-            events = adapter.poll(max_items=1)
-            if not events:
-                break
-            
-            event = events[0]
-            # Accumulate to internal slice
-            _ohlcv_rows.append({
-                "timestamp": pd.Timestamp(event.ts, unit="ms", tz="UTC"),
-                "open": event.open,
-                "high": event.high,
-                "low": event.low,
-                "close": event.close,
-                "volume": event.volume,
-            })
-            warmup_consumed += 1
-            consumed_count += 1
+        # AG-3M-2-1: Resume support
+        # If resuming (start_idx > 0), we need to:
+        # 1. Skip warmup (already done in previous run)
+        # 2. Skip already-processed steps
+        # 3. Rebuild _ohlcv_rows to have correct slice for strategy
+        is_resuming = start_idx > 0
         
-        if warmup_consumed < warmup:
-            return {"events": [], "metrics": self._get_metrics(), "consumed": consumed_count}
+        # Warmup phase: consume without processing (skip if resuming)
+        warmup_consumed = 0
+        if not is_resuming:
+            while warmup_consumed < warmup:
+                next_ts = adapter.peek_next_ts()
+                if next_ts is None:
+                    logger.warning(
+                        "Adapter exhausted during warmup (consumed %d of %d required)",
+                        warmup_consumed, warmup
+                    )
+                    break
+                
+                events = adapter.poll(max_items=1)
+                if not events:
+                    break
+                
+                event = events[0]
+                _ohlcv_rows.append({
+                    "timestamp": pd.Timestamp(event.ts, unit="ms", tz="UTC"),
+                    "open": event.open,
+                    "high": event.high,
+                    "low": event.low,
+                    "close": event.close,
+                    "volume": event.volume,
+                })
+                warmup_consumed += 1
+                consumed_count += 1
+            
+            if warmup_consumed < warmup:
+                return {"events": [], "metrics": self._get_metrics(), "consumed": consumed_count}
+        else:
+            # Resuming: skip warmup + already processed steps
+            # We need to consume (warmup + start_idx) events to rebuild state
+            skip_count = warmup + start_idx
+            for _ in range(skip_count):
+                next_ts = adapter.peek_next_ts()
+                if next_ts is None:
+                    break
+                events = adapter.poll(max_items=1)
+                if not events:
+                    break
+                event = events[0]
+                _ohlcv_rows.append({
+                    "timestamp": pd.Timestamp(event.ts, unit="ms", tz="UTC"),
+                    "open": event.open,
+                    "high": event.high,
+                    "low": event.low,
+                    "close": event.close,
+                    "volume": event.volume,
+                })
+                consumed_count += 1
+            
+            logger.info("Resumed adapter-mode: skipped %d events (warmup=%d, processed=%d)",
+                       consumed_count, warmup, start_idx)
         
         # Main processing loop
         end_steps = max_steps if max_steps else float('inf')
@@ -773,9 +1004,18 @@ class LoopStepper:
             # Metrics: start strategy stage
             strategy_t0 = _metrics_clock() if metrics_collector else 0.0
             
-            # Process with step()
             bar_idx = len(_ohlcv_rows) - 1
-            step_events_list = self.step(ohlcv_slice, bar_idx=bar_idx)
+            
+            # AG-3M-1-1: When exchange_adapter is provided, do end-to-end wiring
+            # Strategy -> Risk -> Exec (via ExchangeAdapter) -> PositionStore
+            if exchange_adapter is not None:
+                step_events_list = self._step_with_adapter(
+                    ohlcv_slice, bar_idx, exchange_adapter, current_step_ts
+                )
+            else:
+                # Original behavior: use step() which uses simulate_execution()
+                step_events_list = self.step(ohlcv_slice, bar_idx=bar_idx)
+            
             all_events.extend(step_events_list)
             step_count += 1
             
@@ -808,6 +1048,12 @@ class LoopStepper:
                         action="emit",
                         extra={"bar_idx": bar_idx},
                     )
+            
+            # AG-3M-2-1: Update and save checkpoint after each step
+            if checkpoint and checkpoint_path:
+                # step_count is 1-indexed here (incremented above), use as processed index
+                checkpoint = checkpoint.update(start_idx + step_count - 1)
+                checkpoint.save_atomic(checkpoint_path)
         
         # Close JSONL logger
         if jsonl_logger:

@@ -1,0 +1,12 @@
+{
+  "drain_iterations": 0,
+  "max_step_id": 5,
+  "num_execution_reports": 0,
+  "num_fills": 0,
+  "num_order_intents": 0,
+  "num_positions_updated": 0,
+  "num_risk_allowed": 0,
+  "num_risk_decisions_total": 0,
+  "num_risk_rejected": 0,
+  "unique_trace_ids": 0
+}

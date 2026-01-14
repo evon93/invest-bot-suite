@@ -1,0 +1,31 @@
+# First run:
+python tools/run_live_3E.py --data fixture --fixture-path tests/fixtures/ohlcv_fixture_3K1.csv --data-mode adapter --exchange paper --clock simulated --seed 42 --max-steps 5 --run-dir report/out_3M2_smoke/first_run
+
+Output:
+  Created run directory: report\out_3M2_smoke\first_run (idempotency=file)
+  Strategy: v0_7
+  RiskManager initialized with 0 rules
+  Starting run_live_3E with clock=simulated, exchange=paper...
+  Simulation done. Published: 0
+
+Artifacts:
+  - checkpoint.json (last_processed_idx=4, processed_count=5)
+  - idempotency_keys.jsonl
+
+# Resume run:
+python tools/run_live_3E.py --data fixture --fixture-path tests/fixtures/ohlcv_fixture_3K1.csv --data-mode adapter --exchange paper --clock simulated --seed 42 --max-steps 5 --resume report/out_3M2_smoke/first_run --outdir report/out_3M2_smoke/resume_run
+
+Output:
+  Resuming from run_id=run_42_5, start_idx=5
+  Strategy: v0_7
+  RiskManager initialized with 0 rules
+  Starting run_live_3E with clock=simulated, exchange=paper...
+  Resuming from index 5
+  Simulation done. Published: 0
+
+Artifacts:
+  - events.ndjson
+  - run_meta.json
+  - run_metrics.json
+  - results.csv
+  - state.db
