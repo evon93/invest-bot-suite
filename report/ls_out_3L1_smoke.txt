@@ -1,5 +1,0 @@
-﻿events.ndjson
-results.csv
-run_meta.json
-run_metrics.json
-state.db

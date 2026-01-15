@@ -1,1 +1,0 @@
-﻿5eecaf2 3F.1: runtime config fail-fast + env example + tests

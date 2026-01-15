@@ -1,8 +1,0 @@
-RiskManager initialized with 0 rules
-INFO: RiskManager initialized with 0 rules
-Created run directory: report/out_3N1_preset_smoke (idempotency=memory)
-  Strategy: v0_7
-  Data source: fixture (tests/fixtures/ohlcv_fixture_3K1.csv, 10 bars, adapter mode)
-Starting run_live_3E with clock=simulated, exchange=paper...
-Simulation done. Published: 0
-Artifacts generated in report/out_3N1_preset_smoke

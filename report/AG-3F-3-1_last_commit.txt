@@ -1,1 +1,0 @@
-﻿a143935 3F.3: real-ish adapter gated + tests

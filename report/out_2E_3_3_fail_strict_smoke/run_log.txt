@@ -1,8 +1,0 @@
-Calibration run started at 2025-12-30T17:57:59.146277
-[2025-12-30T17:57:59] Mode: full, Profile: full_demo, Total grid: 288, Running: 1, Seed: 42
-[2025-12-30T17:57:59] Output dir: report\out_2E_3_3_fail_strict_smoke
-[2025-12-30T17:57:59] START combo_id=ffae19fec604 (1/1) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
-[2025-12-30T17:57:59] END combo_id=ffae19fec604 status=ok duration_s=0.01
-[2025-12-30T17:57:59] DONE: 1 ok, 0 errors, total 1, duration 0.03s
-[2025-12-30T17:57:59] GATE full: FAIL | active_n=1 active_rate=100.00% active_pass_rate=100.00% reasons=[active_n_below_min]
-[2025-12-30T17:57:59] Artifacts written to: report\out_2E_3_3_fail_strict_smoke

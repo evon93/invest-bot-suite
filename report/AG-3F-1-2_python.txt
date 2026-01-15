@@ -1,2 +1,0 @@
-﻿Python 3.12.3
-/mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/bin/python

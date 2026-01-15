@@ -1,9 +1,0 @@
-From e2077e8... Mon Sep 17 00:00:00 2001
-Subject: [PATCH] report: freeze 2B-3.3 topk candidates
-
----
- report/2B_3_3_topk_freeze.json | 350 ++++++++++++++++++++++++++++++++++
- report/2B_3_3_topk_freeze.md   |  65 +++++++
- 2 files changed, 415 insertions(+)
- create mode 100644 report/2B_3_3_topk_freeze.json
- create mode 100644 report/2B_3_3_topk_freeze.md

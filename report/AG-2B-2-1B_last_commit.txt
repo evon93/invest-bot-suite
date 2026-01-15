@@ -1,1 +1,0 @@
-﻿897c492 2B.2: risk_decision tick events + ATR/hard-stop counters

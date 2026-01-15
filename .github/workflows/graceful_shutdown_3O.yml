@@ -33,9 +33,13 @@ jobs:
       - name: Create Artifact Dir
         run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
           
-      - name: Run Graceful Shutdown Test
+      - name: Run Graceful Shutdown Test (Direct)
         run: |
           python -m pytest tests/test_graceful_shutdown_signal_3O2.py -v
+
+      - name: Run Graceful Shutdown Test (Supervisor)
+        run: |
+          python -m pytest tests/test_graceful_shutdown_supervisor_3O2.py -v
           
       - name: Inspect Artifacts (Debug)
         if: always()

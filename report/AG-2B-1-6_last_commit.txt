@@ -1,1 +1,0 @@
-﻿23d301a 2B.1: closed_trades + win_rate metrics for calibration

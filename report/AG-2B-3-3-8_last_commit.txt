@@ -1,1 +1,0 @@
-bc15e5a (HEAD -> main) 2B: add deterministic sensitivity harness for calibration grid discrimination

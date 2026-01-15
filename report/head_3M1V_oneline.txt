@@ -1,1 +1,0 @@
-c957bc3 3M.1: adapter-mode end-to-end via ExchangeAdapter (paper/stub)

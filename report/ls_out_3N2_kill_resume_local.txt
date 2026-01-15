@@ -1,9 +1,0 @@
-total 24
-drwxrwxrwx 1 ivn_b ivn_b  4096 Jan 15 19:04 .
-drwxrwxrwx 1 ivn_b ivn_b  4096 Jan 15  2026 ..
--rwxrwxrwx 1 ivn_b ivn_b   132 Jan 15 19:04 checkpoint.json
--rwxrwxrwx 1 ivn_b ivn_b  1726 Jan 15 19:04 events.ndjson
--rwxrwxrwx 1 ivn_b ivn_b   199 Jan 15 19:04 results.csv
--rwxrwxrwx 1 ivn_b ivn_b   378 Jan 15 19:04 run_meta.json
--rwxrwxrwx 1 ivn_b ivn_b   261 Jan 15 19:04 run_metrics.json
--rwxrwxrwx 1 ivn_b ivn_b 20480 Jan 15 19:04 state.db

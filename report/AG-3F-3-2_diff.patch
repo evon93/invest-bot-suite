@@ -1,9 +1,0 @@
-﻿diff --git a/pytest.ini b/pytest.ini
-index 3ca3815..35ae8a8 100644
---- a/pytest.ini
-+++ b/pytest.ini
-@@ -3,3 +3,4 @@ testpaths = tests
- norecursedirs = audit .venv
- markers =
-     realdata: tests that require INVESTBOT_REALDATA_PATH environment variable
-+    integration: integration tests requiring env flags (SKIP in CI by default)

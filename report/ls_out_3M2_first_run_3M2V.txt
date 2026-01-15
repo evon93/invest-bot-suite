@@ -1,5 +1,0 @@
-total 0
-drwxrwxrwx 1 ivn_b ivn_b 4096 Jan 14 19:41 .
-drwxrwxrwx 1 ivn_b ivn_b 4096 Jan 14 19:41 ..
--rwxrwxrwx 1 ivn_b ivn_b  134 Jan 14 19:41 checkpoint.json
--rwxrwxrwx 1 ivn_b ivn_b    0 Jan 14 19:41 idempotency_keys.jsonl
