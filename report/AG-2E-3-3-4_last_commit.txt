@@ -1,0 +1,1 @@
+e3fb90d (HEAD -> feature/2E_gate_semantics_fix, origin/feature/2E_gate_semantics_fix) 2E: enforce activity gate thresholds + granular fail reasons

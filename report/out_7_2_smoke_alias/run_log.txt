@@ -1,0 +1,86 @@
+Calibration run started at 2025-12-30T17:14:38.961154
+[2025-12-30T17:14:38] Mode: full, Profile: full_demo, Total grid: 288, Running: 40, Seed: 42
+[2025-12-30T17:14:38] Output dir: report\out_7_2_smoke_alias
+[2025-12-30T17:14:38] START combo_id=ffae19fec604 (1/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:38] END combo_id=ffae19fec604 status=ok duration_s=0.02
+[2025-12-30T17:14:38] START combo_id=0576d1c2bfe6 (2/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:38] END combo_id=0576d1c2bfe6 status=ok duration_s=0.01
+[2025-12-30T17:14:38] START combo_id=2411a44ce582 (3/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=2411a44ce582 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=f93ac29cc62d (4/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=f93ac29cc62d status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=fa94dabfc7d9 (5/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=fa94dabfc7d9 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=c9b8c7cf9b5f (6/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=c9b8c7cf9b5f status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=2368daacf8d9 (7/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=2368daacf8d9 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=6ecd3e5356e1 (8/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=6ecd3e5356e1 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=abd891f17a53 (9/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=abd891f17a53 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=70d95e17dd21 (10/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=70d95e17dd21 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=88bb39eb908b (11/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=88bb39eb908b status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=033826a6ebbd (12/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=033826a6ebbd status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=9daf5a15114e (13/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=9daf5a15114e status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=671ea044ad47 (14/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=671ea044ad47 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=55f9ee043f57 (15/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=55f9ee043f57 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=e5c570b4dcef (16/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=e5c570b4dcef status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=7a63e2010a20 (17/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=7a63e2010a20 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=fe30318401ff (18/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=fe30318401ff status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=5c455bd3ac35 (19/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=5c455bd3ac35 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=00701c56debb (20/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=00701c56debb status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=dc3c983f74bc (21/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=dc3c983f74bc status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=c7fe42239dff (22/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=c7fe42239dff status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=07d1327734bf (23/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=07d1327734bf status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=1b221ec79489 (24/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.05, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=1b221ec79489 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=c2d7b03329c4 (25/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=c2d7b03329c4 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=b23a93bcf9b7 (26/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=b23a93bcf9b7 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=f9ed600cf3b5 (27/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=f9ed600cf3b5 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=423ef0c62d72 (28/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=423ef0c62d72 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=59aac2ce9c2d (29/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=59aac2ce9c2d status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=038e743b2692 (30/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=038e743b2692 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=c7135fb46b8f (31/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=c7135fb46b8f status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=906cf146891c (32/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 0.7, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=906cf146891c status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=a7ba7b95a053 (33/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=a7ba7b95a053 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=79ed5d41e964 (34/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=79ed5d41e964 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=754bd41915c6 (35/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=754bd41915c6 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=28f2c4b7f488 (36/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.1, 'max_drawdown.size_multiplier_soft': 1.0, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=28f2c4b7f488 status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=34ae485cdeaf (37/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.7}
+[2025-12-30T17:14:39] END combo_id=34ae485cdeaf status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=08df4deed06b (38/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 0.9}
+[2025-12-30T17:14:39] END combo_id=08df4deed06b status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=f8feaa04a5bf (39/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 1.1}
+[2025-12-30T17:14:39] END combo_id=f8feaa04a5bf status=ok duration_s=0.01
+[2025-12-30T17:14:39] START combo_id=a7ce76cb3b72 (40/40) params={'stop_loss.atr_multiplier': 2.0, 'stop_loss.min_stop_pct': 0.02, 'max_drawdown.soft_limit_pct': 0.08, 'max_drawdown.hard_limit_pct': 0.15, 'max_drawdown.size_multiplier_soft': 0.5, 'kelly.cap_factor': 1.3}
+[2025-12-30T17:14:39] END combo_id=a7ce76cb3b72 status=ok duration_s=0.01
+[2025-12-30T17:14:39] DONE: 40 ok, 0 errors, total 40, duration 0.55s
+[2025-12-30T17:14:39] GATE full: PASS | active_n=40 active_rate=100.00% active_pass_rate=100.00% reasons=[none]
+[2025-12-30T17:14:39] Artifacts written to: report\out_7_2_smoke_alias

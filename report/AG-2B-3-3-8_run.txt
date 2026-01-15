@@ -1,0 +1,14 @@
+=== Sensitivity Grid Evidence Run ===
+Command: python tools/run_calibration_2B.py --mode full --max-combinations 24 --scenario sensitivity --output-dir report/out_2B_3_3_grid_discriminates_20251230
+Exit Code: 0
+Gate Status: PASS
+
+=== Key Results ===
+- 24 combos executed
+- 24 unique effective_config_hash values
+- 2 distinct score values: 0.274 vs 0.346
+- 2 distinct pct_time_hard_stop values: 0.714 vs 0.571
+
+=== Discrimination Factors ===
+- max_drawdown.hard_limit_pct=0.10 → score=0.274, pct_hard=71.4%
+- max_drawdown.hard_limit_pct=0.15 → score=0.346, pct_hard=57.1%

@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.x, pytest-8.x, pluggy-1.x
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+collected 132 items
+
+tests/test_backtest_deepseek.py ........................................ [ 30%]
+tests/test_calibration_runner_2B.py .................................... [ 57%]
+tests/test_risk_atr_stop_v0_5.py .............                           [ 67%]
+tests/test_risk_dd_v0_5.py .................                             [ 80%]
+tests/test_risk_manager_v0_5.py ..........................               [100%]
+
+132 passed in 12.56s

@@ -1,0 +1,5 @@
+commit 97c1ddcd5c2c732761d318989a7dcd9a1116037a
+Author: Iván B. <ivan@example.com>
+Date:   Thu Jan 15 20:53:35 2026 +0100
+
+    3O.2: graceful shutdown signals + test + CI artifact

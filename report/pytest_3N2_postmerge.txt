@@ -1,5 +1,0 @@
-  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:149: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
-    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-750 passed, 11 skipped, 7 warnings in 229.51s (0:03:49)

@@ -1,0 +1,3 @@
+Python 3.12.3
+/mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/bin/python
+pip 25.3 from /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/lib/python3.12/site-packages/pip (python 3.12)

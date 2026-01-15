@@ -1,0 +1,18 @@
+# AG-2E-3-2-analyze: Comandos ejecutados (solo lectura)
+
+# No se ejecutaron comandos, solo lectura de archivos
+
+## Archivos leídos
+view_file report/out_2E_3_1_full/run_meta.json
+view_file report/out_2E_3_1_full/summary.md
+view_file report/out_2E_3_1_full/topk.json
+view_file report/out_2E_3_1_full/results.csv
+view_file report/out_2E_3_1_full/run_log.txt
+
+## Análisis realizado
+- Conteo active/inactive por kelly.cap_factor
+- Verificación de distribución num_trades
+- Parseo de warnings en run_log.txt
+- Validación de topk.json scoring
+
+## No commit (policy)

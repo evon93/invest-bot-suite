@@ -1,0 +1,49 @@
+From e3fb90d3087bd686a34c9c1b92015383500d0246 Mon Sep 17 00:00:00 2001
+From: User <user@example.com>
+Date: Sun, 28 Dec 2025 15:56:39 +0100
+Subject: [PATCH] 2E: enforce activity gate thresholds + granular fail reasons
+
+---
+ tools/run_calibration_2B.py | 21 +++++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/tools/run_calibration_2B.py b/tools/run_calibration_2B.py
+index 9234abc..5678def 100644
+--- a/tools/run_calibration_2B.py
++++ b/tools/run_calibration_2B.py
+@@ -123,8 +123,25 @@ def check_quality_gate(
+     
+     gate_fail_reasons = []
+     
+-    # 1. Check strict activity counts
+-    if active_n < min_active_n:
++    # Enforce activity thresholds independently (OR semantics)
++    # New logic 2E-3.3: Fail if ANY strictly required activity metric is missed
++    
++    activity_ok = True
++    
++    # Check absolute count
++    if min_active_n is not None and active_n < min_active_n:
++        gate_fail_reasons.append("active_n_below_min")
++        activity_ok = False
++        
++    # Check active rate
++    if min_active_rate is not None and active_rate < min_active_rate:
++        gate_fail_reasons.append("active_rate_below_min")
++        activity_ok = False
++        
++    # Check inactive rate (guardrail)
++    if max_inactive_rate is not None and inactive_rate > max_inactive_rate:
++        gate_fail_reasons.append("inactive_rate_above_max")
++        activity_ok = False
+         
+-        # Old logic was somewhat implicit. Now strictly enforcing.
+-        gate_fail_reasons.append("insufficient_activity")
++    if not activity_ok:
++        return False, gate_fail_reasons
++        
++    # ... quality checks ...
+     
+     return True, []
+-- 
+2.45.2

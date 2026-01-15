@@ -1,0 +1,1 @@
+9c42d22 (HEAD -> main, origin/main, origin/HEAD) report: add 2B-3.3 run index (full+strict)

@@ -1,0 +1,13 @@
+Subject: [PATCH 1/2] 2E: add manual full robustness workflow (workflow_dispatch)
+
+---
+ .github/workflows/robustness_full.yml | 98 +++++++++++++++++++++++++++
+ 1 file changed, 98 insertions(+)
+ create mode 100644 .github/workflows/robustness_full.yml
+
+Subject: [PATCH 2/2] report: add Orchestrator handoff post2B close2E (2025-12-31)
+
+---
+ report/ORCH_HANDOFF_post2B_close2E_20251231.md | 113 ++++++++++++++++++++++++++
+ 1 file changed, 113 insertions(+)
+ create mode 100644 report/ORCH_HANDOFF_post2B_close2E_20251231.md

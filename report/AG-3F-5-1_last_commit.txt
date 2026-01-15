@@ -1,0 +1,1 @@
+﻿b22cf34 3F.5: add smoke_3F CI workflow (pytest + determinism gate)
