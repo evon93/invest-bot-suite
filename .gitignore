@@ -31,3 +31,30 @@ report/validate_risk_config_step5.txt
 # H0: Ignore accumulated handoff docs and copy-paste packs (AG-H0-EOL-1-5)
 report/DS-*_paste_pack.md
 report/ORCH_HANDOFF_*.md
+
+# H0.1: Ephemeral diagnostic snapshots (cleanup-safe)
+report/git_status_*.txt
+report/head_*.txt
+report/origin_main_*.txt
+report/pytest_*_snapshot.txt
+report/python_*.txt
+report/python_venv_*.txt
+report/python_exe_*.txt
+report/smoke_*.txt
+report/ls_out_*.txt
+report/working_tree_diff_*.txt
+report/ahead_*.txt
+report/ffonly_*.txt
+report/log_graph_*.txt
+report/session_*.txt
+report/session_*.md
+report/os_release_*.txt
+report/remote_*.txt
+report/untracked_count_*.txt
+report/help_*.txt
+report/contains_*.txt
+report/in_main_*.txt
+report/delta_*.md
+report/git_show_*.txt
+report/det_*/
+report/det_close_*/
