@@ -375,6 +375,7 @@ class LoopStepper:
         checkpoint_path: Optional[Path] = None,  # Path to save checkpoint
         start_idx: int = 0,  # Start index for resume (0 = from beginning after warmup)
         metrics_collector = None,  # Optional MetricsCollector for granular observability (3H.1)
+        stop_controller = None,  # AG-3O-2-1: Graceful shutdown
     ) -> Dict[str, Any]:
         """
         Run simulation using bus-based event flow.
@@ -448,6 +449,11 @@ class LoopStepper:
         # Resume support: skip already processed indices
         actual_start = warmup + start_idx
         for i in range(actual_start, end_idx):
+            # AG-3O-2-1: Check for graceful shutdown request
+            if stop_controller and stop_controller.is_stop_requested:
+                logger.info("Bus mode: stop requested (%s), draining and exiting...", stop_controller.stop_reason)
+                break
+
             current_slice = ohlcv_df.iloc[:i+1]
             self._step_count += 1
             
@@ -846,6 +852,7 @@ class LoopStepper:
         checkpoint = None,  # AG-3M-2-1: Optional Checkpoint for progress tracking
         checkpoint_path: Optional[Path] = None,  # AG-3M-2-1: Path to save checkpoint
         start_idx: int = 0,  # AG-3M-2-1: Resume from this step index
+        stop_controller = None,  # AG-3O-2-1: Graceful shutdown
     ) -> Dict[str, Any]:
         """
         Run simulation consuming events directly from MarketDataAdapter.
@@ -965,6 +972,11 @@ class LoopStepper:
         end_steps = max_steps if max_steps else float('inf')
         
         while step_count < end_steps:
+            # AG-3O-2-1: Check for graceful shutdown request
+            if stop_controller and stop_controller.is_stop_requested:
+                logger.info("Adapter mode: stop requested (%s), exiting...", stop_controller.stop_reason)
+                break
+
             next_ts = adapter.peek_next_ts()
             if next_ts is None:
                 # Adapter exhausted

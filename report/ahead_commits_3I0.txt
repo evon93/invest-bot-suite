@@ -1,0 +1,6 @@
+b93e398 AG-3H-7-1: Phase 3H closure (handoff + bridge + registro)
+520fffe AG-3H-6-1: CI smoke_3H workflow (metrics + rotation + dashboard)
+3e3a9ab AG-3H-4-1: 24/7 supervisor with automatic restart and deterministic backoff
+cdc4e88 AG-3H-3-1: file-first HTML metrics dashboard
+ec6db3a AG-3H-2-1: metrics.ndjson rotation (--metrics-rotate-max-mb/lines)
+ccbb2e8 AG-3H-1-1: granular metrics observability per-step/per-stage

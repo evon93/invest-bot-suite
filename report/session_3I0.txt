@@ -1,0 +1,11 @@
+SESSION:
+- repo_path: /mnt/c/Users/ivn_b/Desktop/invest-bot-suite
+- os: WSL (Linux 6.6.87.2-microsoft-standard-WSL2 x86_64)
+- git_branch: main
+- git_head: 83349b217b3467ae091427e2733b6c42f1f408cc
+- git_status_summary: ## main...origin/main;?? report/ahead_commits_3I0.txt;?? report/contains_ac0ffc9_3H0.txt;?? report/det_a/;?? report/det_b/;
+- python_system: Python 3.12.3
+- venv: sí
+- python_venv: Python 3.12.3
+- pytest_last: n/a
+- notes: n/a

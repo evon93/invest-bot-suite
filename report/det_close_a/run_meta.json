@@ -1,0 +1,10 @@
+{
+  "branch": "feature/3F_6_closeout",
+  "clock": "simulated",
+  "commit": "2528afd713e83a44ef088a8650e0b28fbc36da6a",
+  "exchange": "paper",
+  "latency_steps": 0,
+  "max_steps": 50,
+  "seed": 42,
+  "timestamp_start": "2026-01-08 16:02:35.753233+00:00"
+}

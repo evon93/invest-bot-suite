@@ -1,0 +1,6 @@
+## feature/AG-3G-7-1_closeout
+?? report/det_a/
+?? report/det_b/
+?? report/det_close_a/
+?? report/det_close_b/
+?? report/git_status_3H0.txt

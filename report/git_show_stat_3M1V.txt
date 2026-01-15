@@ -1,0 +1,23 @@
+commit c957bc382b3ff0002dd9d8a8d575aaa975e537fd
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Wed Jan 14 19:24:41 2026 +0100
+
+    3M.1: adapter-mode end-to-end via ExchangeAdapter (paper/stub)
+
+ engine/loop_stepper.py                          | 209 ++++++++++++++++++++-
+ report/AG-3M-1-1_diff.patch                     | Bin 0 -> 22456 bytes
+ report/AG-3M-1-1_last_commit.txt                | Bin 0 -> 146 bytes
+ report/AG-3M-1-1_return.md                      |  91 +++++++++
+ report/out_3M1_smoke/events.ndjson              |   1 +
+ report/out_3M1_smoke/results.csv                |   2 +
+ report/out_3M1_smoke/run_meta.json              |  13 ++
+ report/out_3M1_smoke/run_metrics.json           |  12 ++
+ report/out_3M1_smoke/smoke_cmd.txt              | Bin 0 -> 414 bytes
+ report/out_3M1_smoke/smoke_log.txt              |  11 ++
+ report/out_3M1_smoke/state.db                   | Bin 0 -> 20480 bytes
+ report/pytest_3M1.txt                           |  39 ++++
+ report/smoke_3M1.txt                            |  11 ++
+ tests/test_adapter_mode_end_to_end_paper_3M1.py | 232 +++++++++++++++++++++++
+ tests/test_adapter_mode_no_lookahead_3M1.py     | 238 ++++++++++++++++++++++++
+ tools/run_live_3E.py                            |   3 +-
+ 16 files changed, 858 insertions(+), 4 deletions(-)

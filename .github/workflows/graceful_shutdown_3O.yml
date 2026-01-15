@@ -1,0 +1,50 @@
+name: Graceful Shutdown 3O
+
+on:
+  push:
+    branches: [ "feature/*", "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  test-graceful-shutdown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      INVESTBOT_ALLOW_NETWORK: "0"
+      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest
+          
+      - name: Create Artifact Dir
+        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
+          
+      - name: Run Graceful Shutdown Test
+        run: |
+          python -m pytest tests/test_graceful_shutdown_signal_3O2.py -v
+          
+      - name: Inspect Artifacts (Debug)
+        if: always()
+        run: |
+          ls -R ${{ env.INVESTBOT_ARTIFACT_DIR }} || echo "No artifacts found"
+          
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graceful-shutdown-run-dir
+          path: ${{ env.INVESTBOT_ARTIFACT_DIR }}

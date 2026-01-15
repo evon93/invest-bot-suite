@@ -1,0 +1,10 @@
+total 20
+drwxrwxrwx 1 ivn_b ivn_b  4096 Jan 14 19:21 .
+drwxrwxrwx 1 ivn_b ivn_b  4096 Jan 14  2026 ..
+-rwxrwxrwx 1 ivn_b ivn_b   120 Jan 14 19:20 events.ndjson
+-rwxrwxrwx 1 ivn_b ivn_b   200 Jan 14 19:20 results.csv
+-rwxrwxrwx 1 ivn_b ivn_b   357 Jan 14 19:20 run_meta.json
+-rwxrwxrwx 1 ivn_b ivn_b   271 Jan 14 19:20 run_metrics.json
+-rwxrwxrwx 1 ivn_b ivn_b   414 Jan 14 19:20 smoke_cmd.txt
+-rwxrwxrwx 1 ivn_b ivn_b   497 Jan 14 19:21 smoke_log.txt
+-rwxrwxrwx 1 ivn_b ivn_b 20480 Jan 14 19:20 state.db

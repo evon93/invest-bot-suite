@@ -1,0 +1,2 @@
+-rwxrwxrwx 1 ivn_b ivn_b 3417 Jan  9 20:06 report/ORCH_HANDOFF_post3G_close_20260109.md
+-rwxrwxrwx 1 ivn_b ivn_b 2330 Jan  9 20:06 report/bridge_3G_to_next_report.md

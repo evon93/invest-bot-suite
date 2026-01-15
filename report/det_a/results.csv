@@ -1,0 +1,2 @@
+num_order_intents,num_risk_decisions_total,num_risk_allowed,num_risk_rejected,num_execution_reports,num_fills,num_positions_updated,drain_iterations,max_step_id,unique_trace_ids
+9,9,9,0,9,9,9,1,50,9

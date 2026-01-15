@@ -1,0 +1,7 @@
+M	registro_de_estado_invest_bot.md
+A	report/AG-3M-5-1_diff.patch
+A	report/AG-3M-5-1_last_commit.txt
+A	report/AG-3M-5-1_return.md
+A	report/ORCH_HANDOFF_post3M_close_20260114.md
+A	report/bridge_3M_to_next_report.md
+A	report/pytest_3M_postmerge.txt
