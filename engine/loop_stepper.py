@@ -399,6 +399,9 @@ class LoopStepper:
         Raises:
             RuntimeError: If queues not drained within max_drain_iterations
         """
+        if stop_controller and stop_controller.is_stop_requested:
+            return {"metrics": self._get_metrics(), "published": 0, "status": "stopped_early"}
+
         from engine.bus_workers import (
             RiskWorker, ExecWorker, PositionStoreWorker, DrainWorker,
             TOPIC_ORDER_INTENT, TOPIC_RISK_DECISION, TOPIC_EXECUTION_REPORT
@@ -886,6 +889,9 @@ class LoopStepper:
         Raises:
             AssertionError: If adapter returns event with ts > current_step_ts (lookahead)
         """
+        if stop_controller and stop_controller.is_stop_requested:
+            return {"metrics": self._get_metrics(), "published": 0, "status": "stopped_early"}
+
         all_events = []
         
         # Initialize JSONL logger if path provided

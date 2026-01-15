@@ -195,10 +195,18 @@ def install_signal_handlers(stop_controller: StopController) -> None:
     Cross-platform safe: SIGTERM may not be available on Windows.
     """
     def _handler(signum, frame):
-        sig_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
-        print(f"\nReceived {sig_name}, requesting graceful shutdown...")
-        stop_controller.request_stop(sig_name)
-    
+        try:
+            sig_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
+            # Only print if we can
+            try:
+                print(f"\nReceived {sig_name}, requesting graceful shutdown...")
+            except OSError:
+                pass
+            stop_controller.request_stop(sig_name)
+        except Exception:
+            # Emergency fallback if handler fails
+            stop_controller.request_stop("signal_handler_error")
+
     signal.signal(signal.SIGINT, _handler)
     
     if hasattr(signal, 'SIGTERM'):
@@ -345,6 +353,11 @@ def main():
     
     args = parser.parse_args()
     
+    # Check stop immediately after parsing (fast fail)
+    if stop_controller.is_stop_requested:
+        print(f"Stop requested ({stop_controller.stop_reason}) during setup. Exiting.")
+        sys.exit(0)
+    
     # Validate mutually exclusive args
     if args.run_dir and args.resume:
         parser.error("--run-dir and --resume are mutually exclusive")
@@ -430,6 +443,11 @@ def main():
         checkpoint.save_atomic(run_dir / "checkpoint.json")
         idem_store = build_idempotency_store(run_dir, args.idempotency_backend)
         print(f"Created run directory: {run_dir} (idempotency={args.idempotency_backend})")
+    
+    # Check stop before potentially slow initialization
+    if stop_controller.is_stop_requested:
+        print(f"Stop requested ({stop_controller.stop_reason}) before loop init. Exiting.")
+        sys.exit(0)
         
     # 3. Initialize LoopStepper
     bus = InMemoryBus()
@@ -536,6 +554,13 @@ def main():
     print(f"Starting run_live_3E with clock={args.clock}, exchange={args.exchange}...")
     if start_idx > 0:
         print(f"  Resuming from index {start_idx}")
+    
+    # Check stop before starting loop execution
+    if stop_controller.is_stop_requested:
+        print(f"Stop requested ({stop_controller.stop_reason}) before run. Exiting.")
+        if metrics_writer.enabled:
+            metrics_writer.close()
+        sys.exit(0)
     
     # Determine checkpoint_path for saving during loop
     ckpt_path = run_dir / "checkpoint.json" if run_dir else None
