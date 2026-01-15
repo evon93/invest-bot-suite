@@ -1,0 +1,5 @@
+commit 7b8f06e9d147969cdbb414e7d161245547c1af3d
+Author: Iván B. <ivan@example.com>
+Date:   Thu Jan 15 21:30:21 2026 +0100
+
+    3O.2b: integrate H0.1 + supervisor graceful shutdown + untrack ephemeral report

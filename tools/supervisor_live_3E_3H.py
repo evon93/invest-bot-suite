@@ -167,9 +167,48 @@ class Supervisor:
             signal.signal(signal.SIGTERM, _signal_handler)
     
     def _default_run(self, cmd: List[str]) -> int:
-        """Default run function using subprocess."""
-        result = subprocess.run(cmd)
-        return result.returncode
+        """
+        Run function using Popen to allow monitoring stop signals.
+        
+        If stop is requested while child is running:
+        - If reason is SIGINT (Ctrl+C), child likely received it too (process group).
+        - Otherwise (SIGTERM/manual), terminate child explicitly.
+        - Wait for child to exit.
+        """
+        proc = subprocess.Popen(cmd)
+        
+        try:
+            while proc.poll() is None:
+                if self._stop_controller.is_stop_requested:
+                    # Signal handling strategy
+                    reason = self._stop_controller.stop_reason
+                    
+                    # On Windows, Ctrl+C (SIGINT) is broadcast to process group.
+                    # On Linux/Unix, similar behavior if attached to TTY.
+                    # If explicitly stopped via SIGTERM or internal logic, we MUST signal child.
+                    if reason != "SIGINT": 
+                        self._log(f"Stopping child due to {reason}...")
+                        proc.terminate()
+                    else:
+                        self._log("SIGINT received, waiting for child to handle it...")
+                    
+                    try:
+                        proc.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        self._log("Child did not exit in time, killing...")
+                        proc.kill()
+                    
+                    return proc.returncode
+                
+                time.sleep(0.1)
+                
+            return proc.returncode
+            
+        except Exception as e:
+            self._log(f"Exception monitoring child: {e}")
+            if proc.poll() is None:
+                proc.kill()
+            raise
     
     def _log(self, message: str) -> None:
         """Append message to log file."""

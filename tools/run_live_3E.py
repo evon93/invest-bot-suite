@@ -15,6 +15,7 @@ Usage:
 """
 
 import argparse
+import signal
 import sys
 import json
 import logging
@@ -158,8 +159,82 @@ def build_metrics(
     return collector, writer
 
 
+# --- AG-3O-2-1: Graceful shutdown support ---
+
+class StopController:
+    """
+    Simple stop controller for graceful shutdown.
+    
+    Signal handlers set the stop flag; main loop checks it.
+    Thread-safe for single-writer (handler) / single-reader (loop) pattern.
+    """
+    
+    def __init__(self):
+        self._stop_requested = False
+        self._stop_reason: Optional[str] = None
+    
+    def request_stop(self, reason: str = "unknown") -> None:
+        """Request stop (idempotent - first reason wins)."""
+        if not self._stop_requested:
+            self._stop_requested = True
+            self._stop_reason = reason
+    
+    @property
+    def is_stop_requested(self) -> bool:
+        return self._stop_requested
+    
+    @property
+    def stop_reason(self) -> Optional[str]:
+        return self._stop_reason
+
+
+def install_signal_handlers(stop_controller: StopController) -> None:
+    """
+    Install SIGINT/SIGTERM handlers for graceful shutdown.
+    
+    Cross-platform safe: SIGTERM may not be available on Windows.
+    """
+    def _handler(signum, frame):
+        try:
+            sig_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
+            # Only print if we can
+            try:
+                print(f"\nReceived {sig_name}, requesting graceful shutdown...")
+            except OSError:
+                pass
+            stop_controller.request_stop(sig_name)
+        except Exception:
+            # Emergency fallback if handler fails
+            stop_controller.request_stop("signal_handler_error")
+
+    signal.signal(signal.SIGINT, _handler)
+    
+    if hasattr(signal, 'SIGTERM'):
+        signal.signal(signal.SIGTERM, _handler)
+
+
 def main():
+    # AG-3O-2-1: Install graceful shutdown handlers
+    stop_controller = StopController()
+    install_signal_handlers(stop_controller)
+    
     parser = argparse.ArgumentParser(description="Unified Live Runner 3E")
+    
+    # --- AG-3N-1-1: Config/Preset flags (must be first for 2-phase parse) ---
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Path to config file (YAML or JSON). Overrides preset values."
+    )
+    parser.add_argument(
+        "--preset",
+        type=str,
+        default=None,
+        metavar="NAME",
+        help="Preset name from configs/run_live_3E_presets.yaml (e.g., paper_offline_adapter)"
+    )
     
     # Standard args
     parser.add_argument("--outdir", default="report/out_3E_smoke", help="Output directory")
@@ -278,6 +353,11 @@ def main():
     
     args = parser.parse_args()
     
+    # Check stop immediately after parsing (fast fail)
+    if stop_controller.is_stop_requested:
+        print(f"Stop requested ({stop_controller.stop_reason}) during setup. Exiting.")
+        sys.exit(0)
+    
     # Validate mutually exclusive args
     if args.run_dir and args.resume:
         parser.error("--run-dir and --resume are mutually exclusive")
@@ -363,6 +443,11 @@ def main():
         checkpoint.save_atomic(run_dir / "checkpoint.json")
         idem_store = build_idempotency_store(run_dir, args.idempotency_backend)
         print(f"Created run directory: {run_dir} (idempotency={args.idempotency_backend})")
+    
+    # Check stop before potentially slow initialization
+    if stop_controller.is_stop_requested:
+        print(f"Stop requested ({stop_controller.stop_reason}) before loop init. Exiting.")
+        sys.exit(0)
         
     # 3. Initialize LoopStepper
     bus = InMemoryBus()
@@ -470,6 +555,13 @@ def main():
     if start_idx > 0:
         print(f"  Resuming from index {start_idx}")
     
+    # Check stop before starting loop execution
+    if stop_controller.is_stop_requested:
+        print(f"Stop requested ({stop_controller.stop_reason}) before run. Exiting.")
+        if metrics_writer.enabled:
+            metrics_writer.close()
+        sys.exit(0)
+    
     # Determine checkpoint_path for saving during loop
     ckpt_path = run_dir / "checkpoint.json" if run_dir else None
     
@@ -489,6 +581,7 @@ def main():
                 checkpoint=checkpoint,              # AG-3M-2-1: Checkpoint for resume
                 checkpoint_path=ckpt_path,          # AG-3M-2-1: Path to save checkpoint
                 start_idx=start_idx,                # AG-3M-2-1: Resume from this index
+                stop_controller=stop_controller,    # AG-3O-2-1: Graceful shutdown
             )
         else:
             # Default: use run_bus_mode() with DataFrame
@@ -504,9 +597,15 @@ def main():
                 checkpoint_path=ckpt_path,
                 start_idx=start_idx,
                 metrics_collector=metrics_collector,  # 3H.1: granular observability
+                stop_controller=stop_controller,      # AG-3O-2-1: Graceful shutdown
             )
         # End metrics with success
         metrics_collector.end("run_main", status="FILLED")
+    except KeyboardInterrupt:
+        # AG-3O-2-1: Handle Ctrl+C gracefully
+        print("\nKeyboardInterrupt - performing graceful shutdown...")
+        stop_controller.request_stop("KeyboardInterrupt")
+        metrics_collector.end("run_main", status="SHUTDOWN", reason="KeyboardInterrupt")
     except Exception as exc:
         # End metrics with error
         metrics_collector.end("run_main", status="ERROR", reason=type(exc).__name__)
