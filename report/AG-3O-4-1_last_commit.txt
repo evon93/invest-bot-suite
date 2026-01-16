@@ -1,0 +1,5 @@
+commit 11f080ad770d4f702f7a86e45cd8e2bf14008def
+Author: Iván B. <ivan@example.com>
+Date:   Fri Jan 16 14:42:27 2026 +0100
+
+    3O.4: closeout handoff + bridge + registro

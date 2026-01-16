@@ -4,7 +4,32 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-14) — Fase 3M: Adapter Mode End-to-End & Checkpoint/Resume
+## Estado Actual (2026-01-15) — Fase 3O: Graceful Shutdown & Report Hygiene
+
+- **Rama:** `main` (PR #33 merged)
+- **HEAD:** `0ba489ba`
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **Graceful Shutdown:** `run_live_3E.py` y `supervisor_live_3E_3H.py` manejan SIGINT/SIGTERM con exit 0.
+  - **SIGTERM Race Fix:** Checkpoints de stop durante setup para evitar -15 en CI.
+  - **Report Housekeeping:** `tools/cleanup_report.py` + política `.gitignore` para efímeros.
+  - **Report Restoration:** Histórico `report/` restaurado tras borrado accidental.
+- **Handoff:**
+  - `report/ORCH_HANDOFF_post3O_close_20260115.md`
+  - `report/bridge_3O_to_next_report.md`
+- **Verificación:**
+  - CI PR #33: 12/12 PASS
+  - Pytest: 750+ passed
+  - Shutdown tests: 3 passed
+- **Commits:**
+  - AG-3O-2-1: Graceful shutdown (run_live)
+  - AG-3O-2-2: Supervisor + H0.1
+  - AG-3O-2-3: Report history restore
+  - AG-3O-2-4: SIGTERM race fix
+
+---
+
+## Estado Anterior (2026-01-14) — Fase 3M: Adapter Mode End-to-End & Checkpoint/Resume
 
 - **Rama:** `main` (post merge 3M.2 + H0)
 - **Estado:** ✅ COMPLETADO
