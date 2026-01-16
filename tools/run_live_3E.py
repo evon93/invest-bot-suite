@@ -568,6 +568,9 @@ def main():
     # Start metrics tracking for the run
     metrics_collector.start("run_main")
     
+    # AG-H1-2-1: Exit code tracking (0=success/controlled shutdown, nonzero=error)
+    exit_code = 0
+    
     try:
         # AG-3L-1-1 + AG-3M-1-1 + AG-3M-2-1: Use run_adapter_mode() with checkpoint/resume
         if args.data_mode == "adapter" and fixture_adapter is not None:
@@ -609,6 +612,10 @@ def main():
     except Exception as exc:
         # End metrics with error
         metrics_collector.end("run_main", status="ERROR", reason=type(exc).__name__)
+        # AG-H1-2-1: Only set error exit if not a controlled shutdown
+        if not stop_controller.is_stop_requested:
+            logger.error(f"Fatal error: {exc}")
+            exit_code = 2
         raise
     finally:
         stepper.close()
@@ -655,7 +662,11 @@ def main():
         print(f"Artifacts generated in {outdir}")
     else:
         logger.error("No trace file generated!")
-        sys.exit(1)
+        return 1  # AG-H1-2-1: Return error code instead of sys.exit
+    
+    # AG-H1-2-1: Return exit code (0=success, nonzero=error)
+    return exit_code
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
