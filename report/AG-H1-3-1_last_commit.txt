@@ -1,0 +1,13 @@
+af549ae (HEAD -> main) H1.3: adapter-mode SIGTERM checkpoint test
+commit af549ae6ee73bf7e6fc6ff8379abb410a9e22240
+Author: Iván B. <ivan@example.com>
+Date:   Fri Jan 16 18:50:58 2026 +0100
+
+    H1.3: adapter-mode SIGTERM checkpoint test
+
+ report/AG-H1-3-1_checkpoint_evidence.txt    |  39 ++++++
+ report/AG-H1-3-1_pytest_focus.txt           |   2 +
+ report/AG-H1-3-1_pytest_full.txt            |  39 ++++++
+ report/AG-H1-3-1_return.md                  |  64 +++++++++
+ tests/test_adapter_sigterm_checkpoint_h1.py | 206 ++++++++++++++++++++++++++++
+ 5 files changed, 350 insertions(+)

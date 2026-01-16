@@ -1,0 +1,380 @@
+diff --git a/report/AG-H1-3-1_checkpoint_evidence.txt b/report/AG-H1-3-1_checkpoint_evidence.txt
+new file mode 100644
+index 0000000..2cc482a
+--- /dev/null
++++ b/report/AG-H1-3-1_checkpoint_evidence.txt
+@@ -0,0 +1,39 @@
++# AG-H1-3-1 Checkpoint Evidence
++Timestamp: 2026-01-16T18:45:00+01:00
++
++## Checkpoint Location
++Path: `run_dir / checkpoint.json`
++Source: `tools/run_live_3E.py` lines 442-443
++
++## Implementation Details
++- Checkpoint created when `--run-dir` is specified (line 442)
++- Saved via `checkpoint.save_atomic()` (line 443)
++- Updated during run by `run_adapter_mode()` with `checkpoint_path` arg (line 585)
++- Contains: `run_id`, `last_processed_idx`, timestamps
++
++## Test Verification
++Test: `tests/test_adapter_sigterm_checkpoint_h1.py`
++
++### test_sigterm_adapter_mode_exits_zero_and_checkpoints
++- Launches run_live_3E.py with --data fixture --data-mode adapter
++- Sends SIGTERM after 2 seconds processing
++- Asserts: exit code == 0
++- Asserts: checkpoint.json exists
++- Asserts: checkpoint contains run_id and last_processed_idx >= 0
++
++### test_sigint_adapter_mode_exits_zero
++- Same setup, sends SIGINT instead
++- Asserts: exit code == 0
++- Asserts: checkpoint.json exists
++
++## Pytest Results
++```
++pytest -q tests/test_adapter_sigterm_checkpoint_h1.py tests/test_graceful_shutdown_signal_3O2.py
++→ 4 passed in 28.29s
++
++pytest -q
++→ 747 passed, 11 skipped in 203.96s
++```
++
++## Conclusion
++Checkpoint mechanism works correctly in adapter-mode with graceful signal handling.
+diff --git a/report/AG-H1-3-1_pytest_focus.txt b/report/AG-H1-3-1_pytest_focus.txt
+new file mode 100644
+index 0000000..e36c72c
+--- /dev/null
++++ b/report/AG-H1-3-1_pytest_focus.txt
+@@ -0,0 +1,2 @@
++....                                                                     [100%]
++4 passed in 28.29s
+diff --git a/report/AG-H1-3-1_pytest_full.txt b/report/AG-H1-3-1_pytest_full.txt
+new file mode 100644
+index 0000000..3862ea0
+--- /dev/null
++++ b/report/AG-H1-3-1_pytest_full.txt
+@@ -0,0 +1,39 @@
++...........................................................s............ [  9%]
++........................................................................ [ 19%]
++........................................................................ [ 28%]
++....................................................s................... [ 38%]
++........................................................................ [ 47%]
++..........................................s............................. [ 57%]
++................ssss.........sss........................................ [ 66%]
++........................................................................ [ 76%]
++........................................................................ [ 85%]
++........................................................................ [ 95%]
++.....................................                                    [100%]
++=============================== warnings summary ===============================
++tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
++tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py:3065: RuntimeWarning: invalid value encountered in divide
++    c /= stddev[:, None]
++
++tests/test_ohlcv_loader.py::test_load_csv_standard_aliases
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:23: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_seconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:108: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_milliseconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:122: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_microseconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:136: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_timezone_offset_string_converts_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:149: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++747 passed, 11 skipped, 7 warnings in 203.96s (0:03:23)
+diff --git a/report/AG-H1-3-1_return.md b/report/AG-H1-3-1_return.md
+new file mode 100644
+index 0000000..62acc8c
+--- /dev/null
++++ b/report/AG-H1-3-1_return.md
+@@ -0,0 +1,64 @@
++# AG-H1-3-1 Return Packet
++
++**Status**: ✅ PASS  
++**Timestamp**: 2026-01-16T18:45:00+01:00
++
++## Objetivo
++
++Test robusto que valide run_live_3E.py en adapter-mode + SIGTERM → exit 0 + checkpoint guardado.
++
++## Cambios Realizados
++
++### [test_adapter_sigterm_checkpoint_h1.py](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/tests/test_adapter_sigterm_checkpoint_h1.py) [NEW]
++
++~180 líneas, 2 tests:
++
++- `test_sigterm_adapter_mode_exits_zero_and_checkpoints`: SIGTERM → exit 0 + checkpoint
++- `test_sigint_adapter_mode_exits_zero`: SIGINT → exit 0 + checkpoint
++
++## Verificación
++
++### Pytest Focalizado
++
++```
++pytest -q tests/test_adapter_sigterm_checkpoint_h1.py tests/test_graceful_shutdown_signal_3O2.py
++→ 4 passed in 28.29s
++```
++
++### Pytest Completo
++
++```
++pytest -q
++→ 747 passed, 11 skipped in 203.96s
++```
++
++## DoD Verification
++
++| Criterio | Resultado |
++|----------|-----------|
++| Tests focus PASS | ✓ 4 passed |
++| Tests full PASS | ✓ 747 passed |
++| Exit code SIGTERM adapter == 0 | ✓ Verified |
++| checkpoint.json presente | ✓ Verified |
++| checkpoint_evidence.txt | ✓ Created |
++
++## Artefactos
++
++- [AG-H1-3-1_return.md](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-3-1_return.md)
++- [AG-H1-3-1_pytest_focus.txt](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-3-1_pytest_focus.txt)
++- [AG-H1-3-1_pytest_full.txt](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-3-1_pytest_full.txt)
++- [AG-H1-3-1_checkpoint_evidence.txt](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-3-1_checkpoint_evidence.txt)
++
++## AUDIT_SUMMARY
++
++**Ficheros creados**:
++
++- `tests/test_adapter_sigterm_checkpoint_h1.py` (2 tests)
++- `report/AG-H1-3-1_checkpoint_evidence.txt`
++- `report/AG-H1-3-1_pytest_focus.txt`
++- `report/AG-H1-3-1_pytest_full.txt`
++- `report/AG-H1-3-1_return.md`
++
++**Cambios funcionales**: Ninguno (solo tests)
++
++**Riesgos**: Ninguno
+diff --git a/tests/test_adapter_sigterm_checkpoint_h1.py b/tests/test_adapter_sigterm_checkpoint_h1.py
+new file mode 100644
+index 0000000..54cd5fb
+--- /dev/null
++++ b/tests/test_adapter_sigterm_checkpoint_h1.py
+@@ -0,0 +1,206 @@
++"""
++tests/test_adapter_sigterm_checkpoint_h1.py
++
++Test SIGTERM in adapter-mode saves checkpoint (AG-H1-3-1).
++
++Validates:
++1. run_live_3E.py in adapter-mode exits 0 on SIGTERM
++2. checkpoint.json exists and has content after SIGTERM
++"""
++
++import os
++import sys
++import time
++import json
++import signal
++import subprocess
++import pytest
++from pathlib import Path
++
++IS_WINDOWS = sys.platform == "win32"
++PROJECT_ROOT = Path(__file__).parent.parent
++
++
++def wait_for_ready(run_dir: Path, timeout_s: int = 15) -> bool:
++    """Wait for run to be ready (run_meta.json created)."""
++    start = time.time()
++    while time.time() - start < timeout_s:
++        if (run_dir / "run_meta.json").exists():
++            return True
++        time.sleep(0.2)
++    return False
++
++
++def find_fixture_csv() -> Path:
++    """Find a suitable fixture CSV for adapter-mode test."""
++    # Look for existing fixtures
++    fixtures_dir = PROJECT_ROOT / "fixtures"
++    if fixtures_dir.exists():
++        csvs = list(fixtures_dir.glob("*.csv"))
++        if csvs:
++            return csvs[0]
++    
++    # Look in data/ or tests/data/
++    for candidate in [
++        PROJECT_ROOT / "data" / "ohlcv_sample.csv",
++        PROJECT_ROOT / "tests" / "data" / "ohlcv_fixture.csv",
++        PROJECT_ROOT / "tests" / "fixtures" / "ohlcv_sample.csv",
++    ]:
++        if candidate.exists():
++            return candidate
++    
++    return None
++
++
++class TestAdapterSigtermCheckpoint:
++    """Test SIGTERM handling in adapter-mode."""
++    
++    @pytest.fixture
++    def fixture_csv(self, tmp_path) -> Path:
++        """Create or find a fixture CSV for testing."""
++        existing = find_fixture_csv()
++        if existing:
++            return existing
++        
++        # Create minimal fixture CSV
++        csv_path = tmp_path / "test_fixture.csv"
++        import pandas as pd
++        import numpy as np
++        
++        np.random.seed(42)
++        n_bars = 100
++        dates = pd.date_range("2024-01-01", periods=n_bars, freq="1h", tz="UTC")
++        closes = 1000 * np.cumprod(1 + np.random.randn(n_bars) * 0.01)
++        
++        df = pd.DataFrame({
++            "timestamp": dates,
++            "open": closes * 0.999,
++            "high": closes * 1.002,
++            "low": closes * 0.998,
++            "close": closes,
++            "volume": np.random.randint(100, 1000, n_bars),
++        })
++        df.to_csv(csv_path, index=False)
++        return csv_path
++    
++    @pytest.mark.skipif(IS_WINDOWS, reason="SIGTERM is hard-kill on Windows")
++    def test_sigterm_adapter_mode_exits_zero_and_checkpoints(self, tmp_path, fixture_csv):
++        """
++        Test that SIGTERM in adapter-mode:
++        1. Exits with code 0 (graceful shutdown)
++        2. Saves checkpoint.json to run_dir
++        """
++        run_dir = tmp_path / "adapter_sigterm_run"
++        run_dir.mkdir()
++        
++        cmd = [
++            sys.executable,
++            "tools/run_live_3E.py",
++            "--data", "fixture",
++            "--data-mode", "adapter",
++            "--fixture-path", str(fixture_csv),
++            "--outdir", str(run_dir),
++            "--run-dir", str(run_dir),
++            "--max-steps", "500",
++            "--seed", "42",
++        ]
++        
++        proc = subprocess.Popen(
++            cmd,
++            cwd=str(PROJECT_ROOT),
++            stdout=subprocess.PIPE,
++            stderr=subprocess.PIPE,
++            text=True,
++        )
++        
++        try:
++            # Wait for startup
++            if not wait_for_ready(run_dir):
++                proc.kill()
++                stdout, stderr = proc.communicate()
++                pytest.fail(f"Startup timeout.\nSTDOUT: {stdout}\nSTDERR: {stderr}")
++            
++            # Let it process some steps
++            time.sleep(2)
++            
++            # Send SIGTERM
++            proc.terminate()
++            
++            # Wait for exit
++            try:
++                return_code = proc.wait(timeout=15)
++            except subprocess.TimeoutExpired:
++                proc.kill()
++                pytest.fail("Process did not exit within timeout after SIGTERM")
++            
++            stdout, stderr = proc.communicate()
++            
++            # Assert exit code 0
++            assert return_code == 0, (
++                f"Expected exit 0 on SIGTERM, got {return_code}\n"
++                f"STDOUT: {stdout}\nSTDERR: {stderr}"
++            )
++            
++            # Assert checkpoint exists
++            checkpoint_path = run_dir / "checkpoint.json"
++            assert checkpoint_path.exists(), (
++                f"checkpoint.json not found in {run_dir}\n"
++                f"Contents: {list(run_dir.iterdir())}"
++            )
++            
++            # Validate checkpoint content
++            with open(checkpoint_path) as f:
++                ckpt = json.load(f)
++            
++            assert "run_id" in ckpt, "checkpoint missing run_id"
++            assert "last_processed_idx" in ckpt, "checkpoint missing last_processed_idx"
++            # Should have processed at least some steps
++            assert ckpt["last_processed_idx"] >= 0, "last_processed_idx should be >= 0"
++            
++        finally:
++            if proc.poll() is None:
++                proc.kill()
++    
++    @pytest.mark.skipif(IS_WINDOWS, reason="SIGINT handling differs on Windows")
++    def test_sigint_adapter_mode_exits_zero(self, tmp_path, fixture_csv):
++        """
++        Test that SIGINT (Ctrl+C) in adapter-mode exits with code 0.
++        """
++        run_dir = tmp_path / "adapter_sigint_run"
++        run_dir.mkdir()
++        
++        cmd = [
++            sys.executable,
++            "tools/run_live_3E.py",
++            "--data", "fixture",
++            "--data-mode", "adapter",
++            "--fixture-path", str(fixture_csv),
++            "--outdir", str(run_dir),
++            "--run-dir", str(run_dir),
++            "--max-steps", "500",
++            "--seed", "42",
++        ]
++        
++        proc = subprocess.Popen(
++            cmd,
++            cwd=str(PROJECT_ROOT),
++        )
++        
++        try:
++            if not wait_for_ready(run_dir):
++                proc.kill()
++                pytest.fail("Startup timeout")
++            
++            time.sleep(1)
++            
++            # Send SIGINT
++            proc.send_signal(signal.SIGINT)
++            
++            return_code = proc.wait(timeout=15)
++            
++            assert return_code == 0, f"Expected exit 0 on SIGINT, got {return_code}"
++            assert (run_dir / "checkpoint.json").exists()
++            
++        finally:
++            if proc.poll() is None:
++                proc.kill()

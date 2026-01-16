@@ -1,0 +1,39 @@
+# AG-H1-3-1 Checkpoint Evidence
+Timestamp: 2026-01-16T18:45:00+01:00
+
+## Checkpoint Location
+Path: `run_dir / checkpoint.json`
+Source: `tools/run_live_3E.py` lines 442-443
+
+## Implementation Details
+- Checkpoint created when `--run-dir` is specified (line 442)
+- Saved via `checkpoint.save_atomic()` (line 443)
+- Updated during run by `run_adapter_mode()` with `checkpoint_path` arg (line 585)
+- Contains: `run_id`, `last_processed_idx`, timestamps
+
+## Test Verification
+Test: `tests/test_adapter_sigterm_checkpoint_h1.py`
+
+### test_sigterm_adapter_mode_exits_zero_and_checkpoints
+- Launches run_live_3E.py with --data fixture --data-mode adapter
+- Sends SIGTERM after 2 seconds processing
+- Asserts: exit code == 0
+- Asserts: checkpoint.json exists
+- Asserts: checkpoint contains run_id and last_processed_idx >= 0
+
+### test_sigint_adapter_mode_exits_zero
+- Same setup, sends SIGINT instead
+- Asserts: exit code == 0
+- Asserts: checkpoint.json exists
+
+## Pytest Results
+```
+pytest -q tests/test_adapter_sigterm_checkpoint_h1.py tests/test_graceful_shutdown_signal_3O2.py
+→ 4 passed in 28.29s
+
+pytest -q
+→ 747 passed, 11 skipped in 203.96s
+```
+
+## Conclusion
+Checkpoint mechanism works correctly in adapter-mode with graceful signal handling.
