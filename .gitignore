@@ -18,19 +18,29 @@ report/dashboard_2J/
 report/topk_freeze_2H.json
 
 # H0: Ignore generated report artifacts (AG-2J-0-2)
-report/AG-*
+# H1.1: Artifact Policy - Track essential docs, ignore ephemeral outputs
+report/AG-*_diff.patch
+report/AG-*_run.txt
+report/AG-*_run_*.txt
 report/out_*
 report/dashboard_handoff/
 report/robustness_2D/
 report/test_2g_out/
 report/external_ai/inbox_external/
 
+# H1.1: Explicitly track return packets and essential docs (negate ignore)
+!report/AG-*_return.md
+!report/AG-*_last_commit.txt
+!report/AG-*_notes.md
+!report/bridge_*_report.md
+
 # H0: Ignore validate_risk_config noise
 report/validate_risk_config_step5.txt
 
-# H0: Ignore accumulated handoff docs and copy-paste packs (AG-H0-EOL-1-5)
+# H1.1: Track handoff reports (negate previous H0 ignore)
+# report/ORCH_HANDOFF_*.md - now tracked
+# report/DS-*_paste_pack.md - keep ignoring
 report/DS-*_paste_pack.md
-report/ORCH_HANDOFF_*.md
 
 # H0.1: Ephemeral diagnostic snapshots (cleanup-safe)
 report/git_status_*.txt

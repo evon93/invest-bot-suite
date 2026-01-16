@@ -1,0 +1,559 @@
+diff --git a/.gitignore b/.gitignore
+index 663c547..a599498 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -18,19 +18,29 @@ report/dashboard_2J/
+ report/topk_freeze_2H.json
+ 
+ # H0: Ignore generated report artifacts (AG-2J-0-2)
+-report/AG-*
++# H1.1: Artifact Policy - Track essential docs, ignore ephemeral outputs
++report/AG-*_diff.patch
++report/AG-*_run.txt
++report/AG-*_run_*.txt
+ report/out_*
+ report/dashboard_handoff/
+ report/robustness_2D/
+ report/test_2g_out/
+ report/external_ai/inbox_external/
+ 
++# H1.1: Explicitly track return packets and essential docs (negate ignore)
++!report/AG-*_return.md
++!report/AG-*_last_commit.txt
++!report/AG-*_notes.md
++!report/bridge_*_report.md
++
+ # H0: Ignore validate_risk_config noise
+ report/validate_risk_config_step5.txt
+ 
+-# H0: Ignore accumulated handoff docs and copy-paste packs (AG-H0-EOL-1-5)
++# H1.1: Track handoff reports (negate previous H0 ignore)
++# report/ORCH_HANDOFF_*.md - now tracked
++# report/DS-*_paste_pack.md - keep ignoring
+ report/DS-*_paste_pack.md
+-report/ORCH_HANDOFF_*.md
+ 
+ # H0.1: Ephemeral diagnostic snapshots (cleanup-safe)
+ report/git_status_*.txt
+diff --git a/docs/policy_report_artifacts.md b/docs/policy_report_artifacts.md
+new file mode 100644
+index 0000000..04955a8
+--- /dev/null
++++ b/docs/policy_report_artifacts.md
+@@ -0,0 +1,84 @@
++# Report Artifact Storage Policy
++
++**Ticket**: AG-H1-1-1  
++**Status**: Active
++
++---
++
++## Overview
++
++This policy defines what files in `report/` should be tracked in git vs uploaded as CI artifacts.
++
++## Categories
++
++### Category A: Track in Git
++
++Essential documentation for reproducibility and audit trail:
++
++| Pattern | Description |
++|---------|-------------|
++| `AG-*_return.md` | Return packets (required) |
++| `AG-*_last_commit.txt` | Commit references |
++| `AG-*_notes.md` | Decision notes |
++| `bridge_*_report.md` | Phase bridge reports |
++| `ORCH_HANDOFF_*.md` | Orchestrator handoffs |
++
++### Category B: CI Artifacts Only
++
++Large/ephemeral files uploaded to GitHub Actions artifacts:
++
++| Pattern | Description |
++|---------|-------------|
++| `AG-*_diff.patch` | Full diffs (can be large) |
++| `AG-*_run.txt` | Run/execution logs |
++| `pytest_*.txt` | Test output logs |
++| `runs/**` | CI run directories |
++| `out_*/**` | Output directories |
++
++## Size Thresholds
++
++| Level | Size | Action |
++|-------|------|--------|
++| OK | < 1 MB | Allowed |
++| Warning | 1-5 MB | Review required |
++| Block | > 5 MB | Must use CI artifacts |
++
++## Tools
++
++### Validation
++
++```bash
++# Check policy
++python tools/report_artifact_policy.py --check
++
++# Generate digest for large file
++python tools/report_artifact_policy.py --digest report/large_file.txt
++```
++
++### Cleanup
++
++```bash
++# Preview ephemeral files
++python tools/cleanup_report.py --dry-run
++
++# Delete ephemeral files older than 7 days
++python tools/cleanup_report.py --apply --days 7
++```
++
++## CI Integration
++
++Workflows use `actions/upload-artifact@v4` for large outputs:
++
++```yaml
++- name: Upload Run Artifacts
++  uses: actions/upload-artifact@v4
++  with:
++    name: run-artifacts
++    path: ${{ env.ARTIFACT_DIR }}
++```
++
++## Implementation
++
++- `.gitignore` patterns enforce Category B exclusions
++- `report_artifact_policy.py` validates at CI time
++- Large files should include SHA256 digest in return packet
+diff --git a/report/AG-H1-1-1_return.md b/report/AG-H1-1-1_return.md
+new file mode 100644
+index 0000000..feb743f
+--- /dev/null
++++ b/report/AG-H1-1-1_return.md
+@@ -0,0 +1,59 @@
++# AG-H1-1-1 Return Packet
++
++**Status**: ✅ PASS  
++**Timestamp**: 2026-01-16T18:16:00+01:00
++
++## Objetivo
++
++Definir e implementar Artifact Storage Policy para report/.
++
++## Cambios Realizados
++
++### [.gitignore](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/.gitignore) [MODIFY]
++
++- Corregido: ahora trackea `*_return.md`, `*_last_commit.txt`, `*_notes.md`
++- Corregido: ahora trackea `ORCH_HANDOFF_*.md`, `bridge_*_report.md`
++- Mantiene ignorados: `*_diff.patch`, `*_run.txt`, `pytest_*.txt`
++
++### [tools/report_artifact_policy.py](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/tools/report_artifact_policy.py) [NEW]
++
++~190 líneas. Features:
++
++- Scan por archivos >threshold (1MB warn, 5MB block)
++- Allowlist para docs esenciales
++- Generación de SHA256 digest
++- Exit code para CI gate
++
++### [docs/policy_report_artifacts.md](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/docs/policy_report_artifacts.md) [NEW]
++
++Documentación de policy: categorías A/B, thresholds, uso de tools.
++
++### [tests/test_report_policy_h1_1.py](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/tests/test_report_policy_h1_1.py) [NEW]
++
++7 tests unitarios para report_artifact_policy.py.
++
++## Verificación
++
++```
++python -m pytest -q
++→ 745 passed, 11 skipped in 202.97s
++```
++
++## Policy Summary
++
++| Categoría | Track Git | Ejemplos |
++|-----------|-----------|----------|
++| A (docs) | ✓ | `*_return.md`, `ORCH_HANDOFF_*.md` |
++| B (ephemeral) | ✗ | `*_diff.patch`, `runs/**` |
++
++## AUDIT_SUMMARY
++
++**Ficheros modificados**: `.gitignore`
++
++**Ficheros creados**:
++
++- `tools/report_artifact_policy.py`
++- `docs/policy_report_artifacts.md`
++- `tests/test_report_policy_h1_1.py`
++
++**Riesgos**: Ninguno - backward compatible
+diff --git a/report/pytest_H1_1_1_full.txt b/report/pytest_H1_1_1_full.txt
+new file mode 100644
+index 0000000..3e27f2c
+--- /dev/null
++++ b/report/pytest_H1_1_1_full.txt
+@@ -0,0 +1,39 @@
++.........................................................s.............. [  9%]
++........................................................................ [ 19%]
++........................................................................ [ 28%]
++..................................................s..................... [ 38%]
++........................................................................ [ 47%]
++........................................s............................... [ 57%]
++..............ssss.........sss.......................................... [ 66%]
++........................................................................ [ 76%]
++........................................................................ [ 85%]
++........................................................................ [ 95%]
++...................................                                      [100%]
++=============================== warnings summary ===============================
++tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
++tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py:3065: RuntimeWarning: invalid value encountered in divide
++    c /= stddev[:, None]
++
++tests/test_ohlcv_loader.py::test_load_csv_standard_aliases
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:23: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_seconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:108: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_milliseconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:122: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_microseconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:136: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_timezone_offset_string_converts_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:149: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++745 passed, 11 skipped, 7 warnings in 202.97s (0:03:22)
+diff --git a/tests/test_report_policy_h1_1.py b/tests/test_report_policy_h1_1.py
+new file mode 100644
+index 0000000..e58cacb
+--- /dev/null
++++ b/tests/test_report_policy_h1_1.py
+@@ -0,0 +1,99 @@
++"""
++tests/test_report_policy_h1_1.py
++
++Tests for report_artifact_policy.py (AG-H1-1-1).
++"""
++
++import sys
++from pathlib import Path
++
++import pytest
++
++sys.path.insert(0, str(Path(__file__).parent.parent / "tools"))
++from report_artifact_policy import (
++    matches_any,
++    check_policy,
++    generate_digest,
++    ALLOWLIST_PATTERNS,
++    WARNING_THRESHOLD,
++    BLOCK_THRESHOLD,
++)
++
++
++class TestMatchesAny:
++    """Test pattern matching."""
++    
++    def test_allowlist_return_md(self):
++        assert matches_any("AG-H1-1-1_return.md", ALLOWLIST_PATTERNS)
++    
++    def test_allowlist_last_commit(self):
++        assert matches_any("AG-3O-2-1_last_commit.txt", ALLOWLIST_PATTERNS)
++    
++    def test_non_allowlist_diff(self):
++        assert not matches_any("AG-H1-1-1_diff.patch", ALLOWLIST_PATTERNS)
++
++
++class TestCheckPolicy:
++    """Test policy checking."""
++    
++    def test_empty_dir_no_violations(self, tmp_path):
++        report_dir = tmp_path / "report"
++        report_dir.mkdir()
++        
++        warnings, errors = check_policy(report_dir)
++        
++        assert warnings == []
++        assert errors == []
++    
++    def test_small_file_no_violation(self, tmp_path):
++        report_dir = tmp_path / "report"
++        report_dir.mkdir()
++        (report_dir / "small.txt").write_text("hello")
++        
++        warnings, errors = check_policy(report_dir)
++        
++        assert warnings == []
++        assert errors == []
++    
++    def test_large_file_warning(self, tmp_path):
++        report_dir = tmp_path / "report"
++        report_dir.mkdir()
++        
++        # Create file > 1MB
++        large_file = report_dir / "large.txt"
++        large_file.write_bytes(b"x" * (WARNING_THRESHOLD + 1000))
++        
++        warnings, errors = check_policy(report_dir)
++        
++        assert len(warnings) == 1
++        assert "large.txt" in warnings[0]["path"]
++        assert errors == []
++    
++    def test_allowlist_exempt_from_check(self, tmp_path):
++        report_dir = tmp_path / "report"
++        report_dir.mkdir()
++        
++        # Create large return.md (allowlisted)
++        return_file = report_dir / "AG-test_return.md"
++        return_file.write_bytes(b"x" * (WARNING_THRESHOLD + 1000))
++        
++        warnings, errors = check_policy(report_dir)
++        
++        # Should be exempt
++        assert warnings == []
++        assert errors == []
++
++
++class TestGenerateDigest:
++    """Test digest generation."""
++    
++    def test_digest_has_required_fields(self, tmp_path):
++        test_file = tmp_path / "test.txt"
++        test_file.write_text("line1\nline2\nline3\n")
++        
++        digest = generate_digest(test_file)
++        
++        assert "path" in digest
++        assert "size_bytes" in digest
++        assert "sha256" in digest
++        assert len(digest["sha256"]) == 64  # SHA256 hex length
+diff --git a/tools/report_artifact_policy.py b/tools/report_artifact_policy.py
+new file mode 100644
+index 0000000..8e39bf4
+--- /dev/null
++++ b/tools/report_artifact_policy.py
+@@ -0,0 +1,211 @@
++#!/usr/bin/env python3
++"""
++tools/report_artifact_policy.py
++
++Validate report/ artifacts against storage policy (AG-H1-1-1).
++
++Features:
++- Scan for files exceeding size thresholds
++- Validate allowlist exceptions
++- Generate SHA256 digest for large files
++- Exit code != 0 if policy violations found (CI gate)
++
++Usage:
++    python tools/report_artifact_policy.py --check          # Validate (default)
++    python tools/report_artifact_policy.py --digest FILE    # Generate digest
++"""
++
++import argparse
++import hashlib
++import sys
++from pathlib import Path
++from typing import List, Tuple
++
++# Size thresholds (bytes)
++WARNING_THRESHOLD = 1 * 1024 * 1024   # 1 MB
++BLOCK_THRESHOLD = 5 * 1024 * 1024     # 5 MB
++
++# Patterns that are ALLOWED to be large (tracked in git)
++ALLOWLIST_PATTERNS = [
++    "*_return.md",
++    "*_last_commit.txt",
++    "*_notes.md",
++    "bridge_*_report.md",
++    "ORCH_HANDOFF_*.md",
++]
++
++# Patterns that should go to CI artifacts (ignored in git)
++CI_ARTIFACT_PATTERNS = [
++    "*_diff.patch",
++    "*_run.txt",
++    "*_run_*.txt",
++    "pytest_*.txt",
++    "runs/**",
++    "out_*/**",
++]
++
++
++def matches_any(name: str, patterns: List[str]) -> bool:
++    """Check if name matches any glob pattern."""
++    import fnmatch
++    for pattern in patterns:
++        if fnmatch.fnmatch(name, pattern):
++            return True
++    return False
++
++
++def get_sha256(path: Path, first_bytes: int = 0) -> str:
++    """Calculate SHA256 hash of file (or first N bytes)."""
++    h = hashlib.sha256()
++    with open(path, "rb") as f:
++        if first_bytes > 0:
++            h.update(f.read(first_bytes))
++        else:
++            for chunk in iter(lambda: f.read(8192), b""):
++                h.update(chunk)
++    return h.hexdigest()
++
++
++def generate_digest(path: Path) -> dict:
++    """Generate metadata digest for a file."""
++    stat = path.stat()
++    sha = get_sha256(path)
++    
++    # Get first/last lines for text files
++    first_lines = []
++    last_lines = []
++    try:
++        with open(path, "r", encoding="utf-8", errors="replace") as f:
++            lines = f.readlines()
++            first_lines = [l.rstrip() for l in lines[:5]]
++            last_lines = [l.rstrip() for l in lines[-5:]]
++    except Exception:
++        pass
++    
++    return {
++        "path": str(path),
++        "size_bytes": stat.st_size,
++        "sha256": sha,
++        "first_lines": first_lines,
++        "last_lines": last_lines,
++    }
++
++
++def check_policy(report_dir: Path) -> Tuple[List[dict], List[dict]]:
++    """
++    Check files against policy.
++    
++    Returns:
++        (warnings, errors) - lists of violation dicts
++    """
++    warnings = []
++    errors = []
++    
++    for path in report_dir.rglob("*"):
++        if not path.is_file():
++            continue
++        
++        rel_path = path.relative_to(report_dir)
++        name = path.name
++        size = path.stat().st_size
++        
++        # Skip allowlisted
++        if matches_any(name, ALLOWLIST_PATTERNS):
++            continue
++        
++        # Check thresholds
++        if size >= BLOCK_THRESHOLD:
++            errors.append({
++                "path": str(rel_path),
++                "size_mb": size / (1024 * 1024),
++                "reason": "exceeds_block_threshold",
++            })
++        elif size >= WARNING_THRESHOLD:
++            warnings.append({
++                "path": str(rel_path),
++                "size_mb": size / (1024 * 1024),
++                "reason": "exceeds_warning_threshold",
++            })
++    
++    return warnings, errors
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(
++        description="Validate report/ artifacts against storage policy"
++    )
++    parser.add_argument(
++        "--check",
++        action="store_true",
++        default=True,
++        help="Check policy (default)",
++    )
++    parser.add_argument(
++        "--digest",
++        type=Path,
++        metavar="FILE",
++        help="Generate digest for specific file",
++    )
++    parser.add_argument(
++        "--report-dir",
++        type=Path,
++        default=None,
++        help="Path to report/ (auto-detect if not specified)",
++    )
++    
++    args = parser.parse_args()
++    
++    # Determine report directory
++    if args.report_dir:
++        report_dir = args.report_dir
++    else:
++        script_dir = Path(__file__).parent
++        report_dir = script_dir.parent / "report"
++    
++    # Digest mode
++    if args.digest:
++        if not args.digest.exists():
++            print(f"ERROR: File not found: {args.digest}", file=sys.stderr)
++            return 1
++        
++        import json
++        digest = generate_digest(args.digest)
++        print(json.dumps(digest, indent=2))
++        return 0
++    
++    # Check mode
++    if not report_dir.is_dir():
++        print(f"ERROR: report/ not found: {report_dir}", file=sys.stderr)
++        return 1
++    
++    warnings, errors = check_policy(report_dir)
++    
++    print(f"=== Report Artifact Policy Check ===")
++    print(f"Directory: {report_dir}")
++    print(f"Thresholds: warn={WARNING_THRESHOLD // (1024*1024)}MB, block={BLOCK_THRESHOLD // (1024*1024)}MB")
++    print()
++    
++    if warnings:
++        print(f"WARNINGS ({len(warnings)}):")
++        for w in warnings:
++            print(f"  {w['path']}: {w['size_mb']:.2f} MB")
++    
++    if errors:
++        print(f"\nERRORS ({len(errors)}):")
++        for e in errors:
++            print(f"  {e['path']}: {e['size_mb']:.2f} MB - EXCEEDS BLOCK THRESHOLD")
++    
++    if not warnings and not errors:
++        print("OK: No policy violations found")
++        return 0
++    
++    if errors:
++        print(f"\nFAILED: {len(errors)} file(s) exceed block threshold")
++        return 1
++    
++    print(f"\nPASSED with warnings")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())

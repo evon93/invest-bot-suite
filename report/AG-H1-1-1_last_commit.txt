@@ -1,0 +1,17 @@
+bab4cb1
+bab4cb1 (HEAD -> main) H1.1: report artifact policy + CI artifacts
+commit bab4cb1e627139ec78d4379c64ba27bacc2dc07d
+Author: Iván B. <ivan@example.com>
+Date:   Fri Jan 16 18:20:49 2026 +0100
+
+    H1.1: report artifact policy + CI artifacts
+
+ .gitignore                       |  16 +-
+ docs/policy_report_artifacts.md  |  84 ++++++
+ report/AG-H1-1-1_diff.patch      | 559 +++++++++++++++++++++++++++++++++++++++
+ report/AG-H1-1-1_last_commit.txt |  14 +
+ report/AG-H1-1-1_return.md       |  59 +++++
+ report/pytest_H1_1_1_full.txt    |  39 +++
+ tests/test_report_policy_h1_1.py |  99 +++++++
+ tools/report_artifact_policy.py  | 211 +++++++++++++++
+ 8 files changed, 1078 insertions(+), 3 deletions(-)
