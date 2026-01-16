@@ -1,0 +1,15 @@
+# AG-H1-0-1 Baseline
+Timestamp: 2026-01-16T15:43:00+01:00
+
+## Git Status
+Branch: main (tracking origin/main)
+Status: CLEAN (no uncommitted changes)
+
+## HEAD Commit
+Commit: 10301a882ecd9ef2e0161bd63e80b4348615f725
+Message: 3O.4: closeout handoff + bridge + registro
+Parent: Phase 3O closeout
+
+## Environment
+Shell: WSL bash (Ubuntu 24.04)
+Python venv: .venv (active)

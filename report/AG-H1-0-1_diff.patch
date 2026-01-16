@@ -1,0 +1,168 @@
+diff --git a/report/AG-H1-0-1_baseline.txt b/report/AG-H1-0-1_baseline.txt
+new file mode 100644
+index 0000000..4b5bae4
+--- /dev/null
++++ b/report/AG-H1-0-1_baseline.txt
+@@ -0,0 +1,15 @@
++# AG-H1-0-1 Baseline
++Timestamp: 2026-01-16T15:43:00+01:00
++
++## Git Status
++Branch: main (tracking origin/main)
++Status: CLEAN (no uncommitted changes)
++
++## HEAD Commit
++Commit: 10301a882ecd9ef2e0161bd63e80b4348615f725
++Message: 3O.4: closeout handoff + bridge + registro
++Parent: Phase 3O closeout
++
++## Environment
++Shell: WSL bash (Ubuntu 24.04)
++Python venv: .venv (active)
+diff --git a/report/AG-H1-0-1_grep_targets.txt b/report/AG-H1-0-1_grep_targets.txt
+new file mode 100644
+index 0000000..19b60c0
+--- /dev/null
++++ b/report/AG-H1-0-1_grep_targets.txt
+@@ -0,0 +1,29 @@
++# AG-H1-0-1 Grep Targets (H1 Readiness Inventory)
++Timestamp: 2026-01-16T15:43:00+01:00
++
++## sys.exit occurrences (src/, tools/)
++tools/apply_calibration_topk.py:296:    sys.exit(main())
++tools/build_best_params_2C.py:205:    sys.exit(main())
++tools/check_determinism_3E.py:59:        sys.exit(1)
++tools/check_determinism_3E.py:101:        sys.exit(0)
++tools/check_determinism_3E.py:104:        sys.exit(1)
++tools/check_repo.py:97:    sys.exit(main())
++tools/cleanup_report.py:250:    sys.exit(main())
++tools/freeze_topk_2H.py:214:        sys.exit(1)
++
++## signal.SIGTERM occurrences (src/, tools/, tests/)
++(No direct matches found in scanned paths - graceful shutdown uses signal handlers in engine/)
++
++## cleanup_report occurrences (tools/, report/, .github/)
++tools/cleanup_report.py - main cleanup utility
++
++## report/ references in workflows/tools
++.github/workflows/robustness_quick.yml:92:  path: report/runs/ci_2D_quick/
++.github/workflows/smoke_3B.yml:38:  mkdir -p report/runs/3B_CI
++.github/workflows/robustness_quick.yml:44:  --outdir report/runs/ci_2D_quick
++
++## Summary
++- Exit codes: Multiple tools use sys.exit() for CLI exit status
++- Signals: Graceful shutdown handlers in engine/ (not in tools/)
++- Cleanup: cleanup_report.py available for artifact management
++- CI: Workflows write to report/runs/
+diff --git a/report/AG-H1-0-1_pytest_smoke.txt b/report/AG-H1-0-1_pytest_smoke.txt
+new file mode 100644
+index 0000000..a7c2c6b
+--- /dev/null
++++ b/report/AG-H1-0-1_pytest_smoke.txt
+@@ -0,0 +1,16 @@
++# AG-H1-0-1 Pytest Smoke (3O2 Tests)
++Timestamp: 2026-01-16T15:43:00+01:00
++
++## Command
++python -m pytest -q tests/test_graceful_shutdown_signal_3O2.py tests/test_graceful_shutdown_supervisor_3O2.py
++
++## Result
++3 passed in 21.57s
++
++## Exit Code
++0 (SUCCESS)
++
++## Notes
++- Tests executed in WSL Ubuntu 24.04 with .venv active
++- No warnings or errors
++- Duration within expected range (<30s)
+diff --git a/report/AG-H1-0-1_return.md b/report/AG-H1-0-1_return.md
+new file mode 100644
+index 0000000..02001b0
+--- /dev/null
++++ b/report/AG-H1-0-1_return.md
+@@ -0,0 +1,65 @@
++# AG-H1-0-1 Return Packet
++
++**Status**: ✅ PASS  
++**Timestamp**: 2026-01-16T15:43:00+01:00
++
++## Objetivo
++
++Generar snapshot "repo-truth" y baseline H1 sobre `main@10301a8`, sin cambiar lógica.
++
++## Baseline Confirmado
++
++| Campo | Valor |
++|-------|-------|
++| Branch | `main` (tracking `origin/main`) |
++| HEAD | `10301a882ecd9ef2e0161bd63e80b4348615f725` |
++| Status | CLEAN (sin drift) |
++| Archivos | 1047 |
++| Tree Digest | `a31ff7c74dd440d3cc4ac612741dbb8492caef70c0fdc2bb7c6aaf505e782b87` |
++
++## Verificación Pytest
++
++```
++pytest -q tests/test_graceful_shutdown_signal_3O2.py tests/test_graceful_shutdown_supervisor_3O2.py
++→ 3 passed in 21.57s
++```
++
++## Artefactos Generados
++
++- [AG-H1-0-1_baseline.txt](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-0-1_baseline.txt)
++- [AG-H1-0-1_tree_digest.txt](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-0-1_tree_digest.txt)
++- [AG-H1-0-1_grep_targets.txt](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-0-1_grep_targets.txt)
++- [AG-H1-0-1_pytest_smoke.txt](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-0-1_pytest_smoke.txt)
++- [AG-H1-0-1_return.md](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/report/AG-H1-0-1_return.md) (este archivo)
++
++## Inventario H1 Targets (resumen)
++
++| Categoría | Hallazgo |
++|-----------|----------|
++| `sys.exit` | 8+ ocurrencias en `tools/` |
++| `signal.SIGTERM` | Handlers en `engine/` (graceful shutdown) |
++| `cleanup_report` | `tools/cleanup_report.py` disponible |
++| CI → `report/` | Workflows escriben a `report/runs/` |
++
++## Comando Verificación
++
++```bash
++git diff --stat HEAD
++# Esperado: solo nuevos archivos en report/AG-H1-0-1_*
++```
++
++## AUDIT_SUMMARY
++
++**Ficheros creados**:
++
++- `report/AG-H1-0-1_baseline.txt`
++- `report/AG-H1-0-1_tree_digest.txt`
++- `report/AG-H1-0-1_grep_targets.txt`
++- `report/AG-H1-0-1_pytest_smoke.txt`
++- `report/AG-H1-0-1_return.md`
++
++**Cambios funcionales**: Ninguno (solo lectura + reportes)
++
++**Riesgos**: Ninguno identificado
++
++**Siguiente paso**: Commit con mensaje `H1.0: baseline snapshot (AG-H1-0-1)`
+diff --git a/report/AG-H1-0-1_tree_digest.txt b/report/AG-H1-0-1_tree_digest.txt
+new file mode 100644
+index 0000000..e9d055d
+--- /dev/null
++++ b/report/AG-H1-0-1_tree_digest.txt
+@@ -0,0 +1,13 @@
++# AG-H1-0-1 Tree Digest
++Timestamp: 2026-01-16T15:43:00+01:00
++
++## File Count
++Total tracked files: 1047
++
++## File List Digest (SHA256)
++Command: git ls-files | sort | sha256sum
++Digest: a31ff7c74dd440d3cc4ac612741dbb8492caef70c0fdc2bb7c6aaf505e782b87
++
++## Notes
++- No submodules present
++- Digest computed from sorted file list (deterministic)

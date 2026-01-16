@@ -1,0 +1,16 @@
+7b0aa55
+7b0aa55 (HEAD -> main) H1.0: baseline snapshot (AG-H1-0-1)
+commit 7b0aa558d0293fc71374a21abb50e2456ad0cead
+Author: Iván B. <ivan@example.com>
+Date:   Fri Jan 16 15:47:07 2026 +0100
+
+    H1.0: baseline snapshot (AG-H1-0-1)
+
+ report/AG-H1-0-1_baseline.txt     |  15 ++++
+ report/AG-H1-0-1_diff.patch       | 168 ++++++++++++++++++++++++++++++++++++++
+ report/AG-H1-0-1_grep_targets.txt |  29 +++++++
+ report/AG-H1-0-1_last_commit.txt  |  13 +++
+ report/AG-H1-0-1_pytest_smoke.txt |  16 ++++
+ report/AG-H1-0-1_return.md        |  65 +++++++++++++++
+ report/AG-H1-0-1_tree_digest.txt  |  13 +++
+ 7 files changed, 319 insertions(+)

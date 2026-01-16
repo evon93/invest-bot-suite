@@ -1,0 +1,29 @@
+# AG-H1-0-1 Grep Targets (H1 Readiness Inventory)
+Timestamp: 2026-01-16T15:43:00+01:00
+
+## sys.exit occurrences (src/, tools/)
+tools/apply_calibration_topk.py:296:    sys.exit(main())
+tools/build_best_params_2C.py:205:    sys.exit(main())
+tools/check_determinism_3E.py:59:        sys.exit(1)
+tools/check_determinism_3E.py:101:        sys.exit(0)
+tools/check_determinism_3E.py:104:        sys.exit(1)
+tools/check_repo.py:97:    sys.exit(main())
+tools/cleanup_report.py:250:    sys.exit(main())
+tools/freeze_topk_2H.py:214:        sys.exit(1)
+
+## signal.SIGTERM occurrences (src/, tools/, tests/)
+(No direct matches found in scanned paths - graceful shutdown uses signal handlers in engine/)
+
+## cleanup_report occurrences (tools/, report/, .github/)
+tools/cleanup_report.py - main cleanup utility
+
+## report/ references in workflows/tools
+.github/workflows/robustness_quick.yml:92:  path: report/runs/ci_2D_quick/
+.github/workflows/smoke_3B.yml:38:  mkdir -p report/runs/3B_CI
+.github/workflows/robustness_quick.yml:44:  --outdir report/runs/ci_2D_quick
+
+## Summary
+- Exit codes: Multiple tools use sys.exit() for CLI exit status
+- Signals: Graceful shutdown handlers in engine/ (not in tools/)
+- Cleanup: cleanup_report.py available for artifact management
+- CI: Workflows write to report/runs/

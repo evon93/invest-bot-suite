@@ -1,0 +1,16 @@
+# AG-H1-0-1 Pytest Smoke (3O2 Tests)
+Timestamp: 2026-01-16T15:43:00+01:00
+
+## Command
+python -m pytest -q tests/test_graceful_shutdown_signal_3O2.py tests/test_graceful_shutdown_supervisor_3O2.py
+
+## Result
+3 passed in 21.57s
+
+## Exit Code
+0 (SUCCESS)
+
+## Notes
+- Tests executed in WSL Ubuntu 24.04 with .venv active
+- No warnings or errors
+- Duration within expected range (<30s)

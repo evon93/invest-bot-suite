@@ -1,0 +1,13 @@
+# AG-H1-0-1 Tree Digest
+Timestamp: 2026-01-16T15:43:00+01:00
+
+## File Count
+Total tracked files: 1047
+
+## File List Digest (SHA256)
+Command: git ls-files | sort | sha256sum
+Digest: a31ff7c74dd440d3cc4ac612741dbb8492caef70c0fdc2bb7c6aaf505e782b87
+
+## Notes
+- No submodules present
+- Digest computed from sorted file list (deterministic)
