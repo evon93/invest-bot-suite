@@ -1,0 +1,275 @@
+diff --git a/registro_de_estado_invest_bot.md b/registro_de_estado_invest_bot.md
+index 72b1b33..b485528 100644
+--- a/registro_de_estado_invest_bot.md
++++ b/registro_de_estado_invest_bot.md
+@@ -4,7 +4,31 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
+ 
+ ---
+ 
+-## Estado Actual (2026-01-15) — Fase 3O: Graceful Shutdown & Report Hygiene
++## Estado Actual (2026-01-17) — Fase H1: Operabilidad Post-3O
++
++- **Rama:** `main` (feature/AG-H1-5-1_closeout pending merge)
++- **HEAD:** `f96d88b`
++- **Estado:** ✅ COMPLETADO
++- **Entregables:**
++  - **H1.1 Artifact Policy:** `.gitignore` corregido, `tools/report_artifact_policy.py`, `docs/policy_report_artifacts.md`
++  - **H1.2 Exit Codes:** `run_live_3E.py` → exit 0 en shutdown, exit 2 en error
++  - **H1.3 Adapter Tests:** `tests/test_adapter_sigterm_checkpoint_h1.py` (SIGTERM/SIGINT + checkpoint)
++  - **H1.4 CI Gate:** `.github/workflows/h1_gate.yml` (policy check + H1 tests)
++- **Handoff:**
++  - `report/ORCH_HANDOFF_postH1_close_20260117.md`
++  - `report/bridge_H1_to_next_report.md`
++- **Verificación:**
++  - Pytest: 747 passed, 11 skipped
++  - CI H1 Gate: PENDING (workflow creado)
++- **Commits:**
++  - H1.1: `581472f` (artifact policy)
++  - H1.2: `44bd161` (exit codes)
++  - H1.3: `ed5c602` (adapter tests)
++  - H1.4: `f96d88b` (CI gate)
++
++---
++
++## Estado Anterior (2026-01-15) — Fase 3O: Graceful Shutdown & Report Hygiene
+ 
+ - **Rama:** `main` (PR #33 merged)
+ - **HEAD:** `0ba489ba`
+diff --git a/report/AG-H1-5-1_return.md b/report/AG-H1-5-1_return.md
+new file mode 100644
+index 0000000..ec87e49
+--- /dev/null
++++ b/report/AG-H1-5-1_return.md
+@@ -0,0 +1,45 @@
++# AG-H1-5-1 Return Packet
++
++**Status**: ✅ PASS  
++**Timestamp**: 2026-01-17T18:30:00+01:00
++
++## Objetivo
++
++Closeout H1 + Handoff a Orchestrator.
++
++## Verificación Final
++
++```
++pytest -q → 747 passed, 11 skipped, 7 warnings (222.01s)
++```
++
++## Entregables de Cierre
++
++| Archivo | Propósito |
++|---------|-----------|
++| `ORCH_HANDOFF_postH1_close_20260117.md` | Handoff completo H1 |
++| `bridge_H1_to_next_report.md` | Bridge a siguiente fase |
++| `pytest_H1_closeout.txt` | Evidencia pytest |
++| `registro_de_estado_invest_bot.md` | Estado actualizado |
++
++## Resumen H1
++
++| Ticket | Commit | Descripción |
++|--------|--------|-------------|
++| H1.1 | `581472f` | Artifact storage policy |
++| H1.2 | `44bd161` | Exit code semantics |
++| H1.3 | `ed5c602` | Adapter SIGTERM tests |
++| H1.4 | `f96d88b` | CI gate workflow |
++
++## DoD Verification
++
++- ✅ pytest -q global: PASS
++- ✅ H1.4 contenido en main
++- ✅ Handoff + bridge creados
++- ✅ registro_de_estado actualizado
++
++## AUDIT_SUMMARY
++
++**Ficheros creados**: 3 (handoff, bridge, pytest log)
++**Ficheros modificados**: 1 (registro_de_estado)
++**Riesgos**: Ninguno
+diff --git a/report/ORCH_HANDOFF_postH1_close_20260117.md b/report/ORCH_HANDOFF_postH1_close_20260117.md
+new file mode 100644
+index 0000000..53c5168
+--- /dev/null
++++ b/report/ORCH_HANDOFF_postH1_close_20260117.md
+@@ -0,0 +1,83 @@
++# ORCH_HANDOFF Post-H1 Close — 2026-01-17
++
++## Estado del Repositorio
++
++- **Branch**: main
++- **HEAD**: f96d88b (H1.4 merged)
++- **Fecha**: 2026-01-17
++- **Pytest**: 747 passed, 11 skipped, 7 warnings
++
++---
++
++## Resumen Ejecutivo H1
++
++La fase H1 establece las bases de **operabilidad y observabilidad** post-3O:
++
++1. **Artifact Storage Policy** — Control de bloat en `report/`
++2. **Exit Code Semantics** — Semántica clara para CI (0 = shutdown controlado)
++3. **Adapter SIGTERM Tests** — Validación de checkpoint en señales
++4. **CI Gate H1** — Workflow que gatee todos los cambios H1
++
++---
++
++## Cambios por Ticket
++
++### H1.1: Artifact Storage Policy (581472f)
++
++- **`.gitignore`**: Corregido para trackear `*_return.md`, `*_last_commit.txt`, `ORCH_HANDOFF_*.md`
++- **`tools/report_artifact_policy.py`**: Herramienta de validación (~190 líneas)
++- **`docs/policy_report_artifacts.md`**: Documentación de policy
++- **`tests/test_report_policy_h1_1.py`**: 7 tests
++
++### H1.2: Exit Code Semantics (44bd161)
++
++- **`tools/run_live_3E.py`**: Exit code explícito (0=success/shutdown, 2=error)
++- **`tests/test_exit_codes_h1.py`**: 5 tests (failure + shutdown)
++
++### H1.3: Adapter SIGTERM Checkpoint (ed5c602)
++
++- **`tests/test_adapter_sigterm_checkpoint_h1.py`**: 2 tests (SIGTERM + SIGINT en adapter-mode)
++- Verificación de `checkpoint.json` tras señal
++
++### H1.4: CI Gate (f96d88b)
++
++- **`.github/workflows/h1_gate.yml`**: Workflow CI
++  - Policy check: `python tools/report_artifact_policy.py --check`
++  - Tests H1: exit_codes, adapter_sigterm, report_policy
++  - Artifact upload: `report/AG-H1-*`
++
++---
++
++## CI / Workflows
++
++| Workflow | Propósito | Estado |
++|----------|-----------|--------|
++| `h1_gate.yml` | Gate H1: policy + tests | ✅ Nuevo |
++| `graceful_shutdown_3O.yml` | Tests shutdown directo/supervisor | Existente |
++
++**Nota**: Todos los workflows son offline (`INVESTBOT_ALLOW_NETWORK=0`).
++
++---
++
++## Invariantes Respetadas
++
++- ✅ **Determinismo**: seed42 en todos los tests
++- ✅ **Offline**: Sin dependencias de red
++- ✅ **Trazabilidad**: Return packets + handoffs trackados en git
++- ✅ **Backward compatible**: Tests 3O2 siguen pasando
++
++---
++
++## Known Issues / Warnings
++
++- 7 deprecation warnings de pandas (`is_datetime64tz_dtype`)
++- ~200 archivos untracked en `report/` (return packets históricos no commiteados)
++
++---
++
++## Recomendaciones para H2
++
++1. **Artifact cleanup**: Considerar commit batch de return packets históricos o cleanup
++2. **Exit codes supervisor**: Extender validación en `supervisor_live_3E_3H.py`
++3. **CI consolidation**: Evaluar unificar workflows H1 con other gates
++4. **Pandas deprecation**: Migrar a `isinstance(dtype, pd.DatetimeTZDtype)`
+diff --git a/report/bridge_H1_to_next_report.md b/report/bridge_H1_to_next_report.md
+new file mode 100644
+index 0000000..5f161aa
+--- /dev/null
++++ b/report/bridge_H1_to_next_report.md
+@@ -0,0 +1,47 @@
++# Bridge Report: H1 → Next Phase
++
++## Fase Completada: H1 (Operabilidad Post-3O)
++
++### Done ✅
++
++- Artifact storage policy implementada y documentada
++- Exit code semantics en run_live_3E.py (0=shutdown, 2=error)
++- Tests de SIGTERM/SIGINT en adapter-mode con checkpoint
++- CI gate workflow para validar H1
++
++### Open / Pendiente
++
++- Return packets históricos untracked (~200 archivos)
++- Deprecation warnings de pandas (7)
++- Validación exit codes en supervisor no extendida
++
++---
++
++## Próximos Tickets Sugeridos
++
++| ID | Descripción | Prioridad |
++|----|-------------|-----------|
++| H2-1 | Cleanup/commit batch de return packets históricos | H1 |
++| H2-2 | Migrar `is_datetime64tz_dtype` a nueva API pandas | H2 |
++| H2-3 | Extender exit code validation a supervisor | H2 |
++| H2-4 | Consolidar workflows CI (H1 + 3O + smoke) | H2 |
++| H2-5 | Documentar flujo de creación de tickets en .agent/ | H3 |
++
++---
++
++## Riesgos Técnicos
++
++| Riesgo | Impacto | Mitigación |
++|--------|---------|------------|
++| Crecimiento report/ | Repo bloat | Policy ya implementada + cleanup tool |
++| Pandas deprecations | Tests warnings | Ticket H2-2 prioritario |
++| Untracked files noise | Git status ruido | Commit selectivo o gitignore |
++
++---
++
++## Archivos Clave para Siguiente Fase
++
++- `tools/report_artifact_policy.py` — Validación de artifacts
++- `docs/policy_report_artifacts.md` — Documentación policy
++- `.github/workflows/h1_gate.yml` — CI gate H1
++- `registro_de_estado_invest_bot.md` — Estado del proyecto
+diff --git a/report/pytest_H1_closeout.txt b/report/pytest_H1_closeout.txt
+new file mode 100644
+index 0000000..971c3ed
+--- /dev/null
++++ b/report/pytest_H1_closeout.txt
+@@ -0,0 +1,39 @@
++...........................................................s............ [  9%]
++........................................................................ [ 19%]
++........................................................................ [ 28%]
++....................................................s................... [ 38%]
++........................................................................ [ 47%]
++..........................................s............................. [ 57%]
++................ssss.........sss........................................ [ 66%]
++........................................................................ [ 76%]
++........................................................................ [ 85%]
++........................................................................ [ 95%]
++.....................................                                    [100%]
++=============================== warnings summary ===============================
++tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
++tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py:3065: RuntimeWarning: invalid value encountered in divide
++    c /= stddev[:, None]
++
++tests/test_ohlcv_loader.py::test_load_csv_standard_aliases
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:23: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_seconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:108: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_milliseconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:122: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_epoch_microseconds_timestamp_parses_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:136: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++tests/test_ohlcv_loader.py::test_timezone_offset_string_converts_to_utc
++  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:149: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
++    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
++
++-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++747 passed, 11 skipped, 7 warnings in 222.01s (0:03:42)

@@ -4,7 +4,31 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-15) — Fase 3O: Graceful Shutdown & Report Hygiene
+## Estado Actual (2026-01-17) — Fase H1: Operabilidad Post-3O
+
+- **Rama:** `main` (feature/AG-H1-5-1_closeout pending merge)
+- **HEAD:** `f96d88b`
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **H1.1 Artifact Policy:** `.gitignore` corregido, `tools/report_artifact_policy.py`, `docs/policy_report_artifacts.md`
+  - **H1.2 Exit Codes:** `run_live_3E.py` → exit 0 en shutdown, exit 2 en error
+  - **H1.3 Adapter Tests:** `tests/test_adapter_sigterm_checkpoint_h1.py` (SIGTERM/SIGINT + checkpoint)
+  - **H1.4 CI Gate:** `.github/workflows/h1_gate.yml` (policy check + H1 tests)
+- **Handoff:**
+  - `report/ORCH_HANDOFF_postH1_close_20260117.md`
+  - `report/bridge_H1_to_next_report.md`
+- **Verificación:**
+  - Pytest: 747 passed, 11 skipped
+  - CI H1 Gate: PENDING (workflow creado)
+- **Commits:**
+  - H1.1: `581472f` (artifact policy)
+  - H1.2: `44bd161` (exit codes)
+  - H1.3: `ed5c602` (adapter tests)
+  - H1.4: `f96d88b` (CI gate)
+
+---
+
+## Estado Anterior (2026-01-15) — Fase 3O: Graceful Shutdown & Report Hygiene
 
 - **Rama:** `main` (PR #33 merged)
 - **HEAD:** `0ba489ba`

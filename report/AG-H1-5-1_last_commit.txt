@@ -1,0 +1,13 @@
+a606057 (HEAD -> feature/AG-H1-5-1_closeout) H1.5: closeout phase H1 + handoff to Orchestrator
+commit a6060577068d230ff857651cc954c44de1a917cd
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 17 18:35:39 2026 +0100
+
+    H1.5: closeout phase H1 + handoff to Orchestrator
+
+ registro_de_estado_invest_bot.md             | 26 ++++++++-
+ report/AG-H1-5-1_return.md                   | 45 +++++++++++++++
+ report/ORCH_HANDOFF_postH1_close_20260117.md | 83 ++++++++++++++++++++++++++++
+ report/bridge_H1_to_next_report.md           | 47 ++++++++++++++++
+ report/pytest_H1_closeout.txt                | 39 +++++++++++++
+ 5 files changed, 239 insertions(+), 1 deletion(-)
