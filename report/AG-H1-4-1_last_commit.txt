@@ -1,0 +1,10 @@
+fca77a7 (HEAD -> feature/AG-H1-4-1_ci_gate) H1.4: CI gate workflow (policy + tests H1 + artifacts)
+commit fca77a72e3d9fef282150c33afdadd460a3d2668
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 17 16:50:59 2026 +0100
+
+    H1.4: CI gate workflow (policy + tests H1 + artifacts)
+
+ .github/workflows/h1_gate.yml | 68 +++++++++++++++++++++++++++++++++++++++++++
+ report/AG-H1-4-1_return.md    | 37 +++++++++++++++++++++++
+ 2 files changed, 105 insertions(+)

@@ -1,0 +1,117 @@
+diff --git a/.github/workflows/h1_gate.yml b/.github/workflows/h1_gate.yml
+new file mode 100644
+index 0000000..e6b6ec6
+--- /dev/null
++++ b/.github/workflows/h1_gate.yml
+@@ -0,0 +1,68 @@
++name: H1 Gate
++
++on:
++  push:
++    branches: [ "feature/*", "main" ]
++  pull_request:
++    branches: [ "main" ]
++  workflow_dispatch:
++
++jobs:
++  h1-gate:
++    runs-on: ubuntu-latest
++    timeout-minutes: 10
++    env:
++      INVESTBOT_ALLOW_NETWORK: "0"
++      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
++    
++    steps:
++      - uses: actions/checkout@v4
++      
++      - name: Set up Python 3.12
++        uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++          cache: 'pip'
++          
++      - name: Install dependencies
++        run: |
++          python -m pip install --upgrade pip
++          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
++          pip install pytest
++          
++      - name: Create Artifact Dir
++        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
++        
++      - name: Run Artifact Policy Check
++        run: |
++          python tools/report_artifact_policy.py --check
++          
++      - name: Run H1 Tests - Exit Codes
++        run: |
++          python -m pytest tests/test_exit_codes_h1.py -v
++          
++      - name: Run H1 Tests - Adapter SIGTERM Checkpoint
++        run: |
++          python -m pytest tests/test_adapter_sigterm_checkpoint_h1.py -v
++          
++      - name: Run H1 Tests - Report Policy
++        run: |
++          python -m pytest tests/test_report_policy_h1_1.py -v
++          
++      - name: Inspect Artifacts (Debug)
++        if: always()
++        run: |
++          echo "=== Artifact Dir ==="
++          ls -la ${{ env.INVESTBOT_ARTIFACT_DIR }} || echo "No artifacts in temp"
++          echo "=== report/AG-H1-* ==="
++          ls -la report/AG-H1-* 2>/dev/null || echo "No H1 report artifacts"
++          
++      - name: Upload Test Artifacts
++        if: always()
++        uses: actions/upload-artifact@v4
++        with:
++          name: h1-gate-artifacts
++          path: |
++            ${{ env.INVESTBOT_ARTIFACT_DIR }}
++            report/AG-H1-*
++          if-no-files-found: ignore
+diff --git a/report/AG-H1-4-1_return.md b/report/AG-H1-4-1_return.md
+new file mode 100644
+index 0000000..46cea4b
+--- /dev/null
++++ b/report/AG-H1-4-1_return.md
+@@ -0,0 +1,37 @@
++# AG-H1-4-1 Return Packet
++
++**Status**: ✅ PASS  
++**Timestamp**: 2026-01-17T16:44:00+01:00
++
++## Objetivo
++
++CI gate workflow para H1: policy check + tests H1 + artifacts upload.
++
++## Cambios Realizados
++
++### [h1_gate.yml](file:///c:/Users/ivn_b/Desktop/invest-bot-suite/.github/workflows/h1_gate.yml) [NEW]
++
++Workflow de GitHub Actions (~65 líneas):
++
++- Triggers: push (feature/*, main), pull_request (main), workflow_dispatch
++- Python 3.12, ubuntu-latest, timeout 10min
++- Steps:
++  1. `python tools/report_artifact_policy.py --check`
++  2. `pytest tests/test_exit_codes_h1.py`
++  3. `pytest tests/test_adapter_sigterm_checkpoint_h1.py`
++  4. `pytest tests/test_report_policy_h1_1.py`
++  5. Upload artifacts: INVESTBOT_ARTIFACT_DIR + report/AG-H1-*
++
++## DoD
++
++| Criterio | Resultado |
++|----------|-----------|
++| Workflow creado | ✓ h1_gate.yml |
++| Policy check step | ✓ |
++| H1 tests steps | ✓ (3 tests) |
++| Artifact upload | ✓ |
++
++## AUDIT_SUMMARY
++
++**Ficheros creados**: `.github/workflows/h1_gate.yml`
++**Riesgos**: Ninguno - workflow sigue patrón existente
