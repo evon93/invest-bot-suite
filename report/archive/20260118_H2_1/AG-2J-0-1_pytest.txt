@@ -1,0 +1,11 @@
+..................................s..................................... [ 36%]
+.............s..............ssss........................................ [ 73%]
+...................................................                      [100%]
+=============================== warnings summary ===============================
+tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
+tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py:3065: RuntimeWarning: invalid value encountered in divide
+    c /= stddev[:, None]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+189 passed, 6 skipped, 2 warnings in 90.31s (0:01:30)

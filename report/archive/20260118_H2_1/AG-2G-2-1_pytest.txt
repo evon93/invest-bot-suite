@@ -1,0 +1,9 @@
+======================== test session starts =========================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+collected 6 items
+
+tests/test_multiseed_spec_2G2.py ......                                [100%]
+
+=================== 6 passed, 2 warnings in 0.73s ====================

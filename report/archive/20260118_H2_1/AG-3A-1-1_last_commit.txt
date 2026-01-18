@@ -1,0 +1,12 @@
+commit 24beab718c1ee70e15c5e03cfb56d724a5938ff5
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 20:05:29 2026 +0100
+
+    3A.1: event-driven contracts v1 (+ docs/tests)
+
+ bridge_2J_to_3A_report.md        |   2 +-
+ contracts/__init__.py            |   0
+ contracts/event_messages.py      | 139 +++++++++++++++++++++++++++++++++++++++
+ registro_de_estado_invest_bot.md |  57 ++++++++++------
+ tests/test_contracts_3A.py       |  82 +++++++++++++++++++++++
+ 5 files changed, 259 insertions(+), 21 deletions(-)

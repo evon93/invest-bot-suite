@@ -1,0 +1,5 @@
+commit bb542cfb5a013460044b9f071c8841c734bfd293 (HEAD -> release/2J_3A_sync)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sat Jan 3 21:28:40 2026 +0100
+
+    3B.1: runner 2J --mode quick|full + tests

@@ -1,0 +1,10 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pyproject.toml
+plugins: anyio-4.8.0, cov-6.0.0, hyphen-0.0.1, sugar-1.0.0, timeout-2.3.1, xdist-3.6.1, html-4.1.1, metadata-3.1.1
+collected 1 item
+
+tests/test_run_live_integration_3B.py .                                  [100%]
+
+============================== 1 passed in 0.47s ==============================

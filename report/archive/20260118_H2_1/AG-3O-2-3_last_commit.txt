@@ -1,0 +1,5 @@
+commit 87061643c9f3a9159abed48b9e192300cffb30e3
+Author: Iván B. <ivan@example.com>
+Date:   Thu Jan 15 22:08:58 2026 +0100
+
+    3O.2c: restore report history; keep 3O2 artifacts + policy

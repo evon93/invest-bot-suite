@@ -1,0 +1,5 @@
+commit f54ac8dd8719825eb25fcbb60c3e5258a680f17d
+Author: Iván B. <ivan@example.com>
+Date:   Mon Jan 5 22:08:14 2026 +0100
+
+    3E.4: add determinism gate for 3E runner

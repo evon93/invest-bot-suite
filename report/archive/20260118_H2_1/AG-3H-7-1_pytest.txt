@@ -1,0 +1,2 @@
+520 passed, 10 skipped, 7 warnings in 29.39s
+Exit code: 0

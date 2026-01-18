@@ -1,0 +1,9 @@
+commit 2769633cb04dfdd81c52affb77a9ca3bfa837bb6
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 19:36:39 2026 +0100
+
+    2J.1: add canonical E2E synth runner (strict validation)
+
+ tools/freeze_topk_2H.py |   4 +-
+ tools/run_e2e_2J.py     | 161 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 163 insertions(+), 2 deletions(-)

@@ -1,0 +1,1 @@
+322f404 AG-3K-1-1: MarketDataAdapter + Fixture adapter + tests

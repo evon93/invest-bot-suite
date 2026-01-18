@@ -1,0 +1,17 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+collected 164 items
+
+tests/test_backtest_deepseek.py ........................................ [ 24%]
+tests/test_calibration_2B_grid_discriminates.py ..s                      [ 26%]
+tests/test_calibration_2B_override_wiring.py .......                     [ 30%]
+tests/test_calibration_runner_2B.py .................................... [ 52%]
+tests/test_load_ohlcv.py .................s                              [ 63%]
+tests/test_realdata_smoke_2F.py ssss                                     [ 66%]
+tests/test_risk_atr_stop_v0_5.py .............                           [ 74%]
+tests/test_risk_dd_v0_5.py .................                             [ 84%]
+tests/test_risk_manager_v0_5.py ..........................               [100%]
+
+158 passed, 6 skipped in 16.34s

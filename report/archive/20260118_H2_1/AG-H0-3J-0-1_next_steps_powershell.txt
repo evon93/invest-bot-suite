@@ -1,0 +1,38 @@
+# AG-H0-3J-0-1: PowerShell Commands for 3J Integration
+# Copy/paste these in sequence
+
+# ========================================
+# STEP 1: Push the 3J branch to origin
+# ========================================
+git push -u origin feature/AG-3J-1-1_strategy_selector_v0_8
+
+# ========================================
+# STEP 2: Create PR on GitHub
+# ========================================
+# Option A: Open browser manually
+Start-Process "https://github.com/evon93/invest-bot-suite/compare/main...feature/AG-3J-1-1_strategy_selector_v0_8?expand=1"
+
+# Option B: Use GitHub CLI (if installed)
+# gh pr create --base main --head feature/AG-3J-1-1_strategy_selector_v0_8 --title "AG-3J: Strategy v0.8 selector + deterministic" --body "Tickets: AG-3J-1-1, AG-3J-2-1"
+
+# ========================================
+# STEP 3: After PR is merged on GitHub
+# ========================================
+git checkout main
+git pull origin main
+
+# ========================================
+# STEP 4: Verify tests pass on updated main
+# ========================================
+python -m pytest -q
+
+# ========================================
+# STEP 5: (Optional) Clean up local branch
+# ========================================
+# git branch -d feature/AG-3J-1-1_strategy_selector_v0_8
+
+# ========================================
+# EXPECTED RESULT
+# ========================================
+# - origin/main will include commits fe85f52 and ea126b5
+# - pytest should pass: ~603 passed, 10 skipped

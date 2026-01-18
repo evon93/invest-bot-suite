@@ -1,0 +1,5 @@
+commit 6f82625c5b0a7a920008aaf0a2395810c7cbd153
+Author: Iván B. <ivan@example.com>
+Date:   Mon Jan 5 22:00:36 2026 +0100
+
+    3E.3: add unified live runner (run_live_3E) + smoke test

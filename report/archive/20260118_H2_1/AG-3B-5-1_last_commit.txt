@@ -1,0 +1,5 @@
+commit 77b1fe7a529d716ba24c70756e261e7a947ed4f4 (HEAD -> main)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sat Jan 3 22:58:05 2026 +0100
+
+    3B.5: integrated live-like runner (offline) + smoke test

@@ -1,0 +1,5 @@
+commit e18bfa1b466c9e8e8f54f67a8d19c40386cbfa41 (HEAD -> main)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sat Jan 3 22:54:45 2026 +0100
+
+    3B.4: execution adapter v0.2 (deterministic live-like) + tests

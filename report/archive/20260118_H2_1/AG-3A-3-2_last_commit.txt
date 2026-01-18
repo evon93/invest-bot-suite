@@ -1,0 +1,9 @@
+commit 95745b208a95cd543ed2197404e6db58365bbf4d
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 20:37:18 2026 +0100
+
+    3A.3: harden rejection reason aggregation + alias
+
+ tests/test_paper_loop_3A.py |   4 ++
+ tools/run_paper_loop_3A.py  | 100 +++++++++++++++++++++++---------------------
+ 2 files changed, 57 insertions(+), 47 deletions(-)

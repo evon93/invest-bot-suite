@@ -1,0 +1,1 @@
+ec6db3a (HEAD -> main) AG-3H-2-1: metrics.ndjson rotation (--metrics-rotate-max-mb/lines)

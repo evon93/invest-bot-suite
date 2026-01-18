@@ -1,0 +1,5 @@
+commit 5ae7db3d57b504f3b25c8d85af39ef2566cc4a9f
+Author: Iván B. <ivan@example.com>
+Date:   Mon Jan 5 22:13:52 2026 +0100
+
+    3E.4: add smoke_3E workflow (pytest + determinism gate)

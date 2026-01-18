@@ -1,0 +1,5 @@
+commit ea33a3e42c24b6add7448eb430e4889324241473 (HEAD -> main)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sat Jan 3 21:15:12 2026 +0100
+
+    3B.0: preflight hygiene (ignore/move local artifacts)

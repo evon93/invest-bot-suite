@@ -1,0 +1,5 @@
+commit 3eb271a26dac5335cdcfde5f2863ef8d6d2e5874
+Author: Iván B. <ivan@example.com>
+Date:   Mon Jan 5 22:26:20 2026 +0100
+
+    3E.5: emit position_changed internal event

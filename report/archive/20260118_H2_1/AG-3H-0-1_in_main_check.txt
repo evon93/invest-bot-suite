@@ -1,0 +1,4 @@
+git merge-base --is-ancestor ac0ffc9571a97dc7b2ecf488ba319ea5c8668034 HEAD
+Result: YES - ac0ffc9 is ancestor of HEAD
+
+Verification: commit ac0ffc9 is now contained in main branch.

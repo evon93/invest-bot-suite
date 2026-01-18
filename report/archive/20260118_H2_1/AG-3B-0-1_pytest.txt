@@ -1,0 +1,23 @@
+============================= test session starts =============================
+platform linux -- Python 3.12.3, pytest-8.3.4, pluggy-1.5.0
+rootdir: /mnt/c/Users/ivn_b/Desktop/invest-bot-suite
+configfile: pyproject.toml
+plugins: anyio-4.8.0, cov-6.0.0, hyphen-0.0.1, sugar-1.0.0, timeout-2.3.1, xdist-3.6.1, html-4.1.1, metadata-3.1.1
+collected 201 items
+
+tests/test_backtest_deepseek.py ..................................s...   [ 18%]
+.........................                                                [ 31%]
+tests/test_backtest_initial.py .                                         [ 31%]
+tests/test_build_dashboard_2I.py .........................               [ 44%]
+tests/test_config_loader.py ..........                                   [ 49%]
+tests/test_e2e_canonical_runner.py s                                     [ 49%]
+tests/test_e2e_repro_2F.py s                                             [ 50%]
+tests/test_local_data_loader.py ..                                       [ 51%]
+tests/test_paper_loop_3A.py ............................                 [ 65%]
+tests/test_paper_simulator.py ....................                       [ 75%]
+tests/test_risk_atr_stop_v0_5.py .................                       [ 83%]
+tests/test_risk_dd_v0_5.py .................                             [ 92%]
+tests/test_risk_manager_v0_5.py .....                                    [ 94%]
+tests/test_run_calibration_2B.py .............ssss                       [100%]
+
+================== 195 passed, 6 skipped, 2 warnings in 20.95s ===================

@@ -1,0 +1,5 @@
+commit 4322b419fe76e62150420338d62f05a3470fd10a
+Author: Iván B. <ivan@example.com>
+Date:   Mon Jan 5 22:04:37 2026 +0100
+
+    3E.3: fix smoke test expectations for results.csv

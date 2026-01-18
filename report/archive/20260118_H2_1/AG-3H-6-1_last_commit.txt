@@ -1,0 +1,1 @@
+520fffe (HEAD -> main) AG-3H-6-1: CI smoke_3H workflow (metrics + rotation + dashboard)

@@ -1,0 +1,34 @@
+TOTAL_BYTES_TRACKED 34891046
+BUCKET_BYTES {'other': 550383, 'report': 33453166, 'tests': 601654, 'tools': 285843}
+TOP_FILES_BY_BYTES
+11186024 report/AG-2D-02-2A_diff.patch
+10670528 report/AG-3O-2-2_diff.patch
+3998675 report/external_ai/2D_02_2.1/Grok4_GR-2D-02-2.1_research.pdf
+787942 report/AG-2E-3-3-gate-semantics_run.txt
+787762 report/AG-2E-4-1_run.txt
+787762 report/AG-2E-3-4-yaml-profiles_run.txt
+597518 report/AG-2E-3-3-gate-semantics_diff.patch
+388550 report/AG-2E-4-1_run_smoke.txt
+388530 report/AG-2E-4-2_run_smoke.txt
+263271 report/AG-3O-2-1_diff.patch
+184146 report/external_ai/2D_02_2.1/DeepSeek_DS-2D-02-2.1_contract.pdf
+133917 report/external_ai/2D_02_2.1/Gemini3Pro_GM-2D-02-2.1_schema.pdf
+100475 report/out_2B_3_3_grid_strict_20251230_193344/run_log.txt
+100470 report/out_2B_3_3_grid_full_20251230_191032/run_log.txt
+77928 report/out_2B_3_3_grid_strict_20251230_193344/results.csv
+77928 report/out_2B_3_3_grid_full_20251230_191032/results.csv
+75422 report/2E_3_1_full.txt
+75387 report/out_2E_3_1_full/run_log.txt
+75308 report/calibration_2B/run_full_log.txt
+62196 report/AG-2D-03-3.1_diff.patch
+49346 report/AG-3G-3-1_diff.patch
+49315 report/AG-2B-3-3_diff.patch
+47576 report/AG-2D-01-1B_diff.patch
+45396 tools/run_calibration_2B.py
+44124 engine/loop_stepper.py
+38735 report/AG-3M-2-1_diff.patch
+37782 report/AG-3M-1-1_diff.patch
+36756 report/out_2E_3_1_full/results.csv
+33124 report/AG-3G-2-1_diff.patch
+30736 registro_de_estado_invest_bot.md
+FILES_OVER_1MB 3

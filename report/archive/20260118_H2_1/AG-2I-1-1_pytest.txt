@@ -1,0 +1,9 @@
+======================== test session starts =========================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+collected 2 items
+
+tests/test_build_dashboard_2I.py ..                                    [100%]
+
+========================= 2 passed in 2.93s ==========================

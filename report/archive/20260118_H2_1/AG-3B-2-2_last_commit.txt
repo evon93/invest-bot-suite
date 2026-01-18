@@ -1,0 +1,5 @@
+commit e12f6859379ec866a620e4635faa033e92f29596 (HEAD -> main)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sat Jan 3 22:38:37 2026 +0100
+
+    3B.2: harden OHLCV loader (epoch + tz contract + micro tests)

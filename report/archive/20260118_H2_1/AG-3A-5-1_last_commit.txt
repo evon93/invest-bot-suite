@@ -1,0 +1,9 @@
+commit e96ad1875ebe9cca27b252c8e39646560c348c1e
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 20:41:20 2026 +0100
+
+    3A.5: bridge 3A to 3B (docs)
+
+ bridge_3A_to_3B_report.md        | 53 ++++++++++++++++++++++++++++++++++++++++
+ registro_de_estado_invest_bot.md |  9 +++++++
+ 2 files changed, 62 insertions(+)

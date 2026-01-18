@@ -1,0 +1,1 @@
+4ea818f (HEAD -> main) 2F.1H: harden OHLCV loader (NaT/NaN policy + epoch s/ms + encoding)

@@ -1,0 +1,10 @@
+2026-01-16T17:53:13+01:00
+## main...origin/main [ahead 1]
+?? report/_tmp_bytes.py
+?? report/_tmp_loc_effective.py
+?? report/_tmp_loc_physical.py
+?? report/_tmp_ratios.py
+?? report/_tmp_tests.py
+44bd16167b9239e4dc179d266c60482825a16f64
+44bd161 (HEAD -> main) H1.2: exit code semantics (fail!=0, shutdown==0)
+1060

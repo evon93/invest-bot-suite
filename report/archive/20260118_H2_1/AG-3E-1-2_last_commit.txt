@@ -1,0 +1,5 @@
+commit 738a94a2ddc0da62256c5b2758d622cbd7758926
+Author: Iván B. <ivan@example.com>
+Date:   Mon Jan 5 21:41:46 2026 +0100
+
+    3E.1: TimeProvider + LoopStepper injection (simulated default)

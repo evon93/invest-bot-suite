@@ -1,0 +1,5 @@
+commit 594ad8542c4b8d18c675d7df84ab0c41c275ff61
+Author: Iván B. <ivan@example.com>
+Date:   Tue Jan 6 19:17:45 2026 +0100
+
+    3E.6: closeout handoff + bridge + state update

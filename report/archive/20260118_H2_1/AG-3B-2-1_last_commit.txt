@@ -1,0 +1,5 @@
+commit 333604d5ef0457f47378eee5d87b1d213013b80d (HEAD -> main)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sat Jan 3 21:44:01 2026 +0100
+
+    3B.2: add OHLCV loader (offline) + tests

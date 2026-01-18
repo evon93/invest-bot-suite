@@ -1,0 +1,29 @@
+TOTAL_LINES_TRACKED 433540
+BUCKET_LINES {'other': 15598, 'report': 391966, 'tests': 17511, 'tools': 8465}
+TOP_EXT_LINES [('.patch', 279148), ('.txt', 67745), ('.py', 36268), ('.md', 21253), ('.pdf', 17579), ('.json', 8247), ('.csv', 1439), ('.yml', 911), ('.yaml', 682), ('<noext>', 88), ('.jsonl', 60), ('.db', 37), ('.lock', 30), ('.example', 21), ('.ps1', 20), ('.ndjson', 6), ('.ini', 6), ('.md"', 0)]
+TOP_FILES_BY_LINES
+174627 report/AG-3O-2-2_diff.patch
+82894 report/AG-2D-02-2A_diff.patch
+15208 report/external_ai/2D_02_2.1/Grok4_GR-2D-02-2.1_research.pdf
+10302 report/AG-2E-4-1_run.txt
+10302 report/AG-2E-3-4-yaml-profiles_run.txt
+10302 report/AG-2E-3-3-gate-semantics_run.txt
+10301 report/AG-2E-4-2_run_smoke.txt
+10301 report/AG-2E-4-1_run_smoke.txt
+5078 report/AG-3O-2-1_diff.patch
+3320 report/AG-2E-3-3-gate-semantics_diff.patch
+1360 report/external_ai/2D_02_2.1/DeepSeek_DS-2D-02-2.1_contract.pdf
+1270 tools/run_calibration_2B.py
+1095 engine/loop_stepper.py
+1029 report/AG-2B-3-3_diff.patch
+1012 report/AG-3M-2-1_diff.patch
+1011 report/external_ai/2D_02_2.1/Gemini3Pro_GM-2D-02-2.1_schema.pdf
+1008 report/AG-3M-1-1_diff.patch
+892 report/AG-2D-03-3.1_diff.patch
+764 tools/run_robustness_2D.py
+741 report/AG-3G-3-1_diff.patch
+687 registro_de_estado_invest_bot.md
+672 tools/run_live_3E.py
+608 risk_manager_v0_5.py
+582 report/out_2B_3_3_grid_strict_20251230_193344/run_log.txt
+582 report/out_2B_3_3_grid_full_20251230_191032/run_log.txt

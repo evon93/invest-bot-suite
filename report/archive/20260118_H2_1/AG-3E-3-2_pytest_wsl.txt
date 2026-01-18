@@ -1,0 +1,34 @@
+......................................s................................. [ 19%]
+........................................................................ [ 38%]
+...............s..........s............................................s [ 57%]
+sss..................................................................... [ 76%]
+........................................................................ [ 95%]
+.................                                                        [100%]
+=============================== warnings summary ===============================
+tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
+tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py:3065: RuntimeWarning: invalid value encountered in divide
+    c /= stddev[:, None]
+
+tests/test_ohlcv_loader.py::test_load_csv_standard_aliases
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:23: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+tests/test_ohlcv_loader.py::test_epoch_seconds_timestamp_parses_to_utc
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:108: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+tests/test_ohlcv_loader.py::test_epoch_milliseconds_timestamp_parses_to_utc
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:122: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+tests/test_ohlcv_loader.py::test_epoch_microseconds_timestamp_parses_to_utc
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:136: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+tests/test_ohlcv_loader.py::test_timezone_offset_string_converts_to_utc
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:149: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+370 passed, 7 skipped, 7 warnings in 103.19s (0:01:43)

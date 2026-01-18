@@ -1,0 +1,1 @@
+4c9b7f1 H0: normalize .gitignore EOL and ignore stray report docs

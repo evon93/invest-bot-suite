@@ -1,0 +1,1 @@
+2e3c397 (HEAD -> main) 2G.1: QA ranking stability edge cases

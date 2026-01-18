@@ -1,0 +1,10 @@
+commit a17e9df5f4afbaac8f228562d18b440baf93365e
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 20:22:55 2026 +0100
+
+    3A.2: paper trading loop simulator (events+metrics)
+
+ examples/signals_3A.ndjson  |   4 +
+ tests/test_paper_loop_3A.py |  74 +++++++++++++
+ tools/run_paper_loop_3A.py  | 255 ++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 333 insertions(+)

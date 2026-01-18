@@ -1,0 +1,5 @@
+commit 1128c42a35a1c79bb8bbcb4dbfd86e326e1c3312
+Author: Iván B. <ivan@example.com>
+Date:   Mon Jan 5 21:50:38 2026 +0100
+
+    3E.2: add ExchangeAdapter + wire ExecWorker (paper default)

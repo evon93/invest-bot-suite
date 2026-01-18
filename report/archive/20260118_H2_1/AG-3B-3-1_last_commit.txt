@@ -1,0 +1,5 @@
+commit 611eccefabd94397446657c282660e8c7992d2c6 (HEAD -> main)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sat Jan 3 22:48:06 2026 +0100
+
+    3B.3: strategy engine emits OrderIntent (SMA crossover) + tests

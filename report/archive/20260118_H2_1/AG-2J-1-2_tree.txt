@@ -1,0 +1,14 @@
+report/runs/2J_e2e_synth
+report/runs/2J_e2e_synth/results.csv
+report/runs/2J_e2e_synth/results_agg.csv
+report/runs/2J_e2e_synth/results_by_seed.csv
+report/runs/2J_e2e_synth/run_log.txt
+report/runs/2J_e2e_synth/run_meta.json
+report/runs/2J_e2e_synth/summary.md
+report/runs/2J_e2e_synth/topk.json
+configs/risk_rules_prod.yaml
+configs/best_params_2H.json
+report/topk_freeze_2H.json
+report/dashboard_2J
+report/dashboard_2J/index.html
+report/dashboard_2J/summary.json

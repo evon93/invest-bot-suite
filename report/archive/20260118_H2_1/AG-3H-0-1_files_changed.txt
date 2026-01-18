@@ -1,0 +1,13 @@
+commit ac0ffc9571a97dc7b2ecf488ba319ea5c8668034
+Author: Ivan <evon93@gmail.com>
+Date:   Thu Jan 9 20:09:25 2026 +0100
+
+    AG-3G-7-1: closeout 3G (handoff + bridge + registro)
+
+ .github/workflows/smoke_3G.yml               |  58 +++++++
+ engine/idempotency.py                        | 103 +++++++++++
+ registro_de_estado_invest_bot.md             |  10 +-
+ report/ORCH_HANDOFF_post3G_close_20260109.md |  77 +++++++++++
+ report/bridge_3G_to_next_report.md           |  43 +++++
+ tests/test_run_live_metrics_wiring.py        |  45 +++++
+ 9 files changed, 236 insertions(+), 1 deletion(-)

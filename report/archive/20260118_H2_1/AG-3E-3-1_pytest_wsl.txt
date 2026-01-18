@@ -1,0 +1,91 @@
+..F...................................s................................. [ 19%]
+........................................................................ [ 38%]
+...............s..........s............................................s [ 57%]
+sss..................................................................... [ 76%]
+........................................................................ [ 95%]
+.................                                                        [100%]
+=================================== FAILURES ===================================
+_______________________ test_run_live_3E_simulated_paper _______________________
+
+temp_outdir = PosixPath('/tmp/pytest-of-ivn_b/pytest-23/test_run_live_3E_simulated_pap0/out_smoke')
+
+    def test_run_live_3E_simulated_paper(temp_outdir):
+        """Test standard deterministic run: simulated clock + paper exchange."""
+    
+        cmd = [
+            sys.executable, str(RUNNER_PATH),
+            "--outdir", str(temp_outdir),
+            "--clock", "simulated",
+            "--exchange", "paper",
+            "--seed", "42",
+            "--max-steps", "10"
+        ]
+    
+        # Execute runner
+        result = subprocess.run(cmd, capture_output=True, text=True)
+    
+        assert result.returncode == 0, f"Runner failed: {result.stderr}"
+    
+        # Check artifacts
+        assert (temp_outdir / "events.ndjson").exists()
+        assert (temp_outdir / "run_meta.json").exists()
+        assert (temp_outdir / "results.csv").exists()
+        # State DB depends on implementation details, but usually created
+        assert (temp_outdir / "state.db").exists()
+    
+        # Check meta content
+        with open(temp_outdir / "run_meta.json") as f:
+            meta = json.load(f)
+            assert meta["clock"] == "simulated"
+            assert meta["exchange"] == "paper"
+            assert meta["seed"] == 42
+    
+        # Check events content
+        with open(temp_outdir / "events.ndjson") as f:
+            lines = f.readlines()
+            assert len(lines) > 0, "Events file should not be empty"
+            # Check for expected event types
+            has_intent = any("OrderIntentV1" in line for line in lines)
+            assert has_intent, "Should have OrderIntentV1 events"
+    
+        # Check results csv
+        df = pd.read_csv(temp_outdir / "results.csv")
+        assert not df.empty
+        # Expect at least some metric columns
+>       assert "events_count" in df.columns or "steps_processed" in df.columns or "total_events" in df.columns
+E       AssertionError: assert ('events_count' in Index(['num_order_intents', 'num_risk_decisions_total', 'num_risk_allowed',\n       'num_risk_rejected', 'num_execution...',\n       'num_positions_updated', 'drain_iterations', 'max_step_id',\n       'unique_trace_ids'],\n      dtype='object') or 'steps_processed' in Index(['num_order_intents', 'num_risk_decisions_total', 'num_risk_allowed',\n       'num_risk_rejected', 'num_execution...',\n       'num_positions_updated', 'drain_iterations', 'max_step_id',\n       'unique_trace_ids'],\n      dtype='object') or 'total_events' in Index(['num_order_intents', 'num_risk_decisions_total', 'num_risk_allowed',\n       'num_risk_rejected', 'num_execution...',\n       'num_positions_updated', 'drain_iterations', 'max_step_id',\n       'unique_trace_ids'],\n      dtype='object'))
+E        +  where Index(['num_order_intents', 'num_risk_decisions_total', 'num_risk_allowed',\n       'num_risk_rejected', 'num_execution...',\n       'num_positions_updated', 'drain_iterations', 'max_step_id',\n       'unique_trace_ids'],\n      dtype='object') =    num_order_intents  num_risk_decisions_total  ...  max_step_id  unique_trace_ids\n0                  1                         1  ...           10                 1\n\n[1 rows x 10 columns].columns
+E        +  and   Index(['num_order_intents', 'num_risk_decisions_total', 'num_risk_allowed',\n       'num_risk_rejected', 'num_execution...',\n       'num_positions_updated', 'drain_iterations', 'max_step_id',\n       'unique_trace_ids'],\n      dtype='object') =    num_order_intents  num_risk_decisions_total  ...  max_step_id  unique_trace_ids\n0                  1                         1  ...           10                 1\n\n[1 rows x 10 columns].columns
+E        +  and   Index(['num_order_intents', 'num_risk_decisions_total', 'num_risk_allowed',\n       'num_risk_rejected', 'num_execution...',\n       'num_positions_updated', 'drain_iterations', 'max_step_id',\n       'unique_trace_ids'],\n      dtype='object') =    num_order_intents  num_risk_decisions_total  ...  max_step_id  unique_trace_ids\n0                  1                         1  ...           10                 1\n\n[1 rows x 10 columns].columns
+
+tests/test_3E_runner_smoke.py:65: AssertionError
+=============================== warnings summary ===============================
+tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
+tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/.venv/lib/python3.12/site-packages/numpy/lib/_function_base_impl.py:3065: RuntimeWarning: invalid value encountered in divide
+    c /= stddev[:, None]
+
+tests/test_ohlcv_loader.py::test_load_csv_standard_aliases
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:23: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+tests/test_ohlcv_loader.py::test_epoch_seconds_timestamp_parses_to_utc
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:108: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+tests/test_ohlcv_loader.py::test_epoch_milliseconds_timestamp_parses_to_utc
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:122: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+tests/test_ohlcv_loader.py::test_epoch_microseconds_timestamp_parses_to_utc
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:136: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+tests/test_ohlcv_loader.py::test_timezone_offset_string_converts_to_utc
+  /mnt/c/Users/ivn_b/Desktop/invest-bot-suite/tests/test_ohlcv_loader.py:149: DeprecationWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
+    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_3E_runner_smoke.py::test_run_live_3E_simulated_paper - Asse...
+1 failed, 369 passed, 7 skipped, 7 warnings in 105.42s (0:01:45)

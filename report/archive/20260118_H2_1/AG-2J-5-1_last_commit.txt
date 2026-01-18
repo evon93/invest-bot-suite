@@ -1,0 +1,9 @@
+commit 0bf352c22934e96578d8ad977fbec8a08441b713
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 19:54:34 2026 +0100
+
+    2J.5: bridge 2J to 3A (docs)
+
+ bridge_2J_to_3A_report.md        | 58 ++++++++++++++++++++++++++++++++++++++++
+ registro_de_estado_invest_bot.md |  9 +++++++
+ 2 files changed, 67 insertions(+)

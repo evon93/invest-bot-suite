@@ -1,0 +1,4 @@
+PY_TOTAL_PHYS 36268
+PY_TOTAL_EFF 24042
+PY_BUCKET_PHYS {'other': 10308, 'tests': 17495, 'tools': 8465}
+PY_BUCKET_EFF {'other': 6156, 'tests': 12043, 'tools': 5843}

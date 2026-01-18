@@ -1,0 +1,7 @@
+commit 3e3a9ab (HEAD -> main)
+
+    AG-3H-4-1: 24/7 supervisor with automatic restart and deterministic backoff
+
+ tests/test_supervisor_3H.py       | 289 ++++++++++++++++++++++++++++++
+ tools/supervisor_live_3E_3H.py    | 260 +++++++++++++++++++++++++++
+ 2 files changed, 546 insertions(+)

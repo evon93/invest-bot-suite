@@ -1,0 +1,1 @@
+ecf44f1 3N.2: CI smoke adapter kill+resume

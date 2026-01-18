@@ -1,0 +1,36 @@
+# Git Dump - AG-H0-3J-0-1 Reconcile
+# Generated: 2026-01-12T20:10
+
+## git status -sb
+## main...origin/main
+(Many untracked files in report/)
+
+## git rev-parse HEAD
+aa735b343d6e0264dd79cd5d4f653c90a9582e1d
+
+## git log --oneline --decorate -10
+aa735b3 (HEAD -> main, origin/main, origin/HEAD) AG-3I-1-2: TimeProvider test isolation + tz validation + docs
+04d6a6b AG-3I-1-1: monotonic time provider
+2703e29 Merge pull request #22 from evon93/feature/AG-3I-1-1_time_provider_monotonic
+...
+
+## git rev-parse origin/main
+aa735b343d6e0264dd79cd5d4f653c90a9582e1d
+
+## git branch -a | grep 3J
+feature/AG-3J-1-1_strategy_selector_v0_8 (LOCAL ONLY - not in remotes)
+
+## git branch --contains fe85f52
+feature/AG-3J-1-1_strategy_selector_v0_8
+
+## git branch --contains ea126b5
+feature/AG-3J-1-1_strategy_selector_v0_8
+
+## git show -s --oneline fe85f52 ea126b5
+fe85f52 AG-3J-1-1: strategy v0.8 selector wiring
+ea126b5 AG-3J-2-1: strategy v0.8 deterministic + no-lookahead tests
+
+## CONCLUSION
+Commits 3J exist in local branch only.
+Branch NOT pushed to origin.
+No remote tracking branch exists.

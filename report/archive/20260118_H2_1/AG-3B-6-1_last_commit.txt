@@ -1,0 +1,5 @@
+commit fd7e7d8775dc7f1b1a4e9e13e685601a41d44342 (HEAD -> main)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sun Jan 4 18:49:17 2026 +0100
+
+    3B.6: add CI smoke workflow for integrated runner

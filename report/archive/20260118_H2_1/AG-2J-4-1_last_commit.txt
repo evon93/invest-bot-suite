@@ -1,0 +1,10 @@
+commit fc02e412b9433cd18f8a612a46be4c0f59de2da6
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 19:50:33 2026 +0100
+
+    2J.4: standardize python 3.12 version policy
+
+ .ai/decisions_log.md             |  6 ++++++
+ registro_de_estado_invest_bot.md |  7 +++++++
+ report/AG-2J-4-1_notes.md        | 31 +++++++++++++++++++++++++++++++
+ 3 files changed, 44 insertions(+)

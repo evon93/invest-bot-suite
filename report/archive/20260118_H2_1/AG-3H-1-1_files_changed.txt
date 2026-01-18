@@ -1,0 +1,11 @@
+commit ccbb2e8fc186a58b0269585b92a27796fa1d3579 (HEAD -> main)
+Author: evon93
+Date:   Sat Jan 10 21:00:01 2026 +0100
+
+    AG-3H-1-1: granular metrics observability per-step/per-stage
+
+ engine/loop_stepper.py                           |  69 ++++++++-
+ engine/metrics_collector.py                      | 107 ++++++++++++-
+ tests/test_loop_stepper_metrics_granular.py      | 356 +++++++++++++++++++++++
+ tools/run_live_3E.py                             |   5 +-
+ 4 files changed, 534 insertions(+), 3 deletions(-)

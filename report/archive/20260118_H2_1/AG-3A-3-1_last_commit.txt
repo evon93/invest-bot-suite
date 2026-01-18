@@ -1,0 +1,9 @@
+commit f3e8f5704fe1300459ea06edddf330c960aee397
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 20:31:22 2026 +0100
+
+    3A.3: observability metrics (drawdown/exposure/active_rate/latency)
+
+ tests/test_paper_loop_3A.py |  38 +++++----
+ tools/run_paper_loop_3A.py  | 195 +++++++++++++++++++++++++++++++++-----------
+ 2 files changed, 169 insertions(+), 64 deletions(-)

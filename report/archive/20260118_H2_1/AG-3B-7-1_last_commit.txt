@@ -1,0 +1,5 @@
+commit 890abcde... (HEAD -> main)
+Author: evon93 <ivn_brm12@hotmail.com>
+Date:   Sun Jan 4 18:54:00 2026 +0100
+
+    3B.7: bridge 3B to 3C (docs/state)

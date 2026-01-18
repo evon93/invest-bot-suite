@@ -1,0 +1,28 @@
+# Artifacts Tree - AG-3J-6-1
+
+## 3J Smoke/Harness Outputs
+
+report/out_3J3_test/
+├── metrics_summary.json
+├── run_meta.json
+└── signals.ndjson
+
+report/out_3J3_v07/
+├── metrics_summary.json
+├── run_meta.json
+└── signals.ndjson
+
+report/out_3J4_smoke/
+├── events.ndjson
+├── results.csv
+├── run_meta.json
+├── run_metrics.json
+└── state.db
+
+## Closeout Documents
+
+report/ORCH_HANDOFF_post3J_close_20260112.md
+report/bridge_3J_to_3K_report.md
+report/pytest_3Jclose_snapshot.txt
+report/head_3Jclose.txt
+report/head_3Jclose_oneline.txt

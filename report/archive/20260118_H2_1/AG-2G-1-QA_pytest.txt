@@ -1,0 +1,9 @@
+======================== test session starts =========================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+collected 5 items
+
+tests/test_ranking_stability_2G.py .....                                 [100%]
+
+========================= 5 passed in 0.48s ==========================

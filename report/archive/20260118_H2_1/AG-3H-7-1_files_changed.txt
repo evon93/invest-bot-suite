@@ -1,0 +1,8 @@
+commit b93e398 (HEAD -> main)
+
+    AG-3H-7-1: Phase 3H closure (handoff + bridge + registro)
+
+ registro_de_estado_invest_bot.md            |  26 +++-
+ report/ORCH_HANDOFF_post3H_close_20260110.md | 206 +++++++++++++++++++++++++++
+ report/bridge_3H_to_next_report.md           | 137 ++++++++++++++++++
+ 3 files changed, 368 insertions(+), 1 deletion(-)

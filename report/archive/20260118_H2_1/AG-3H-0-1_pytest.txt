@@ -1,0 +1,5 @@
+pytest -q output (post-merge on main):
+
+482 passed, 10 skipped, 7 warnings in 33.23s
+
+Exit code: 0

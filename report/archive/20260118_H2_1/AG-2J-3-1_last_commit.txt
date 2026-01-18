@@ -1,0 +1,8 @@
+commit b06edb6bcfb91648ac1063df9fe05de109891751
+Author: Iván B. <ivan@example.com>
+Date:   Sat Jan 3 19:46:14 2026 +0100
+
+    2J.3: add e2e_smoke workflow for canonical runner
+
+ .github/workflows/e2e_smoke_2J.yml | 83 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 83 insertions(+)

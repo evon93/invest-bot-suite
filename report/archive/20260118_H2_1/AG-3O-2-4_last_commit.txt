@@ -1,0 +1,5 @@
+commit 3383140f148edbe1388595e93bf380bbcbded71a
+Author: Iván B. <ivan@example.com>
+Date:   Thu Jan 15 22:38:07 2026 +0100
+
+    3O.2d: fix SIGTERM race in run_live (CI smoke-3g)

@@ -1,0 +1,9 @@
+======================== test session starts =========================
+platform win32 -- Python 3.13.3, pytest-8.4.1, pluggy-1.6.0
+rootdir: C:\Users\ivn_b\Desktop\invest-bot-suite
+configfile: pytest.ini
+collected 4 items
+
+tests/test_freeze_topk_2H.py ....                                          [100%]
+
+========================== 4 passed in 3.08s ===========================

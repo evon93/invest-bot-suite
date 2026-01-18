@@ -1,0 +1,10 @@
+commit ec6db3a0131ad26702f58ae2851f2fd2bf34473c (HEAD -> main)
+Author: evon93
+Date:   Sat Jan 10 21:11:41 2026 +0100
+
+    AG-3H-2-1: metrics.ndjson rotation (--metrics-rotate-max-mb/lines)
+
+ engine/metrics_collector.py    | 111 ++++++++++++++++-
+ tests/test_metrics_rotation.py | 267 +++++++++++++++++++++++++++++++++++++++++
+ tools/run_live_3E.py           |  39 +++++-
+ 3 files changed, 407 insertions(+), 10 deletions(-)
