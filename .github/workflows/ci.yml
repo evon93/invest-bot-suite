@@ -5,8 +5,10 @@ on:
     branches: [main, orchestrator-v2, "feature/**"]
   pull_request:
     branches: [main, orchestrator-v2]
+  workflow_dispatch:
 
 jobs:
+  # Core checks - runs on all triggers
   check:
     runs-on: ubuntu-latest
     
@@ -26,3 +28,137 @@ jobs:
       
       - name: Run repository checks
         run: python tools/check_repo.py
+
+  # Tests - runs full pytest suite
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run pytest
+        run: python -m pytest -q
+
+  # H1 Gate - runs on push/PR (merged from h1_gate.yml)
+  h1-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      INVESTBOT_ALLOW_NETWORK: "0"
+      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest
+          
+      - name: Create Artifact Dir
+        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
+        
+      - name: Run Artifact Policy Check
+        run: python tools/report_artifact_policy.py --check
+          
+      - name: Run H1 Tests - Exit Codes
+        run: python -m pytest tests/test_exit_codes_h1.py -v
+          
+      - name: Run H1 Tests - Adapter SIGTERM Checkpoint
+        run: python -m pytest tests/test_adapter_sigterm_checkpoint_h1.py -v
+          
+      - name: Run H1 Tests - Report Policy
+        run: python -m pytest tests/test_report_policy_h1_1.py -v
+          
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: h1-gate-artifacts
+          path: |
+            ${{ env.INVESTBOT_ARTIFACT_DIR }}
+            report/AG-H1-*
+          if-no-files-found: ignore
+
+  # Graceful Shutdown - runs on push/PR (merged from graceful_shutdown_3O.yml)
+  graceful-shutdown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      INVESTBOT_ALLOW_NETWORK: "0"
+      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest
+          
+      - name: Create Artifact Dir
+        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
+          
+      - name: Run Graceful Shutdown Test (Direct)
+        run: python -m pytest tests/test_graceful_shutdown_signal_3O2.py -v
+
+      - name: Run Graceful Shutdown Test (Supervisor)
+        run: python -m pytest tests/test_graceful_shutdown_supervisor_3O2.py -v
+          
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graceful-shutdown-run-dir
+          path: ${{ env.INVESTBOT_ARTIFACT_DIR }}
+
+  # Edge Tests - runs ONLY on push to main (NOT on PR) (merged from edge_tests.yml)
+  edge-tests:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run edge tests
+        run: python risk_edge_cases.py 2>&1 | tee edge_logs.txt
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edge_logs
+          path: edge_logs.txt

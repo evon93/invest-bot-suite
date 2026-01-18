@@ -1,0 +1,29 @@
+=== ci.yml on: section ===
+name: CI
+
+on:
+  push:
+    branches: [main, orchestrator-v2, "feature/**"]
+  pull_request:
+    branches: [main, orchestrator-v2]
+  workflow_dispatch:
+
+=== Jobs merged with conditions ===
+
+# h1-gate (no condition - runs on all triggers)
+h1-gate:
+  runs-on: ubuntu-latest
+  timeout-minutes: 10
+  # Runs on push/PR per workflow on: triggers
+
+# graceful-shutdown (no condition - runs on all triggers)
+graceful-shutdown:
+  runs-on: ubuntu-latest
+  timeout-minutes: 5
+  # Runs on push/PR per workflow on: triggers
+
+# edge-tests (CONDITION: push to main ONLY, NOT on PR)
+edge-tests:
+  runs-on: ubuntu-latest
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  # Preserves original edge_tests.yml behavior: only push main

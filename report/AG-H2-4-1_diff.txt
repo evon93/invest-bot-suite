@@ -1,0 +1,559 @@
+ .github/workflows/ci.yml                   | 136 +++++++++++++++++++++++++++++
+ .github/workflows/edge_tests.yml           |  24 -----
+ .github/workflows/graceful_shutdown_3O.yml |  54 ------------
+ .github/workflows/h1_gate.yml              |  68 ---------------
+ .github/workflows/smoke_3C.yml             |  51 -----------
+ .github/workflows/smoke_3E.yml             |  49 -----------
+ .github/workflows/smoke_3F.yml             |  51 -----------
+ .github/workflows/smoke_3G.yml             |  58 ------------
+ 8 files changed, 136 insertions(+), 355 deletions(-)
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 369b69a..341a360 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -5,8 +5,10 @@ on:
+     branches: [main, orchestrator-v2, "feature/**"]
+   pull_request:
+     branches: [main, orchestrator-v2]
++  workflow_dispatch:
+ 
+ jobs:
++  # Core checks - runs on all triggers
+   check:
+     runs-on: ubuntu-latest
+     
+@@ -26,3 +28,137 @@ jobs:
+       
+       - name: Run repository checks
+         run: python tools/check_repo.py
++
++  # Tests - runs full pytest suite
++  tests:
++    runs-on: ubuntu-latest
++    timeout-minutes: 15
++    
++    steps:
++      - uses: actions/checkout@v4
++      
++      - name: Set up Python
++        uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++          cache: "pip"
++      
++      - name: Install dependencies
++        run: |
++          python -m pip install --upgrade pip
++          pip install -r requirements.txt
++      
++      - name: Run pytest
++        run: python -m pytest -q
++
++  # H1 Gate - runs on push/PR (merged from h1_gate.yml)
++  h1-gate:
++    runs-on: ubuntu-latest
++    timeout-minutes: 10
++    env:
++      INVESTBOT_ALLOW_NETWORK: "0"
++      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
++    
++    steps:
++      - uses: actions/checkout@v4
++      
++      - name: Set up Python 3.12
++        uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++          cache: 'pip'
++          
++      - name: Install dependencies
++        run: |
++          python -m pip install --upgrade pip
++          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
++          pip install pytest
++          
++      - name: Create Artifact Dir
++        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
++        
++      - name: Run Artifact Policy Check
++        run: python tools/report_artifact_policy.py --check
++          
++      - name: Run H1 Tests - Exit Codes
++        run: python -m pytest tests/test_exit_codes_h1.py -v
++          
++      - name: Run H1 Tests - Adapter SIGTERM Checkpoint
++        run: python -m pytest tests/test_adapter_sigterm_checkpoint_h1.py -v
++          
++      - name: Run H1 Tests - Report Policy
++        run: python -m pytest tests/test_report_policy_h1_1.py -v
++          
++      - name: Upload Test Artifacts
++        if: always()
++        uses: actions/upload-artifact@v4
++        with:
++          name: h1-gate-artifacts
++          path: |
++            ${{ env.INVESTBOT_ARTIFACT_DIR }}
++            report/AG-H1-*
++          if-no-files-found: ignore
++
++  # Graceful Shutdown - runs on push/PR (merged from graceful_shutdown_3O.yml)
++  graceful-shutdown:
++    runs-on: ubuntu-latest
++    timeout-minutes: 5
++    env:
++      INVESTBOT_ALLOW_NETWORK: "0"
++      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
++    
++    steps:
++      - uses: actions/checkout@v4
++      
++      - name: Set up Python 3.12
++        uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++          cache: 'pip'
++          
++      - name: Install dependencies
++        run: |
++          python -m pip install --upgrade pip
++          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
++          pip install pytest
++          
++      - name: Create Artifact Dir
++        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
++          
++      - name: Run Graceful Shutdown Test (Direct)
++        run: python -m pytest tests/test_graceful_shutdown_signal_3O2.py -v
++
++      - name: Run Graceful Shutdown Test (Supervisor)
++        run: python -m pytest tests/test_graceful_shutdown_supervisor_3O2.py -v
++          
++      - name: Upload Test Artifacts
++        if: always()
++        uses: actions/upload-artifact@v4
++        with:
++          name: graceful-shutdown-run-dir
++          path: ${{ env.INVESTBOT_ARTIFACT_DIR }}
++
++  # Edge Tests - runs ONLY on push to main (NOT on PR) (merged from edge_tests.yml)
++  edge-tests:
++    runs-on: ubuntu-latest
++    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
++    
++    steps:
++      - uses: actions/checkout@v4
++      
++      - uses: actions/setup-python@v5
++        with:
++          python-version: '3.12'
++      
++      - name: Install deps
++        run: |
++          python -m pip install --upgrade pip
++          pip install -r requirements.txt
++      
++      - name: Run edge tests
++        run: python risk_edge_cases.py 2>&1 | tee edge_logs.txt
++      
++      - uses: actions/upload-artifact@v4
++        with:
++          name: edge_logs
++          path: edge_logs.txt
+diff --git a/.github/workflows/edge_tests.yml b/.github/workflows/edge_tests.yml
+deleted file mode 100644
+index 48834e5..0000000
+--- a/.github/workflows/edge_tests.yml
++++ /dev/null
+@@ -1,24 +0,0 @@
+-﻿name: edge_tests
+-on:
+-  push:
+-    branches: [ main ]
+-  workflow_dispatch: {}
+-jobs:
+-  edge_tests:
+-    runs-on: ubuntu-latest
+-    steps:
+-      - uses: actions/checkout@v4
+-      - uses: actions/setup-python@v5
+-        with:
+-          python-version: '3.12'
+-      - name: Install deps
+-        run: |
+-          python -m pip install --upgrade pip
+-          pip install -r requirements.txt
+-      - name: Run edge tests
+-        run: |
+-          python risk_edge_cases.py 2>&1 | tee edge_logs.txt
+-      - uses: actions/upload-artifact@v4
+-        with:
+-          name: edge_logs
+-          path: edge_logs.txt
+diff --git a/.github/workflows/graceful_shutdown_3O.yml b/.github/workflows/graceful_shutdown_3O.yml
+deleted file mode 100644
+index 273e480..0000000
+--- a/.github/workflows/graceful_shutdown_3O.yml
++++ /dev/null
+@@ -1,54 +0,0 @@
+-name: Graceful Shutdown 3O
+-
+-on:
+-  push:
+-    branches: [ "feature/*", "main" ]
+-  pull_request:
+-    branches: [ "main" ]
+-  workflow_dispatch:
+-
+-jobs:
+-  test-graceful-shutdown:
+-    runs-on: ubuntu-latest
+-    timeout-minutes: 5
+-    env:
+-      INVESTBOT_ALLOW_NETWORK: "0"
+-      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
+-    
+-    steps:
+-      - uses: actions/checkout@v4
+-      
+-      - name: Set up Python 3.12
+-        uses: actions/setup-python@v5
+-        with:
+-          python-version: "3.12"
+-          cache: 'pip'
+-          
+-      - name: Install dependencies
+-        run: |
+-          python -m pip install --upgrade pip
+-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+-          pip install pytest
+-          
+-      - name: Create Artifact Dir
+-        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
+-          
+-      - name: Run Graceful Shutdown Test (Direct)
+-        run: |
+-          python -m pytest tests/test_graceful_shutdown_signal_3O2.py -v
+-
+-      - name: Run Graceful Shutdown Test (Supervisor)
+-        run: |
+-          python -m pytest tests/test_graceful_shutdown_supervisor_3O2.py -v
+-          
+-      - name: Inspect Artifacts (Debug)
+-        if: always()
+-        run: |
+-          ls -R ${{ env.INVESTBOT_ARTIFACT_DIR }} || echo "No artifacts found"
+-          
+-      - name: Upload Test Artifacts
+-        if: always()
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: graceful-shutdown-run-dir
+-          path: ${{ env.INVESTBOT_ARTIFACT_DIR }}
+diff --git a/.github/workflows/h1_gate.yml b/.github/workflows/h1_gate.yml
+deleted file mode 100644
+index e6b6ec6..0000000
+--- a/.github/workflows/h1_gate.yml
++++ /dev/null
+@@ -1,68 +0,0 @@
+-name: H1 Gate
+-
+-on:
+-  push:
+-    branches: [ "feature/*", "main" ]
+-  pull_request:
+-    branches: [ "main" ]
+-  workflow_dispatch:
+-
+-jobs:
+-  h1-gate:
+-    runs-on: ubuntu-latest
+-    timeout-minutes: 10
+-    env:
+-      INVESTBOT_ALLOW_NETWORK: "0"
+-      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
+-    
+-    steps:
+-      - uses: actions/checkout@v4
+-      
+-      - name: Set up Python 3.12
+-        uses: actions/setup-python@v5
+-        with:
+-          python-version: "3.12"
+-          cache: 'pip'
+-          
+-      - name: Install dependencies
+-        run: |
+-          python -m pip install --upgrade pip
+-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+-          pip install pytest
+-          
+-      - name: Create Artifact Dir
+-        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
+-        
+-      - name: Run Artifact Policy Check
+-        run: |
+-          python tools/report_artifact_policy.py --check
+-          
+-      - name: Run H1 Tests - Exit Codes
+-        run: |
+-          python -m pytest tests/test_exit_codes_h1.py -v
+-          
+-      - name: Run H1 Tests - Adapter SIGTERM Checkpoint
+-        run: |
+-          python -m pytest tests/test_adapter_sigterm_checkpoint_h1.py -v
+-          
+-      - name: Run H1 Tests - Report Policy
+-        run: |
+-          python -m pytest tests/test_report_policy_h1_1.py -v
+-          
+-      - name: Inspect Artifacts (Debug)
+-        if: always()
+-        run: |
+-          echo "=== Artifact Dir ==="
+-          ls -la ${{ env.INVESTBOT_ARTIFACT_DIR }} || echo "No artifacts in temp"
+-          echo "=== report/AG-H1-* ==="
+-          ls -la report/AG-H1-* 2>/dev/null || echo "No H1 report artifacts"
+-          
+-      - name: Upload Test Artifacts
+-        if: always()
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: h1-gate-artifacts
+-          path: |
+-            ${{ env.INVESTBOT_ARTIFACT_DIR }}
+-            report/AG-H1-*
+-          if-no-files-found: ignore
+diff --git a/.github/workflows/smoke_3C.yml b/.github/workflows/smoke_3C.yml
+deleted file mode 100644
+index b7c16b9..0000000
+--- a/.github/workflows/smoke_3C.yml
++++ /dev/null
+@@ -1,51 +0,0 @@
+-name: Smoke Test 3C
+-
+-on:
+-  pull_request:
+-    branches: [ "main" ]
+-  workflow_dispatch:
+-
+-jobs:
+-  smoke-3c:
+-    runs-on: ubuntu-latest
+-    steps:
+-      - uses: actions/checkout@v4
+-
+-      - name: Set up Python 3.12
+-        uses: actions/setup-python@v5
+-        with:
+-          python-version: "3.12"
+-          cache: 'pip'
+-
+-      - name: Install dependencies
+-        run: |
+-          python -m pip install --upgrade pip
+-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+-          # Install test dependencies if needed
+-          pip install pytest pytest-cov
+-
+-      - name: Run pytest
+-        run: |
+-          python -m pytest -q tests/
+-
+-      - name: Run 3C Runner Smoke
+-        run: |
+-          python tools/run_live_integration_3C.py \
+-            --data data/ci_smoke.csv \
+-            --out report/out_ci_smoke_3C \
+-            --seed 42 \
+-            --max-bars 10 \
+-            --risk-version v0.6
+-
+-      - name: List outputs
+-        run: |
+-          ls -R report/out_ci_smoke_3C
+-
+-      - name: Upload Artifacts
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: smoke-3c-results
+-          path: |
+-            report/out_ci_smoke_3C/events.ndjson
+-            report/out_ci_smoke_3C/run_meta.json
+-            report/out_ci_smoke_3C/state.db
+diff --git a/.github/workflows/smoke_3E.yml b/.github/workflows/smoke_3E.yml
+deleted file mode 100644
+index ff5f7ef..0000000
+--- a/.github/workflows/smoke_3E.yml
++++ /dev/null
+@@ -1,49 +0,0 @@
+-name: Smoke Test 3E (Determinism)
+-
+-on:
+-  push:
+-    branches: [ "main", "develop", "feature/*" ]
+-  pull_request:
+-    branches: [ "main", "develop" ]
+-  workflow_dispatch:
+-
+-jobs:
+-  smoke-3e:
+-    runs-on: ubuntu-latest
+-    steps:
+-      - uses: actions/checkout@v4
+-
+-      - name: Set up Python 3.12
+-        uses: actions/setup-python@v5
+-        with:
+-          python-version: "3.12"
+-          cache: 'pip'
+-
+-      - name: Install dependencies
+-        run: |
+-          python -m pip install --upgrade pip
+-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+-          pip install pytest pytest-cov
+-
+-      - name: Run Pytest
+-        run: |
+-          python -m pytest -q
+-
+-      - name: Check Determinism 3E
+-        run: |
+-          python tools/check_determinism_3E.py \
+-            --seed 42 \
+-            --clock simulated \
+-            --exchange paper \
+-            --outdir-a ${{ runner.temp }}/det_a \
+-            --outdir-b ${{ runner.temp }}/det_b
+-
+-      - name: Upload Artifacts
+-        if: always()
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: smoke-3e-artifacts
+-          path: |
+-            ${{ runner.temp }}/det_a/
+-            ${{ runner.temp }}/det_b/
+diff --git a/.github/workflows/smoke_3F.yml b/.github/workflows/smoke_3F.yml
+deleted file mode 100644
+index 1be0209..0000000
+--- a/.github/workflows/smoke_3F.yml
++++ /dev/null
+@@ -1,51 +0,0 @@
+-name: Smoke Test 3F (Pytest + Determinism)
+-
+-on:
+-  push:
+-    branches: [ "main", "develop", "feature/*" ]
+-  pull_request:
+-    branches: [ "main", "develop" ]
+-  workflow_dispatch:
+-
+-jobs:
+-  smoke-3f:
+-    runs-on: ubuntu-latest
+-    steps:
+-      - uses: actions/checkout@v4
+-
+-      - name: Set up Python 3.12
+-        uses: actions/setup-python@v5
+-        with:
+-          python-version: "3.12"
+-          cache: 'pip'
+-
+-      - name: Install dependencies
+-        run: |
+-          python -m pip install --upgrade pip
+-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+-          pip install pytest pytest-cov
+-
+-      - name: Run Pytest
+-        run: |
+-          python -m pytest -q
+-        # Note: @pytest.mark.integration tests are SKIP by default
+-        # They require INVESTBOT_TEST_INTEGRATION=1 which is not set
+-
+-      - name: Check Determinism 3E
+-        run: |
+-          python tools/check_determinism_3E.py \
+-            --seed 42 \
+-            --clock simulated \
+-            --exchange paper \
+-            --outdir-a ${{ runner.temp }}/det_a \
+-            --outdir-b ${{ runner.temp }}/det_b
+-
+-      - name: Upload Artifacts
+-        if: always()
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: smoke-3f-artifacts
+-          path: |
+-            ${{ runner.temp }}/det_a/
+-            ${{ runner.temp }}/det_b/
+diff --git a/.github/workflows/smoke_3G.yml b/.github/workflows/smoke_3G.yml
+deleted file mode 100644
+index 34f003e..0000000
+--- a/.github/workflows/smoke_3G.yml
++++ /dev/null
+@@ -1,58 +0,0 @@
+-name: Smoke Test 3G (Pytest + Metrics Smoke)
+-
+-on:
+-  push:
+-    branches: [ "main", "develop", "feature/*" ]
+-  pull_request:
+-    branches: [ "main", "develop" ]
+-  workflow_dispatch:
+-
+-jobs:
+-  smoke-3g:
+-    runs-on: ubuntu-latest
+-    steps:
+-      - uses: actions/checkout@v4
+-
+-      - name: Set up Python 3.12
+-        uses: actions/setup-python@v5
+-        with:
+-          python-version: "3.12"
+-          cache: 'pip'
+-
+-      - name: Install dependencies
+-        run: |
+-          python -m pip install --upgrade pip
+-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+-          pip install pytest pytest-cov
+-
+-      - name: Run Pytest
+-        run: |
+-          python -m pytest -q
+-        # Note: ccxt tests are SKIP by default (not installed)
+-        # Integration tests require INVESTBOT_TEST_INTEGRATION=1
+-
+-      - name: Smoke Test - Run Live with Metrics
+-        run: |
+-          python tools/run_live_3E.py \
+-            --outdir ${{ runner.temp }}/out_3g \
+-            --run-dir ${{ runner.temp }}/run_3g \
+-            --enable-metrics \
+-            --max-steps 3 \
+-            --clock simulated \
+-            --exchange paper
+-
+-      - name: Verify Metrics Summary Created
+-        run: |
+-          test -f ${{ runner.temp }}/run_3g/metrics_summary.json || exit 1
+-          echo "✓ metrics_summary.json exists"
+-          cat ${{ runner.temp }}/run_3g/metrics_summary.json
+-
+-      - name: Upload Artifacts
+-        if: always()
+-        uses: actions/upload-artifact@v4
+-        with:
+-          name: smoke-3g-artifacts
+-          path: |
+-            ${{ runner.temp }}/out_3g/
+-            ${{ runner.temp }}/run_3g/
