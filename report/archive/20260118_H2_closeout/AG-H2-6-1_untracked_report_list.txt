@@ -1,0 +1,6 @@
+report/AG-H2-6-1_git_status_before.txt
+report/AG-H2-6-1_head.txt
+report/AG-H2-6-1_untracked_report_list.txt
+report/ORCH_HANDOFF_postH2_close_20260118.md
+report/bridge_H2_to_next_report.md
+report/pytest_H2_closeout.txt

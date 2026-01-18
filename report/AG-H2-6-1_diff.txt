@@ -1,0 +1,2 @@
+ registro_de_estado_invest_bot.md | 27 ++++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)

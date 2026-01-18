@@ -4,7 +4,32 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-17) — Fase H1: Operabilidad Post-3O
+## Estado Actual (2026-01-18) — Fase H2: Hygiene & Housekeeping
+
+- **Rama:** `main`
+- **HEAD:** `7b85612` (H2.5)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **H2.1 Archive Report:** 304 artefactos archivados en `report/archive/20260118_H2_1/`
+  - **H2.2 Pandas Deprecation:** Fix `is_datetime64tz_dtype` en tests
+  - **H2.3 Supervisor Exit Codes:** Semántica 0=graceful, 2=error
+  - **H2.4 CI Consolidation:** 15→8 workflows (47% reducción)
+  - **H2.5 Ticket Workflow:** `.agent/ticket_workflow.md` + enlace README
+- **Handoff:**
+  - `report/ORCH_HANDOFF_postH2_close_20260118.md`
+  - `report/bridge_H2_to_next_report.md`
+- **Verificación:**
+  - Pytest: 751 passed, 11 skipped, 2 warnings
+- **Commits:**
+  - H2.1: `c1a4962` (archive report artifacts)
+  - H2.2: `6ad4212` (pandas deprecation fix)
+  - H2.3: `8d05623` (supervisor exit codes)
+  - H2.4: `5cbcb4f` (CI consolidation)
+  - H2.5: `7b85612` (ticket workflow docs)
+
+---
+
+## Estado Anterior (2026-01-17) — Fase H1: Operabilidad Post-3O
 
 - **Rama:** `main` (feature/AG-H1-5-1_closeout pending merge)
 - **HEAD:** `f96d88b`
