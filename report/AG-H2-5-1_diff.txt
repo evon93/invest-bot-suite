@@ -1,0 +1,17 @@
+diff --git a/README.md b/README.md
+index 6e590b8..69d8f16 100644
+--- a/README.md
++++ b/README.md
+@@ -65,6 +65,10 @@ Desplegar un **bot de inversión autónomo** respaldado por arquitectura **multi
+ - `backlog.md` – roadmap Sprint‑0→3
+ - `integrations.md` – APIs y claves
+ 
++## 🤖 AI / Agent Workflow
++
++- [`.agent/ticket_workflow.md`](.agent/ticket_workflow.md) – flujo operativo para tickets AG/DS (trazabilidad, evidencias, return packets)
++
+ ## 🔌 CCXT opcional (local)
+ 
+ Para desarrollo local con exchanges reales:
+ README.md | 4 ++++
+ 1 file changed, 4 insertions(+)

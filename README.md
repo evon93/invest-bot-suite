@@ -65,6 +65,10 @@ Desplegar un **bot de inversión autónomo** respaldado por arquitectura **multi
 - `backlog.md` – roadmap Sprint‑0→3
 - `integrations.md` – APIs y claves
 
+## 🤖 AI / Agent Workflow
+
+- [`.agent/ticket_workflow.md`](.agent/ticket_workflow.md) – flujo operativo para tickets AG/DS (trazabilidad, evidencias, return packets)
+
 ## 🔌 CCXT opcional (local)
 
 Para desarrollo local con exchanges reales:
