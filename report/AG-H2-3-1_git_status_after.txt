@@ -1,0 +1,13 @@
+## main...origin/main [ahead 2]
+ M tests/test_supervisor_3H.py
+ M tests/test_supervisor_graceful_shutdown_3I2.py
+ M tools/supervisor_live_3E_3H.py
+?? report/AG-H2-3-1_diff.txt
+?? report/AG-H2-3-1_git_status_after.txt
+?? report/AG-H2-3-1_git_status_before.txt
+?? report/AG-H2-3-1_grep_supervisor.txt
+?? report/AG-H2-3-1_head.txt
+?? report/AG-H2-3-1_pytest_H23.txt
+?? report/AG-H2-3-1_pytest_full.txt
+?? report/AG-H2-3-1_return.md
+?? tests/test_supervisor_exit_codes_H23.py

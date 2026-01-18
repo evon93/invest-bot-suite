@@ -254,7 +254,7 @@ class Supervisor:
             Final exit code:
             - 0 on clean child exit
             - 0 on graceful shutdown via signal (SIGINT/SIGTERM)
-            - last child exit code on max_restarts exceeded
+            - 2 on error (max_restarts exceeded or child error)
         """
         self._log(f"Supervisor started. Command: {' '.join(self._command)}")
         self._log(f"Config: max_restarts={self._max_restarts}, backoff_base={self._backoff_base}s, backoff_cap={self._backoff_cap}s")
@@ -270,7 +270,7 @@ class Supervisor:
             # Check max restarts (attempt 1 = first run, not a restart)
             if self._max_restarts is not None and self._attempt > self._max_restarts + 1:
                 self._finalize("max_restarts_exceeded")
-                return self._last_exit_code or 1
+                return 2
             
             self._log(f"Starting child (attempt {self._attempt})...")
             

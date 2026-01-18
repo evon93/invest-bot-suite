@@ -1,0 +1,2 @@
+10f348ea25c3bc142e5fe14e0456e075a380ce91
+10f348e H2.3: supervisor exit code semantics (0 graceful, 2 error)

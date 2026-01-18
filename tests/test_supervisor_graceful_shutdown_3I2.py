@@ -207,7 +207,7 @@ class TestSupervisorGracefulShutdown:
         
         result = supervisor.run()
         
-        assert result == 1  # Non-zero from max_restarts
+        assert result == 2  # Exit code 2 on max_restarts exceeded (AG-H2-3-1)
         
         with open(tmp_path / "supervisor_state.json", "r") as f:
             state = json.load(f)

@@ -1,0 +1,80 @@
+.venv/lib/python3.12/site-packages/pygments/lexers/lisp.py:2906:        'ev/full', 'ev/give', 'ev/give-supervisor', 'ev/go',
+tests/test_graceful_shutdown_supervisor_3O2.py:2:tests/test_graceful_shutdown_supervisor_3O2.py
+tests/test_graceful_shutdown_supervisor_3O2.py:30:        # Check inside the sub-run-dir created by supervisor?
+tests/test_graceful_shutdown_supervisor_3O2.py:39:def test_supervisor_graceful_sigterm(tmp_path):
+tests/test_graceful_shutdown_supervisor_3O2.py:52:    supervisor_dir = base_dir / "sup_sigterm"
+tests/test_graceful_shutdown_supervisor_3O2.py:53:    if supervisor_dir.exists():
+tests/test_graceful_shutdown_supervisor_3O2.py:54:        shutil.rmtree(supervisor_dir)
+tests/test_graceful_shutdown_supervisor_3O2.py:55:    supervisor_dir.mkdir(parents=True, exist_ok=True)
+tests/test_graceful_shutdown_supervisor_3O2.py:57:    # Command: python tools/supervisor_live_3E_3H.py --run-dir <dir> -- python tools/run_live_3E.py ...
+tests/test_graceful_shutdown_supervisor_3O2.py:61:        "--outdir", str(supervisor_dir), # legacy arg, mapped to run_dir usually
+tests/test_graceful_shutdown_supervisor_3O2.py:62:        "--run-dir", str(supervisor_dir),
+tests/test_graceful_shutdown_supervisor_3O2.py:68:    supervisor_cmd = [
+tests/test_graceful_shutdown_supervisor_3O2.py:69:        sys.executable, "tools/supervisor_live_3E_3H.py",
+tests/test_graceful_shutdown_supervisor_3O2.py:70:        "--run-dir", str(supervisor_dir),
+tests/test_graceful_shutdown_supervisor_3O2.py:76:        supervisor_cmd,
+tests/test_graceful_shutdown_supervisor_3O2.py:85:        if not wait_for_ready(supervisor_dir):
+tests/test_graceful_shutdown_supervisor_3O2.py:106:        assert (supervisor_dir / "checkpoint.json").exists(), "Child checkpoint missing"
+tests/test_graceful_shutdown_supervisor_3O2.py:107:        assert (supervisor_dir / "supervisor_state.json").exists(), "Supervisor state missing"
+tests/test_supervisor_3H.py:2:tests/test_supervisor_3H.py
+tests/test_supervisor_3H.py:22:from supervisor_live_3E_3H import Supervisor, calculate_backoff
+tests/test_supervisor_3H.py:62:class TestSupervisorRestartBehavior:
+tests/test_supervisor_3H.py:63:    """Test supervisor restart logic."""
+tests/test_supervisor_3H.py:78:        supervisor = Supervisor(
+tests/test_supervisor_3H.py:85:        result = supervisor.run()
+tests/test_supervisor_3H.py:104:        supervisor = Supervisor(
+tests/test_supervisor_3H.py:113:        result = supervisor.run()
+tests/test_supervisor_3H.py:134:        supervisor = Supervisor(
+tests/test_supervisor_3H.py:144:        result = supervisor.run()
+tests/test_supervisor_3H.py:151:class TestSupervisorStateAndLogs:
+tests/test_supervisor_3H.py:164:        supervisor = Supervisor(
+tests/test_supervisor_3H.py:173:        supervisor.run()
+tests/test_supervisor_3H.py:175:        state_path = tmp_path / "supervisor_state.json"
+tests/test_supervisor_3H.py:197:        supervisor = Supervisor(
+tests/test_supervisor_3H.py:204:        supervisor.run()
+tests/test_supervisor_3H.py:206:        log_path = tmp_path / "supervisor.log"
+tests/test_supervisor_3H.py:225:        supervisor = Supervisor(
+tests/test_supervisor_3H.py:232:        supervisor.run()
+tests/test_supervisor_3H.py:237:class TestSupervisorBackoffProgression:
+tests/test_supervisor_3H.py:251:        supervisor = Supervisor(
+tests/test_supervisor_3H.py:260:        supervisor.run()
+tests/test_supervisor_3H.py:276:        supervisor = Supervisor(
+tests/test_supervisor_3H.py:285:        supervisor.run()
+tests/test_supervisor_graceful_shutdown_3I2.py:2:tests/test_supervisor_graceful_shutdown_3I2.py
+tests/test_supervisor_graceful_shutdown_3I2.py:21:from supervisor_live_3E_3H import Supervisor, StopController, calculate_backoff
+tests/test_supervisor_graceful_shutdown_3I2.py:66:class TestSupervisorGracefulShutdown:
+tests/test_supervisor_graceful_shutdown_3I2.py:70:        """If stop is requested before first cycle, supervisor exits immediately."""
+tests/test_supervisor_graceful_shutdown_3I2.py:80:        supervisor = Supervisor(
+tests/test_supervisor_graceful_shutdown_3I2.py:87:        result = supervisor.run()
+tests/test_supervisor_graceful_shutdown_3I2.py:93:        state_path = tmp_path / "supervisor_state.json"
+tests/test_supervisor_graceful_shutdown_3I2.py:113:        supervisor = Supervisor(
+tests/test_supervisor_graceful_shutdown_3I2.py:120:        result = supervisor.run()
+tests/test_supervisor_graceful_shutdown_3I2.py:126:        log_path = tmp_path / "supervisor.log"
+tests/test_supervisor_graceful_shutdown_3I2.py:145:        # Request stop before supervisor runs
+tests/test_supervisor_graceful_shutdown_3I2.py:157:        supervisor = Supervisor(
+tests/test_supervisor_graceful_shutdown_3I2.py:165:        result = supervisor.run()
+tests/test_supervisor_graceful_shutdown_3I2.py:176:        supervisor = Supervisor(
+tests/test_supervisor_graceful_shutdown_3I2.py:183:        supervisor.run()
+tests/test_supervisor_graceful_shutdown_3I2.py:185:        with open(tmp_path / "supervisor_state.json", "r") as f:
+tests/test_supervisor_graceful_shutdown_3I2.py:200:        supervisor = Supervisor(
+tests/test_supervisor_graceful_shutdown_3I2.py:208:        result = supervisor.run()
+tests/test_supervisor_graceful_shutdown_3I2.py:212:        with open(tmp_path / "supervisor_state.json", "r") as f:
+tests/test_supervisor_graceful_shutdown_3I2.py:219:        supervisor = Supervisor(
+tests/test_supervisor_graceful_shutdown_3I2.py:225:        result = supervisor.run()
+tests/test_supervisor_graceful_shutdown_3I2.py:229:        with open(tmp_path / "supervisor_state.json", "r") as f:
+tests/test_supervisor_graceful_shutdown_3I2.py:235:class TestSupervisorSignalHandlers:
+tests/test_supervisor_graceful_shutdown_3I2.py:240:        supervisor = Supervisor(
+tests/test_supervisor_graceful_shutdown_3I2.py:247:        supervisor.install_signal_handlers()
+tests/test_supervisor_graceful_shutdown_3I2.py:255:        supervisor = Supervisor(
+tests/test_supervisor_graceful_shutdown_3I2.py:262:        supervisor.install_signal_handlers()
+tools/smoke_sigint_3I2.py:22:from supervisor_live_3E_3H import Supervisor, StopController
+tools/smoke_sigint_3I2.py:56:        supervisor = Supervisor(
+tools/smoke_sigint_3I2.py:63:        result = supervisor.run()
+tools/smoke_sigint_3I2.py:77:        supervisor = Supervisor(
+tools/smoke_sigint_3I2.py:83:        supervisor.run()
+tools/smoke_sigint_3I2.py:86:        with open(tmp_path / "supervisor_state.json", "r") as f:
+tools/smoke_sigint_3I2.py:96:        supervisor = Supervisor(
+tools/smoke_sigint_3I2.py:102:            supervisor.install_signal_handlers()
+tools/supervisor_live_3E_3H.py:3:tools/supervisor_live_3E_3H.py
+tools/supervisor_live_3E_3H.py:10:- State persistence (supervisor_state.json)
+tools/supervisor_live_3E_3H.py:11:- Append-only log (supervisor.log)

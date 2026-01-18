@@ -1,0 +1,48 @@
+diff --git a/tests/test_supervisor_3H.py b/tests/test_supervisor_3H.py
+index ceb3aee..e4f80ea 100644
+--- a/tests/test_supervisor_3H.py
++++ b/tests/test_supervisor_3H.py
+@@ -143,7 +143,7 @@ class TestSupervisorRestartBehavior:
+         
+         result = supervisor.run()
+         
+-        assert result == 1  # Returns last exit code
++        assert result == 2  # Returns exit code 2 on max_restarts exceeded (AG-H2-3-1)
+         assert len(run_calls) == 4  # 1 initial + 3 restarts
+         assert len(sleep_calls) == 4  # Sleep after each failure
+ 
+diff --git a/tests/test_supervisor_graceful_shutdown_3I2.py b/tests/test_supervisor_graceful_shutdown_3I2.py
+index 170ed63..b5a6f3a 100644
+--- a/tests/test_supervisor_graceful_shutdown_3I2.py
++++ b/tests/test_supervisor_graceful_shutdown_3I2.py
+@@ -207,7 +207,7 @@ class TestSupervisorGracefulShutdown:
+         
+         result = supervisor.run()
+         
+-        assert result == 1  # Non-zero from max_restarts
++        assert result == 2  # Exit code 2 on max_restarts exceeded (AG-H2-3-1)
+         
+         with open(tmp_path / "supervisor_state.json", "r") as f:
+             state = json.load(f)
+diff --git a/tools/supervisor_live_3E_3H.py b/tools/supervisor_live_3E_3H.py
+index 303baf5..f949fe5 100644
+--- a/tools/supervisor_live_3E_3H.py
++++ b/tools/supervisor_live_3E_3H.py
+@@ -254,7 +254,7 @@ class Supervisor:
+             Final exit code:
+             - 0 on clean child exit
+             - 0 on graceful shutdown via signal (SIGINT/SIGTERM)
+-            - last child exit code on max_restarts exceeded
++            - 2 on error (max_restarts exceeded or child error)
+         """
+         self._log(f"Supervisor started. Command: {' '.join(self._command)}")
+         self._log(f"Config: max_restarts={self._max_restarts}, backoff_base={self._backoff_base}s, backoff_cap={self._backoff_cap}s")
+@@ -270,7 +270,7 @@ class Supervisor:
+             # Check max restarts (attempt 1 = first run, not a restart)
+             if self._max_restarts is not None and self._attempt > self._max_restarts + 1:
+                 self._finalize("max_restarts_exceeded")
+-                return self._last_exit_code or 1
++                return 2
+             
+             self._log(f"Starting child (attempt {self._attempt})...")
+             

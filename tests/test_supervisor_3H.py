@@ -143,7 +143,7 @@ class TestSupervisorRestartBehavior:
         
         result = supervisor.run()
         
-        assert result == 1  # Returns last exit code
+        assert result == 2  # Returns exit code 2 on max_restarts exceeded (AG-H2-3-1)
         assert len(run_calls) == 4  # 1 initial + 3 restarts
         assert len(sleep_calls) == 4  # Sleep after each failure
 
