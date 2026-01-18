@@ -20,7 +20,7 @@ def test_load_csv_standard_aliases(tmp_path):
     df = load_ohlcv(csv_path)
     
     assert list(df.columns) == ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert isinstance(df["timestamp"].dtype, pd.DatetimeTZDtype)
     assert str(df["timestamp"].dt.tz) == "datetime.timezone.utc" or str(df["timestamp"].dt.tz) == "UTC"
     assert len(df) == 2
     assert df.iloc[0]['open'] == 100.0
@@ -105,7 +105,7 @@ def test_epoch_seconds_timestamp_parses_to_utc(tmp_path):
     pd.DataFrame(data).to_csv(csv_path, index=False)
     
     df = load_ohlcv(csv_path)
-    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert isinstance(df["timestamp"].dtype, pd.DatetimeTZDtype)
     assert df["timestamp"].iloc[0].year == 2023
 
 def test_epoch_milliseconds_timestamp_parses_to_utc(tmp_path):
@@ -119,7 +119,7 @@ def test_epoch_milliseconds_timestamp_parses_to_utc(tmp_path):
     pd.DataFrame(data).to_csv(csv_path, index=False)
     
     df = load_ohlcv(csv_path)
-    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert isinstance(df["timestamp"].dtype, pd.DatetimeTZDtype)
     assert df["timestamp"].iloc[0].year == 2023
 
 def test_epoch_microseconds_timestamp_parses_to_utc(tmp_path):
@@ -133,7 +133,7 @@ def test_epoch_microseconds_timestamp_parses_to_utc(tmp_path):
     pd.DataFrame(data).to_csv(csv_path, index=False)
     
     df = load_ohlcv(csv_path)
-    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert isinstance(df["timestamp"].dtype, pd.DatetimeTZDtype)
     assert df["timestamp"].iloc[0].year == 2023
 
 def test_timezone_offset_string_converts_to_utc(tmp_path):
@@ -146,7 +146,7 @@ def test_timezone_offset_string_converts_to_utc(tmp_path):
     pd.DataFrame(data).to_csv(csv_path, index=False)
     
     df = load_ohlcv(csv_path)
-    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+    assert isinstance(df["timestamp"].dtype, pd.DatetimeTZDtype)
     # 00:00 -0500 is 05:00 UTC
     assert df["timestamp"].iloc[0].hour == 5
 

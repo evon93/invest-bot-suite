@@ -1,0 +1,2 @@
+db82417 (hash final)
+db82417 H2.2: fix pandas datetime tz dtype deprecation

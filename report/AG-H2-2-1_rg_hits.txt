@@ -1,0 +1,49 @@
+.venv/lib/python3.12/site-packages/pandas/conftest.py:148:        ("is_datetime64tz_dtype", "is_datetime64tz_dtype is deprecated"),
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/api.py:12:    is_datetime64tz_dtype,
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/api.py:55:    "is_datetime64tz_dtype",
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:299:def is_datetime64tz_dtype(arr_or_dtype) -> bool:
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:318:    >>> from pandas.api.types import is_datetime64tz_dtype
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:319:    >>> is_datetime64tz_dtype(object)
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:321:    >>> is_datetime64tz_dtype([1, 2, 3])
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:323:    >>> is_datetime64tz_dtype(pd.DatetimeIndex([1, 2, 3]))  # tz-naive
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:325:    >>> is_datetime64tz_dtype(pd.DatetimeIndex([1, 2, 3], tz="US/Eastern"))
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:331:    >>> is_datetime64tz_dtype(dtype)
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:333:    >>> is_datetime64tz_dtype(s)
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:338:        "is_datetime64tz_dtype is deprecated and will be removed in a future "
+.venv/lib/python3.12/site-packages/pandas/core/dtypes/common.py:1732:    "is_datetime64tz_dtype",
+.venv/lib/python3.12/site-packages/pandas/tests/api/test_api.py:285:        "is_datetime64tz_dtype",
+.venv/lib/python3.12/site-packages/pandas/tests/api/test_types.py:19:        "is_datetime64tz_dtype",
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:183:        or func is com.is_datetime64tz_dtype
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:235:def test_is_datetime64tz_dtype():
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:236:    msg = "is_datetime64tz_dtype is deprecated"
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:238:        assert not com.is_datetime64tz_dtype(object)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:239:        assert not com.is_datetime64tz_dtype([1, 2, 3])
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:240:        assert not com.is_datetime64tz_dtype(pd.DatetimeIndex([1, 2, 3]))
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:241:        assert com.is_datetime64tz_dtype(pd.DatetimeIndex(["2000"], tz="US/Eastern"))
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:252:    msg = "is_datetime64tz_dtype is deprecated"
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_common.py:254:        assert not com.is_datetime64tz_dtype(not_tz_dtype)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:17:    is_datetime64tz_dtype,
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:294:        msg = "is_datetime64tz_dtype is deprecated"
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:296:            assert is_datetime64tz_dtype(dtype)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:297:            assert is_datetime64tz_dtype("datetime64[ns, US/Eastern]")
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:355:        msg = "is_datetime64tz_dtype is deprecated"
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:357:            assert is_datetime64tz_dtype(dtype)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:364:            assert is_datetime64tz_dtype(s.dtype)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:365:            assert is_datetime64tz_dtype(s)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:366:            assert not is_datetime64tz_dtype(np.dtype("float64"))
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:367:            assert not is_datetime64tz_dtype(1.0)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:1160:        is_datetime64tz_dtype,
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_dtypes.py:1178:        or check is is_datetime64tz_dtype
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_inference.py:47:    is_datetime64tz_dtype,
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_inference.py:1846:        msg = "is_datetime64tz_dtype is deprecated"
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_inference.py:1864:            assert not is_datetime64tz_dtype("datetime64")
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_inference.py:1865:            assert not is_datetime64tz_dtype("datetime64[ns]")
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_inference.py:1866:            assert not is_datetime64tz_dtype(ts)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_inference.py:1867:            assert is_datetime64tz_dtype(tsa)
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_inference.py:1874:        msg = "is_datetime64tz_dtype is deprecated"
+.venv/lib/python3.12/site-packages/pandas/tests/dtypes/test_inference.py:1876:            assert is_datetime64tz_dtype(dtype)
+tests/test_ohlcv_loader.py:23:    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+tests/test_ohlcv_loader.py:108:    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+tests/test_ohlcv_loader.py:122:    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+tests/test_ohlcv_loader.py:136:    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
+tests/test_ohlcv_loader.py:149:    assert pd.api.types.is_datetime64tz_dtype(df["timestamp"])
