@@ -1,0 +1,65 @@
+name: Integration Offline Gate (H3)
+
+on:
+  push:
+    branches: [main, orchestrator-v2, "feature/**"]
+  pull_request:
+    branches: [main, orchestrator-v2]
+  workflow_dispatch:
+
+jobs:
+  integration-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      INVESTBOT_ALLOW_NETWORK: "0"
+      INVESTBOT_ARTIFACT_DIR: ${{ runner.temp }}/artifacts
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest
+
+      - name: Create Artifact Dir
+        run: mkdir -p ${{ env.INVESTBOT_ARTIFACT_DIR }}
+
+      # Gate 1: Warning gate (multiseed determinism)
+      - name: Warning Gate - RuntimeWarning
+        run: |
+          python -m pytest -W error::RuntimeWarning \
+            tests/test_multiseed_spec_2G2.py::TestMultiSeedSpec::test_run_determinism \
+            -v
+
+      # Gate 2: Integration offline tests
+      - name: Integration Offline Tests
+        env:
+          INVESTBOT_TEST_INTEGRATION_OFFLINE: "1"
+        run: |
+          python -m pytest -m integration_offline -v
+
+      # Gate 3: Quick sanity (subset of unit tests)
+      - name: Unit Tests Sanity Check
+        run: |
+          python -m pytest tests/test_checkpoint_atomic_write_3F4.py \
+            tests/test_crash_recovery_resume_no_duplicates_3F4.py \
+            -v
+
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-offline-artifacts
+          path: |
+            ${{ env.INVESTBOT_ARTIFACT_DIR }}
+            report/AG-H3-*
+          if-no-files-found: ignore
