@@ -1,0 +1,10 @@
+# Dependencias de desarrollo (dev-only)
+# NO incluir en producción - solo para desarrollo y CI
+#
+# Instalación:
+#   pip install -r requirements-dev.txt
+#
+
+# Coverage toolchain
+coverage>=7
+pytest-cov>=4
