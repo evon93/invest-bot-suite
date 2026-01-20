@@ -4,7 +4,36 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-18) — Fase H2: Hygiene & Housekeeping
+## Estado Actual (2026-01-20) — Fase H3: Test Infrastructure & Hardening
+
+- **Rama:** `main`
+- **HEAD:** `cac814a` (H3.5)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **H3.0 Bridge Headers:** `tools/bridge_headers.sh` genera SESSION/DELTA headers
+  - **H3.1 RuntimeWarning Fix:** Guard std=0 en `compute_ranking_stability`
+  - **H3.2 Skip Inventory:** `tools/list_skips.sh` inventario automatizado
+  - **H3.3 Integration Offline:** Suite de 3 tests sin red
+  - **H3.4 Validation Gates:** `docs/validation_gates.md` + README link
+  - **H3.5 CI Gate:** `.github/workflows/integration_offline_H3.yml`
+- **Handoff:**
+  - `report/ORCH_HANDOFF_postH3_close_20260120.md`
+  - `report/bridge_H3_to_next_report.md`
+- **Verificación:**
+  - Pytest: 751 passed, 14 skipped (11 original + 3 offline gated)
+  - Warning gate: PASS (0 RuntimeWarnings)
+  - Integration offline: 3 passed
+- **Commits:**
+  - H3.0: `d0df290` (bridge headers generator)
+  - H3.1: `f409817` (numpy RuntimeWarning fix)
+  - H3.2: `2101f0d` (skip inventory tooling)
+  - H3.3: `e4231aa` (offline integration tests)
+  - H3.4: `9b99ed3` (validation gates docs)
+  - H3.5: `cac814a` (CI gate)
+
+---
+
+## Estado Anterior (2026-01-18) — Fase H2: Hygiene & Housekeeping
 
 - **Rama:** `main`
 - **HEAD:** `7b85612` (H2.5)

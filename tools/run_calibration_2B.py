@@ -197,7 +197,13 @@ def compute_ranking_stability(
             if valid.sum() < 2:
                 continue
             # Use pearson corr on RANKS (equivalent to Spearman) to avoid scipy dependency
-            corr = r1[valid].corr(r2[valid], method='pearson')
+            # Guard: if either series has std=0, all values are identical -> perfect correlation
+            r1_valid = r1[valid]
+            r2_valid = r2[valid]
+            if r1_valid.std() == 0 or r2_valid.std() == 0:
+                corr = 1.0  # Degenerate case: identical rankings
+            else:
+                corr = r1_valid.corr(r2_valid, method='pearson')
             if not np.isnan(corr):
                 correlations.append(corr)
     

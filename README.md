@@ -88,4 +88,9 @@ python -m pytest tests/test_ccxt_market_data_real_gated_3L2.py -v
 
 > **Nota:** Estos tests **NO corren en CI** (skip automático sin variables de entorno).
 
+## ✅ Validation / Test Gates
+
+- [`docs/validation_gates.md`](docs/validation_gates.md) – gates de validación, comandos y skips
+- [`docs/bridge_io.md`](docs/bridge_io.md) – generador de headers SESSION/DELTA
+
 > **Próximo paso:** validar **architecture.md** y generar artefacto `strategy_engine.py` skeleton.
