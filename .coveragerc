@@ -1,6 +1,6 @@
 # .coveragerc
 # Coverage configuration for invest-bot-suite
-# Created in AG-H4-3-1
+# Created in AG-H4-3-1, adjusted in AG-H4-3-2
 
 [run]
 # Source directories to measure
@@ -8,13 +8,14 @@ source = engine,tools
 
 # Omit CLI scripts and demos that are not imported during tests
 # These are standalone entry points with if __name__ == "__main__"
+# ONLY scripts with 0% coverage (verified in H4.2 gaps map)
 omit = 
-    # CLI run scripts (entry points)
+    # CLI run scripts (entry points) - wildcard patterns
     tools/run_*.py
     tools/smoke_*.py
     tools/*_demo.py
     
-    # Utility CLI scripts with 0% coverage
+    # Specific 0% CLI utilities (verified in coverage_gaps_H42.md)
     tools/build_dashboard.py
     tools/update_project_map.py
     tools/cleanup_report.py
@@ -23,10 +24,8 @@ omit =
     tools/check_repo.py
     tools/check_determinism_3E.py
     tools/generate_sample_jsonl_3D4.py
-    tools/apply_calibration_topk.py
-    tools/build_best_params_2C.py
-    tools/best_params_schema_2C.py
-    tools/report_artifact_policy.py
+    
+    # Shell scripts (not Python)
     tools/list_skips.sh
     tools/bridge_headers.sh
 
@@ -44,8 +43,8 @@ exclude_lines =
     if TYPE_CHECKING:
     if typing.TYPE_CHECKING:
     
-    # Main entry points (CLI)
-    if __name__ == .__main__.:
+    # Main entry points (CLI) - regex with quotes
+    if __name__ == ["']__main__["']:
 
 # Show missing lines in report
 show_missing = True
