@@ -34,6 +34,10 @@ def wait_for_ready(run_dir: Path, timeout_s: int = 10) -> bool:
         time.sleep(0.1)
     return False
 
+@pytest.mark.skipif(
+    IS_WINDOWS, 
+    reason="CTRL_C_EVENT unreliable in non-interactive pytest on Windows"
+)
 def test_graceful_shutdown_sigint(tmp_path):
     """
     Test graceful shutdown via SIGINT (Ctrl+C).

@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+from pandas.api.types import is_datetime64_any_dtype
 import pytest
 
 # Add tools to path
@@ -88,7 +89,7 @@ class TestLoadOHLCV:
         
         assert len(df) == 10
         assert list(df.columns) == CANONICAL_COLUMNS
-        assert df["date"].dtype == "datetime64[ns]"
+        assert is_datetime64_any_dtype(df["date"])  # supports ns/us units
         assert df["close"].dtype == "float64"
         
         # With return_stats=True
