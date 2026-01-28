@@ -4,7 +4,32 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-20) — Fase H3: Test Infrastructure & Hardening
+## Estado Actual (2026-01-28) — Fase H4: Coverage CI Verification
+
+- **Rama:** `main`
+- **HEAD:** `5afabca` (Merge PR #36 H4.3)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **H4.1 Coverage Toolchain:** `requirements-dev.txt` con coverage>=7, pytest-cov>=4
+  - **H4.2 Coverage Gaps Map:** Análisis de 16 CLI-only scripts excluidos
+  - **H4.3.1 Tests Dirigidos:** +33 tests (`test_validate_risk_config_H43.py`, `test_run_metrics_edge_cases_H43.py`)
+  - **H4.3.2 Coverage Gate:** `.coveragerc` + --cov-fail-under=70
+  - **H4.3.3 Flakiness Fix:** datetime64 ns/us assertion robusta
+- **Handoff:**
+  - `report/ORCH_HANDOFF_postH4_close_20260128.md`
+  - `report/bridge_H4_to_next_report.md`
+- **Verificación:**
+  - Pytest: 769 passed, 21 skipped
+  - Coverage gate: 82.7% > 70% PASS
+- **Commits:**
+  - H4.1: `0dd23c7` (coverage toolchain)
+  - H4.3.1: `9aa0b1a` (tests + gate)
+  - H4.3.2: `b8af5c8` (fix excludes CLI-only)
+  - H4.3.3: `0f1bc34` (fix datetime dtype)
+
+---
+
+## Estado Anterior (2026-01-20) — Fase H3: Test Infrastructure & Hardening
 
 - **Rama:** `main`
 - **HEAD:** `cac814a` (H3.5)
