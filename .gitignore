@@ -17,30 +17,52 @@ configs/risk_rules_prod.yaml
 report/dashboard_2J/
 report/topk_freeze_2H.json
 
-# H0: Ignore generated report artifacts (AG-2J-0-2)
-# H1.1: Artifact Policy - Track essential docs, ignore ephemeral outputs
+# AG-H0-1-1: Generated artifacts (coverage/report) - ignore ephemeral outputs
+# Coverage files
+.coverage
+htmlcov/
+
+# Return packets and commit logs (generated per-ticket)
+report/AG-*_return.md
+report/AG-*_last_commit.txt
 report/AG-*_diff.patch
 report/AG-*_run.txt
 report/AG-*_run_*.txt
+report/AG-*_notes.md
+
+# Pytest output files
+report/pytest*.txt
+
+# Coverage XML reports
+report/coverage_*.xml
+
+# Bridge headers stdout
+report/*stdout*.txt
+
+# Timestamp/session files
+report/ts_*.txt
+report/timestamp_*.txt
+report/*_session_*.txt
+report/branch_*.txt
+
+# Other ephemeral outputs
 report/out_*
 report/dashboard_handoff/
 report/robustness_2D/
 report/test_2g_out/
 report/external_ai/inbox_external/
-
-# H1.1: Explicitly track return packets and essential docs (negate ignore)
-!report/AG-*_return.md
-!report/AG-*_last_commit.txt
-!report/AG-*_notes.md
-!report/bridge_*_report.md
-
-# H0: Ignore validate_risk_config noise
 report/validate_risk_config_step5.txt
-
-# H1.1: Track handoff reports (negate previous H0 ignore)
-# report/ORCH_HANDOFF_*.md - now tracked
-# report/DS-*_paste_pack.md - keep ignoring
 report/DS-*_paste_pack.md
+report/skips_inventory_*.md
+report/coverage_detect_*.txt
+report/coverage_gaps_*.md
+
+# PRESERVE (do NOT ignore):
+# - report/ORCH_HANDOFF_*.md (handoff reports)
+# - report/bridge_*.md (bridge reports, but not bridge_*_report.md pattern)
+# - report/archive/** (historical archives)
+# - report/external_ai/** (except inbox_external/)
+# - registro_de_estado_invest_bot.md (project state register)
 
 # H0.1: Ephemeral diagnostic snapshots (cleanup-safe)
 report/git_status_*.txt
