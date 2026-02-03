@@ -90,7 +90,21 @@ python -m pytest tests/test_ccxt_market_data_real_gated_3L2.py -v
 
 ## ✅ Validation / Test Gates
 
-- [`docs/validation_gates.md`](docs/validation_gates.md) – gates de validación, comandos y skips
+Local validation harness con coverage gate (80%) y offline integration:
+
+```bash
+python tools/validate_local.py --preset ci    # Full (coverage + offline)
+python tools/validate_local.py --preset quick # Fast (pytest only)
+```
+
+Packaging de evidencias con manifest SHA256:
+
+```bash
+python tools/pack_handoff.py --dry-run        # Preview
+python tools/pack_handoff.py --out ...        # Generate ZIP
+```
+
+- [`docs/validation_gates.md`](docs/validation_gates.md) – gates de validación, comandos, presets y CI
 - [`docs/bridge_io.md`](docs/bridge_io.md) – generador de headers SESSION/DELTA
 
 > **Próximo paso:** validar **architecture.md** y generar artefacto `strategy_engine.py` skeleton.
