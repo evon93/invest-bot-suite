@@ -26,7 +26,7 @@ REPORT_DIR = REPO_ROOT / "report"
 # Preset configurations
 PRESETS = {
     "ci": {
-        "cov_fail_under": 70,
+        "cov_fail_under": 80,
         "gates": [
             {"name": "pytest_full", "cmd": ["python", "-m", "pytest", "-q"]},
             {
@@ -45,7 +45,7 @@ PRESETS = {
         ],
     },
     "quick": {
-        "cov_fail_under": 70,
+        "cov_fail_under": 80,
         "gates": [
             {"name": "pytest_full", "cmd": ["python", "-m", "pytest", "-q"]},
         ],
