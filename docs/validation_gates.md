@@ -23,11 +23,14 @@ Ejecuta múltiples gates en un solo comando con evidencias estructuradas.
 ### Uso
 
 ```bash
-# Preset completo (coverage + offline)
+# Preset CI estándar (coverage + offline)
 python tools/validate_local.py --preset ci
 
 # Solo pytest rápido
 python tools/validate_local.py --preset quick
+
+# Validación completa (CI + robustness + repo check)
+python tools/validate_local.py --preset full
 
 # Override de umbral de coverage
 python tools/validate_local.py --preset ci --cov-fail-under 85
@@ -35,10 +38,17 @@ python tools/validate_local.py --preset ci --cov-fail-under 85
 
 ### Presets
 
-| Preset | Gates | Coverage Threshold |
-|--------|-------|-------------------|
-| `ci` | pytest_full, coverage_gate, offline_integration | 80% |
-| `quick` | pytest_full | 80% |
+| Preset | Gates | Coverage | Uso |
+|--------|-------|----------|-----|
+| `ci` | pytest_full, coverage_gate, offline_integration | 80% | CI/PR gates |
+| `quick` | pytest_full | 80% | Dev rápido |
+| `full` | ci + robustness_quick + repo_check | 80% | Pre-release / auditoría |
+
+**Detalle preset `full`:**
+
+- Todos los gates de `ci`
+- `robustness_quick`: valida configs robustness 2D
+- `repo_check`: verifica estructura del repo
 
 ### Outputs
 

@@ -61,6 +61,42 @@ PRESETS = {
             {"name": "pytest_full", "cmd": ["python", "-m", "pytest", "-q"]},
         ],
     },
+    "full": {
+        "cov_fail_under": 80,
+        "description": "Full validation: all CI gates + robustness + additional checks",
+        "gates": [
+            # All CI gates
+            {"name": "pytest_full", "cmd": ["python", "-m", "pytest", "-q"]},
+            {
+                "name": "coverage_gate",
+                "cmd": [
+                    "python", "-m", "pytest", "-q",
+                    "--cov=engine", "--cov=tools",
+                    "--cov-fail-under={cov_fail_under}",
+                    "--cov-report=xml:report/coverage.xml",
+                ],
+            },
+            {
+                "name": "offline_integration",
+                "cmd": ["python", "-m", "pytest", "-q", "tests/test_integration_offline_H3.py"],
+                "env_extra": {"INVESTBOT_TEST_INTEGRATION_OFFLINE": "1"},
+            },
+            # Additional full-only gates
+            {
+                "name": "robustness_quick",
+                "cmd": [
+                    "python", "tools/run_robustness_2D.py",
+                    "--config", "configs/robustness_2D.yaml",
+                    "--mode", "quick",
+                    "--outdir", "report/runs/validate_local_robustness",
+                ],
+            },
+            {
+                "name": "repo_check",
+                "cmd": ["python", "tools/check_repo.py"],
+            },
+        ],
+    },
 }
 
 
