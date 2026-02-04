@@ -4,7 +4,33 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-28) — Fase H4: Coverage CI Verification
+## Estado Actual (2026-02-03) — Fase H5: Validation Harness & Evidence Packaging
+
+- **Rama:** `feature/AG-H5-6-1_closeout`
+- **HEAD:** `bf7a581` (H5.5 docs)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **H5.1 Validate Local:** `tools/validate_local.py` (harness con presets ci/quick)
+  - **H5.2 Pack Handoff:** `tools/pack_handoff.py` (ZIP determinista + manifest SHA256)
+  - **H5.3 Coverage Gate:** Umbral subido de 70% → 80%
+  - **H5.4 CI Artifacts:** Job `validate-local` en ci.yml con upload de artifacts
+  - **H5.5 Docs:** `docs/validation_gates.md` actualizado + README expandido
+- **Handoff:**
+  - `report/ORCH_HANDOFF_postH5_close_20260203.md`
+  - `report/bridge_H5_to_next_report.md`
+- **Verificación:**
+  - Pytest: 789 passed, 14 skipped
+  - Coverage gate: 83.16% > 80% PASS
+- **Commits:**
+  - H5.1: `915d1c5` (validate_local harness)
+  - H5.2: `f85e678` (pack_handoff + manifest)
+  - H5.3: `5eb038a` (coverage gate 80%)
+  - H5.4: `f0b80be` (CI validate-local artifacts)
+  - H5.5: `bf7a581` (docs validation_gates)
+
+---
+
+## Estado Anterior (2026-01-28) — Fase H4: Coverage CI Verification
 
 - **Rama:** `main`
 - **HEAD:** `5afabca` (Merge PR #36 H4.3)
