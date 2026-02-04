@@ -35,6 +35,7 @@ PRESETS = {
                     "python", "-m", "pytest", "-q",
                     "--cov=engine", "--cov=tools",
                     "--cov-fail-under={cov_fail_under}",
+                    "--cov-report=xml:report/coverage.xml",
                 ],
             },
             {

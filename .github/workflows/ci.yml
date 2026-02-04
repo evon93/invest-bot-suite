@@ -51,6 +51,43 @@ jobs:
       - name: Run pytest
         run: python -m pytest -q
 
+  # Validate Local Harness - runs coverage gate + offline integration (H5.4)
+  validate-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      INVESTBOT_ALLOW_NETWORK: "0"
+      INVESTBOT_TEST_INTEGRATION_OFFLINE: "1"
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run validate_local harness
+        run: python tools/validate_local.py --preset ci --out-prefix validate_local_ci
+      
+      - name: Upload validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validate-local-artifacts
+          path: |
+            report/validate_local_ci.txt
+            report/validate_local_ci_run_meta.json
+            report/validate_local_ci_logs/
+            report/coverage.xml
+          if-no-files-found: warn
+
   # H1 Gate - runs on push/PR (merged from h1_gate.yml)
   h1-gate:
     runs-on: ubuntu-latest
