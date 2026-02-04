@@ -19,6 +19,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
+def _safe_print(text: str) -> None:
+    """Print text safely, handling encoding errors for limited encodings like cp1252."""
+    enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        safe = text.encode(enc, errors="replace").decode(enc, errors="replace")
+        print(safe)
+
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REPORT_DIR = REPO_ROOT / "report"
 
@@ -230,7 +240,7 @@ def main() -> int:
         json.dump(run_meta, f, indent=2, sort_keys=True)
     
     # Print summary to stdout
-    print("\n".join(human_log_lines))
+    _safe_print("\n".join(human_log_lines))
     print(f"\nArtifacts written:")
     print(f"  - {txt_path.relative_to(REPO_ROOT)}")
     print(f"  - {json_path.relative_to(REPO_ROOT)}")
