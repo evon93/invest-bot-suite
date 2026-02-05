@@ -64,6 +64,25 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def sha512_file(path: Path) -> str:
+    """Calculate SHA512 hash of a file."""
+    h = hashlib.sha512()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _safe_print(text: str) -> None:
+    """Print text safely, handling encoding errors for limited encodings like cp1252."""
+    enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        safe = text.encode(enc, errors="replace").decode(enc, errors="replace")
+        print(safe)
+
+
 def get_git_info() -> dict:
     """Get current git branch and HEAD."""
     try:
@@ -157,6 +176,11 @@ def main() -> int:
         default=None,
         help="Override default evidence files (relative to repo root)",
     )
+    parser.add_argument(
+        "--sha512",
+        action="store_true",
+        help="Include SHA512 hashes in manifest (in addition to SHA256)",
+    )
     
     args = parser.parse_args()
     
@@ -203,12 +227,18 @@ def main() -> int:
         file_hash = sha256_file(abs_path)
         file_size = abs_path.stat().st_size
         
-        included.append({
+        entry = {
             "abs_path": abs_path,
             "rel_path": rel_path,
             "sha256": file_hash,
             "size_bytes": file_size,
-        })
+        }
+        
+        # Add SHA512 if requested
+        if args.sha512:
+            entry["sha512"] = sha512_file(abs_path)
+        
+        included.append(entry)
     
     # Build manifest
     manifest = {
@@ -219,11 +249,15 @@ def main() -> int:
         "platform": platform.system(),
         "zip_path": str(zip_path.relative_to(REPO_ROOT)) if zip_path.is_relative_to(REPO_ROOT) else str(zip_path),
         "file_count": len(included),
+        "sha512_enabled": args.sha512,
         "files": [
             {
                 "rel_path": f["rel_path"],
                 "sha256": f["sha256"],
                 "size_bytes": f["size_bytes"],
+                **({
+                    "sha512": f["sha512"]
+                } if "sha512" in f else {}),
             }
             for f in sorted(included, key=lambda x: x["rel_path"])
         ],
@@ -253,7 +287,7 @@ def main() -> int:
     
     if args.dry_run:
         log_lines.append("DRY RUN — no files written")
-        print("\n".join(log_lines))
+        _safe_print("\n".join(log_lines))
         return 0
     
     # Create ZIP
@@ -277,7 +311,7 @@ def main() -> int:
         f.write("\n".join(log_lines) + "\n")
     
     # Print summary
-    print("\n".join(log_lines))
+    _safe_print("\n".join(log_lines))
     print(f"\nArtifacts written:")
     print(f"  - {zip_path.relative_to(REPO_ROOT)}")
     print(f"  - {manifest_path.relative_to(REPO_ROOT)}")
