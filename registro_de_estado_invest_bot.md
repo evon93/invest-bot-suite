@@ -4,7 +4,65 @@ _Registro histórico, contexto para IAs colaboradoras y trazabilidad completa._
 
 ---
 
-## Estado Actual (2026-01-28) — Fase H4: Coverage CI Verification
+## Estado Actual (2026-02-05) — Fase H6: Tooling & CI Improvements (Pre-Merge)
+
+- **Rama:** `release/H5_to_main`
+- **HEAD:** `bc5e9d8` (pre-closeout)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **W1 Repo Truth:** Captura inicial de estado del repo
+  - **W2 Branch Integration:** Merge branches H5 a release/H5_to_main, PR #38 creado
+  - **W2.2 Fix Encoding:** _safe_print en validate_local.py (cp1252 fix)
+  - **W3 CI Cache:** Pip caching en edge-tests job
+  - **W4 EOL Hygiene:** .gitattributes mínima para normalización LF/CRLF
+  - **W5 Preset Full:** validate_local --preset full (5 gates)
+  - **W5.2 Fix check_repo:** _safe_print en check_repo.py
+  - **W6 SHA512:** pack_handoff --sha512 opcional
+  - **W7 Closeout:** Handoff + bridge + registro
+- **Handoff:**
+  - `report/ORCH_HANDOFF_postH6_close_20260205.md`
+  - `report/bridge_H6_to_next_report.md`
+- **Verificación:**
+  - Pytest: 791 passed, 21 skipped
+  - Coverage gate: 83.16% > 80% PASS
+  - validate_local ci: PASS (103.2s)
+- **Commits:**
+  - W2: `75cf8ad` (merge branches)
+  - W3: `15b9cbf` (pip cache CI)
+  - W4: `aa0b30f` (.gitattributes)
+  - W5: `dd0e4ff` (preset full)
+  - W5.2: `6c3a41f` (fix check_repo)
+  - W6: `bc5e9d8` (SHA512 opcional)
+
+---
+
+## Estado Anterior (2026-02-03) — Fase H5: Validation Harness & Evidence Packaging
+
+- **Rama:** `feature/AG-H5-6-1_closeout`
+- **HEAD:** `bf7a581` (H5.5 docs)
+- **Estado:** ✅ COMPLETADO
+- **Entregables:**
+  - **H5.1 Validate Local:** `tools/validate_local.py` (harness con presets ci/quick)
+  - **H5.2 Pack Handoff:** `tools/pack_handoff.py` (ZIP determinista + manifest SHA256)
+  - **H5.3 Coverage Gate:** Umbral subido de 70% → 80%
+  - **H5.4 CI Artifacts:** Job `validate-local` en ci.yml con upload de artifacts
+  - **H5.5 Docs:** `docs/validation_gates.md` actualizado + README expandido
+- **Handoff:**
+  - `report/ORCH_HANDOFF_postH5_close_20260203.md`
+  - `report/bridge_H5_to_next_report.md`
+- **Verificación:**
+  - Pytest: 789 passed, 14 skipped
+  - Coverage gate: 83.16% > 80% PASS
+- **Commits:**
+  - H5.1: `915d1c5` (validate_local harness)
+  - H5.2: `f85e678` (pack_handoff + manifest)
+  - H5.3: `5eb038a` (coverage gate 80%)
+  - H5.4: `f0b80be` (CI validate-local artifacts)
+  - H5.5: `bf7a581` (docs validation_gates)
+
+---
+
+## Estado Anterior (2026-01-28) — Fase H4: Coverage CI Verification
 
 - **Rama:** `main`
 - **HEAD:** `5afabca` (Merge PR #36 H4.3)

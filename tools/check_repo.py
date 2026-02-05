@@ -17,6 +17,16 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
+def _safe_print(text: str) -> None:
+    """Print text safely, handling encoding errors for limited encodings like cp1252."""
+    enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        safe = text.encode(enc, errors="replace").decode(enc, errors="replace")
+        print(safe)
+
+
 def run_cmd(cmd: list[str], name: str) -> tuple[bool, str]:
     """Ejecuta comando y retorna (success, output)."""
     print(f"\n{'='*60}")
@@ -80,7 +90,7 @@ def main():
     all_passed = True
     for name, success in results:
         status = "✅ PASS" if success else "❌ FAIL"
-        print(f"  {name}: {status}")
+        _safe_print(f"  {name}: {status}")
         if not success:
             all_passed = False
     

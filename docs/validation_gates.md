@@ -1,64 +1,136 @@
 # Validation Gates
 
-Reference for all test validation gates and standard commands.
+Reference for all test validation gates of invest-bot-suite.
+
+---
 
 ## Quick Reference
 
-| Gate | Command | Env Var | Skip Count (normal) |
-|------|---------|---------|---------------------|
-| **Unit tests** | `pytest -q` | — | 14 skipped |
-| **Warning-free** | `pytest -W error::RuntimeWarning` | — | 0 |
-| **Integration offline** | `pytest -m integration_offline` | `INVESTBOT_TEST_INTEGRATION_OFFLINE=1` | 0 |
-| **Realdata smoke** | `pytest -m realdata` | `INVESTBOT_REALDATA_PATH=/path` | 0 |
-| **CCXT live** | `pytest tests/test_ccxt_*.py` | `INVESTBOT_ALLOW_NETWORK=1` | 0 |
+| Gate | Command | Threshold | Env Var |
+|------|---------|-----------|---------|
+| **Unit tests** | `pytest -q` | — | — |
+| **Coverage gate** | `pytest --cov=engine --cov=tools --cov-fail-under=80` | 80% | — |
+| **Warning-free** | `pytest -W error::RuntimeWarning` | 0 warnings | — |
+| **Integration offline** | `pytest tests/test_integration_offline_H3.py` | — | `INVESTBOT_TEST_INTEGRATION_OFFLINE=1` |
+| **Realdata smoke** | `pytest -m realdata` | — | `INVESTBOT_REALDATA_PATH=/path` |
 
-## Commands
+---
 
-### Full Suite (Default)
+## Local Harness: validate_local.py
 
-```bash
-source .venv/bin/activate
-python -m pytest -q
-```
+Ejecuta múltiples gates en un solo comando con evidencias estructuradas.
 
-Expected: 751+ passed, 14 skipped
-
-### Warning Gate
+### Uso
 
 ```bash
-python -m pytest -W error::RuntimeWarning tests/test_multiseed_spec_2G2.py
+# Preset CI estándar (coverage + offline)
+python tools/validate_local.py --preset ci
+
+# Solo pytest rápido
+python tools/validate_local.py --preset quick
+
+# Validación completa (CI + robustness + repo check)
+python tools/validate_local.py --preset full
+
+# Override de umbral de coverage
+python tools/validate_local.py --preset ci --cov-fail-under 85
 ```
 
-Fails if any RuntimeWarning is raised.
+### Presets
 
-### Integration Offline
+| Preset | Gates | Coverage | Uso |
+|--------|-------|----------|-----|
+| `ci` | pytest_full, coverage_gate, offline_integration | 80% | CI/PR gates |
+| `quick` | pytest_full | 80% | Dev rápido |
+| `full` | ci + robustness_quick + repo_check | 80% | Pre-release / auditoría |
+
+**Detalle preset `full`:**
+
+- Todos los gates de `ci`
+- `robustness_quick`: valida configs robustness 2D
+- `repo_check`: verifica estructura del repo
+
+### Outputs
+
+| Archivo | Descripción |
+|---------|-------------|
+| `report/<prefix>.txt` | Log humano con resultados |
+| `report/<prefix>_run_meta.json` | Metadata JSON estructurada |
+| `report/<prefix>_logs/<gate>.log` | Log individual de cada gate |
+| `report/coverage.xml` | Coverage XML (generado por coverage_gate) |
+
+### Exit Codes
+
+| Code | Significado |
+|------|-------------|
+| 0 | Todos los gates PASS |
+| 1 | Algún gate FAIL |
+| 2 | Error interno (argumentos, I/O) |
+
+---
+
+## Packaging: pack_handoff.py
+
+Empaqueta evidencias en un ZIP determinista con manifest SHA256.
+
+### Uso
 
 ```bash
-INVESTBOT_TEST_INTEGRATION_OFFLINE=1 python -m pytest -m integration_offline
+# Dry-run (ver qué incluiría)
+python tools/pack_handoff.py --dry-run
+
+# Generar ZIP + manifest
+python tools/pack_handoff.py \
+    --out report/archive/YYYYMMDD_handoff/pack.zip \
+    --manifest report/archive/YYYYMMDD_handoff/manifest.json \
+    --date YYYYMMDD
 ```
 
-Runs adapter-mode, checkpoint/resume, idempotency tests without network.
+### Características
 
-### Skip Inventory
+- **Determinismo**: timestamp fijo (1980-01-01), orden lexicográfico
+- **Manifest**: JSON con SHA256 y tamaño por archivo
+- **Exclusiones**: `*.env`, `**/secrets*`, `credentials*`, `__pycache__`, etc.
 
-```bash
-bash tools/list_skips.sh <TAG>
-```
+### Outputs
 
-Generates:
+| Archivo | Descripción |
+|---------|-------------|
+| `<out>.zip` | ZIP comprimido con evidencias |
+| `<manifest>.json` | Manifest con hashes SHA256 |
+| `report/pack_handoff_*.txt` | Log humano del empaquetado |
 
-- `report/pytest_rs_<TAG>.txt` — raw pytest -rs output
-- `report/skips_inventory_<TAG>.md` — parsed table
+---
 
-### Bridge Headers
+## CI Integration
 
-```bash
-bash tools/bridge_headers.sh <TAG>
-```
+### Job: validate-local
 
-Generates reproducible SESSION/DELTA headers for Orchestrator handoffs.
+El workflow `.github/workflows/ci.yml` incluye un job `validate-local` que:
 
-See also: [docs/bridge_io.md](bridge_io.md)
+1. Ejecuta `python tools/validate_local.py --preset ci`
+2. Coverage gate con umbral **80%**
+3. Offline integration tests (con `INVESTBOT_TEST_INTEGRATION_OFFLINE=1`)
+4. Sube artifacts automáticamente
+
+### Triggers
+
+| Evento | Branches | Job validate-local |
+|--------|----------|-------------------|
+| `push` | main, orchestrator-v2, feature/** | ✓ |
+| `pull_request` | main, orchestrator-v2 | ✓ |
+| `workflow_dispatch` | — | ✓ |
+
+### Artifacts Subidos
+
+| Artifact | Path |
+|----------|------|
+| Log humano | `report/validate_local_ci.txt` |
+| Metadata JSON | `report/validate_local_ci_run_meta.json` |
+| Gate logs | `report/validate_local_ci_logs/` |
+| Coverage XML | `report/coverage.xml` |
+
+---
 
 ## Skipped Tests Categories
 
@@ -66,22 +138,31 @@ See also: [docs/bridge_io.md](bridge_io.md)
 |----------|-------|--------|
 | Env gated (realdata/integration) | 7 | Missing env vars |
 | Optional deps (ccxt, pyarrow) | 3 | Not installed |
-| Offline integration | 3 | INVESTBOT_TEST_INTEGRATION_OFFLINE not set |
+| Offline integration | 3 | `INVESTBOT_TEST_INTEGRATION_OFFLINE` not set |
 | Test tuning | 1 | Scenario-specific |
-
-## CI Integration
-
-Gates can be added to CI workflows:
-
-```yaml
-# .github/workflows/test.yml
-- name: Run tests
-  run: python -m pytest -q
-
-- name: Warning gate
-  run: python -m pytest -W error::RuntimeWarning tests/test_multiseed_spec_2G2.py
-```
 
 ---
 
-Generated for AG-H3-4-1
+## Additional Tools
+
+### Skip Inventory
+
+```bash
+bash tools/list_skips.sh <TAG>
+```
+
+Genera `report/skips_inventory_<TAG>.md` con tabla de tests saltados.
+
+### Bridge Headers
+
+```bash
+bash tools/bridge_headers.sh <TAG>
+```
+
+Genera headers SESSION/DELTA para handoffs de Orchestrator.
+
+See: [docs/bridge_io.md](bridge_io.md)
+
+---
+
+*Updated for H5.5 (AG-H5-5-1)*
