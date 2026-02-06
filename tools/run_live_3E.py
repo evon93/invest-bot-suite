@@ -668,5 +668,15 @@ def main():
     return exit_code
 
 
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    # AG-H7-2-1: Wrap in try/except to guarantee exit 0 on graceful SIGINT shutdown.
+    # Without this, Python may exit with -2 (SIGINT) if KeyboardInterrupt escapes main().
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        # Graceful shutdown on Ctrl+C - exit 0 is the expected behavior
+        print("\nShutdown complete.")
+        sys.exit(0)
+
