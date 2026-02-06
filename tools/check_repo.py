@@ -10,11 +10,27 @@ Ejecuta:
 Devuelve exit code != 0 si algo falla.
 """
 
+import fnmatch
 import subprocess
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# AG-H0-2-1: Patterns for volatile report files (should be ignored, not tracked)
+VOLATILE_PATTERNS = [
+    "report/out_*/**",
+    "report/calibration_2B/results.csv",
+    "report/calibration_2B/run_*.txt",
+    "report/calibration_2B/run_meta.json",
+    "report/calibration_2B/topk.json",
+    "report/calibration_results_2B.csv",
+    "report/pytest_*.txt",
+    "report/git_status_*.txt",
+    "report/head_*.txt",
+    "report/smoke_*.txt",
+    "report/runs/**",
+]
 
 
 def _safe_print(text: str) -> None:
@@ -66,6 +82,36 @@ def run_cmd(cmd: list[str], name: str) -> tuple[bool, str]:
         return False, str(e)
 
 
+def check_volatile_report_files() -> list[str]:
+    """Check for modified volatile files in report/ that are tracked. Returns warnings."""
+    warnings = []
+    try:
+        result = subprocess.run(
+            ["git", "status", "--porcelain", "report/"],
+            capture_output=True,
+            text=True,
+            cwd=REPO_ROOT,
+        )
+        if result.returncode != 0:
+            return []
+        
+        for line in result.stdout.strip().split("\n"):
+            if not line.strip():
+                continue
+            # Format: " M path" or "M  path" etc.
+            status = line[:2]
+            filepath = line[3:].strip()
+            
+            # Check if modified file matches volatile pattern
+            for pattern in VOLATILE_PATTERNS:
+                if fnmatch.fnmatch(filepath, pattern):
+                    warnings.append(f"{filepath} (matches {pattern})")
+                    break
+    except Exception:
+        pass  # Non-critical check
+    return warnings
+
+
 def main():
     print("=" * 60)
     print("REPOSITORY VERIFICATION SCRIPT")
@@ -94,9 +140,25 @@ def main():
         if not success:
             all_passed = False
     
-    print("=" * 60)
+    # AG-H0-2-1: Check for volatile tracked files (WARN only)
+    volatile_warnings = check_volatile_report_files()
+    if volatile_warnings:
+        print("\n" + "=" * 60)
+        print("[WARN] VOLATILE TRACKED FILES MODIFIED")
+        print("=" * 60)
+        print("The following volatile files are tracked and modified:")
+        for w in volatile_warnings[:10]:  # Limit output
+            _safe_print(f"  - {w}")
+        if len(volatile_warnings) > 10:
+            print(f"  ... and {len(volatile_warnings) - 10} more")
+        print("Consider: git rm --cached <file> or update .gitignore")
+    
+    print("\n" + "=" * 60)
     if all_passed:
-        print("ALL CHECKS PASSED")
+        if volatile_warnings:
+            print("ALL CHECKS PASSED (with volatile file warnings)")
+        else:
+            print("ALL CHECKS PASSED")
         return 0
     else:
         print("SOME CHECKS FAILED")

@@ -166,3 +166,42 @@ See: [docs/bridge_io.md](bridge_io.md)
 ---
 
 *Updated for H5.5 (AG-H5-5-1)*
+
+---
+
+## Report Artifacts Policy
+
+> Added in AG-H0-2-1
+
+### Volatile vs Permanent Artifacts
+
+| Category | Pattern | Git Status | Purpose |
+|----------|---------|------------|---------|
+| **Volatile** | `out_*/**`, `calibration_*/*.csv`, `pytest_*.txt`, `runs/**` | Ignored | Ephemeral execution outputs |
+| **Permanent** | `ORCH_HANDOFF_*.md`, `bridge_*.md`, `archive/**` | Tracked | Handoff documentation, historical records |
+
+### Guidelines
+
+1. **Do NOT commit** outputs from local executions (validate_local, calibration, smokes)
+2. Volatile patterns are defined in `.gitignore` and `tools/check_repo.py::VOLATILE_PATTERNS`
+3. `tools/check_repo.py` emits **WARN** if it detects volatile files that are tracked and modified
+4. Use `git rm --cached <file>` to untrack files that should be volatile
+
+### Volatile Patterns Reference
+
+```
+report/out_*/**
+report/calibration_2B/*.csv
+report/calibration_2B/run_*.txt
+report/calibration_results_2B.csv
+report/pytest_*.txt
+report/git_status_*.txt
+report/runs/**
+```
+
+### Permanent (Tracked) Artifacts
+
+- `report/ORCH_HANDOFF_*.md` — Phase handoff reports
+- `report/bridge_*.md` — Bridge reports between phases
+- `report/archive/**` — Historical snapshots
+- `report/external_ai/*.md` — External AI audit results (except inbox_external/)

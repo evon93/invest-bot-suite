@@ -90,3 +90,14 @@ report/delta_*.md
 report/git_show_*.txt
 report/det_*/
 report/det_close_*/
+
+# AG-H0-2-1: Volatile outputs inside tracked directories
+report/calibration_2B/results.csv
+report/calibration_2B/run_*.txt
+report/calibration_2B/run_meta.json
+report/calibration_2B/topk.json
+report/calibration_results_2B.csv
+
+# CSV results in out_* directories (explicit for safety, dirs already ignored)
+report/out_*/results.csv
+report/out_*/**/results.csv
