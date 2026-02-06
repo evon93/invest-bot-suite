@@ -73,14 +73,11 @@ def sha512_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def _safe_print(text: str) -> None:
-    """Print text safely, handling encoding errors for limited encodings like cp1252."""
-    enc = getattr(sys.stdout, "encoding", None) or "utf-8"
-    try:
-        print(text)
-    except UnicodeEncodeError:
-        safe = text.encode(enc, errors="replace").decode(enc, errors="replace")
-        print(safe)
+# Import helper (package mode or script mode)
+try:
+    from tools._textio import safe_print
+except ImportError:
+    from _textio import safe_print
 
 
 def get_git_info() -> dict:
@@ -287,7 +284,7 @@ def main() -> int:
     
     if args.dry_run:
         log_lines.append("DRY RUN — no files written")
-        _safe_print("\n".join(log_lines))
+        safe_print("\n".join(log_lines))
         return 0
     
     # Create ZIP
@@ -311,7 +308,7 @@ def main() -> int:
         f.write("\n".join(log_lines) + "\n")
     
     # Print summary
-    _safe_print("\n".join(log_lines))
+    safe_print("\n".join(log_lines))
     print(f"\nArtifacts written:")
     print(f"  - {zip_path.relative_to(REPO_ROOT)}")
     print(f"  - {manifest_path.relative_to(REPO_ROOT)}")
